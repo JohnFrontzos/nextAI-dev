@@ -87,17 +87,18 @@ Autonomous agents fail in real-world codebases because:
 
 ## The Operator Workflow
 
-As the operator, you drive the process. Here's what you do at each phase:
+As the operator, you drive the process entirely from your AI client. After the one-time `nextai init`, everything happens via slash commands:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                         Operator Workflow                                │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
-│  YOU                           AI                        ARTIFACT        │
-│  ───                           ──                        ────────        │
+│  YOU (in AI client)            AI                        ARTIFACT        │
+│  ──────────────────            ──                        ────────        │
 │                                                                          │
-│  1. nextai create "title"      -                         initialization  │
+│  1. /nextai-create             Captures your idea        initialization  │
+│     Describe your idea                                                   │
 │     ↓                                                                    │
 │  2. /nextai-refine             Product Owner asks Qs     requirements    │
 │     YOU answer questions       Technical Architect       spec + tasks    │
@@ -108,7 +109,7 @@ As the operator, you drive the process. Here's what you do at each phase:
 │  4. /nextai-review             Reviewer validates        review.md       │
 │     YOU check verdict                                                    │
 │     ↓                                                                    │
-│  5. nextai testing             -                         testing.md      │
+│  5. /nextai-testing            Logs your results         testing.md      │
 │     YOU test manually                                                    │
 │     ↓                                                                    │
 │  6. /nextai-complete           Document Writer           summary.md      │
@@ -121,7 +122,7 @@ As the operator, you drive the process. Here's what you do at each phase:
 
 | Phase | Your Action | Why It Matters |
 |-------|-------------|----------------|
-| **Create** | Define what you want to build | Sets the scope |
+| **Create** | Describe what you want to build | Sets the scope |
 | **Refine** | Answer AI's clarifying questions | Ensures AI understands requirements |
 | **Implement** | Monitor progress, provide guidance | Catch issues early |
 | **Review** | Check if review passes, decide on fixes | Quality gate |
@@ -154,9 +155,11 @@ This creates:
 - `todo/` and `done/` — Feature tracking directories
 - Syncs slash commands to your AI client
 
-### Step 3: Generate Project Context (Important!)
+### Step 3: Move to Your AI Client
 
-In your AI client, run:
+From this point forward, **everything happens in your AI client** (Claude Code or OpenCode).
+
+### Step 4: Generate Project Context (Important!)
 
 ```
 /nextai-analyze
@@ -170,22 +173,18 @@ This scans your codebase and generates `docs/nextai/` with:
 
 **Without this step, agents won't understand your project.**
 
-### Step 4: Create Your First Feature
+### Step 5: Create Your First Feature
 
-```bash
-nextai create "Add user authentication"
+```
+/nextai-create
 ```
 
-Output:
-```
-✓ Created feature: 20251206_add-user-authentication
-  → Folder: todo/20251206_add-user-authentication/
-  → Init: planning/initialization.md
+Describe your idea when prompted. The AI will:
+- Capture your proposal
+- Scaffold the feature folder
+- Fill the initialization document
 
-Next: Run /nextai-refine 20251206_add-user-authentication
-```
-
-### Step 5: Run the Workflow
+### Step 6: Run the Workflow
 
 Follow the suggested commands. Each phase produces artifacts and suggests the next step.
 
@@ -193,59 +192,59 @@ Follow the suggested commands. Each phase produces artifacts and suggests the ne
 
 ## Command Reference
 
-### CLI Commands (You Run These in Terminal)
+All commands run in your AI client (Claude Code or OpenCode). The only terminal command you need is `nextai init`.
 
-These are **deterministic** — no AI involved, just state management.
+### Workflow Commands
 
-| Command | When to Use | What It Does |
+| Command | When to Use | What Happens |
 |---------|-------------|--------------|
-| `nextai init` | Once per project | Scaffolds `.nextai/`, syncs to AI client |
-| `nextai create [title]` | Start new work | Creates feature folder in `todo/` |
-| `nextai list` | Check status | Shows all features with phases |
-| `nextai show <id>` | Deep dive | Displays feature details and artifacts |
-| `nextai resume [id]` | Continue work | Suggests next action based on state |
-| `nextai testing <id>` | After review passes | Log your manual test results |
-| `nextai complete <id>` | Quick archive | Archive without AI summary |
-| `nextai sync` | After config changes | Re-sync commands to AI client |
-| `nextai repair [id]` | Something's wrong | Health check and fix state |
-| `nextai advance <id>` | Force transition | Move to specific phase |
+| `/nextai-create` | Start new work | Describe your idea, AI scaffolds feature |
+| `/nextai-refine <id>` | After create | AI gathers requirements, writes spec |
+| `/nextai-implement <id>` | After refinement | AI implements tasks from spec |
+| `/nextai-review <id>` | After implementation | AI reviews code against spec |
+| `/nextai-testing <id>` | After review passes | Log your manual test results |
+| `/nextai-complete <id>` | After testing passes | AI generates summary, archives |
 
-### Slash Commands (You Run These in AI Client)
+### Utility Commands
 
-These invoke **AI agents** — run them in Claude Code or OpenCode.
-
-| Command | When to Use | What AI Does |
+| Command | When to Use | What Happens |
 |---------|-------------|--------------|
 | `/nextai-analyze` | After init, periodically | Scans codebase, generates docs |
-| `/nextai-refine <id>` | After create | Gathers requirements, writes spec |
-| `/nextai-implement <id>` | After refinement | Implements tasks from spec |
-| `/nextai-review <id>` | After implementation | Reviews code against spec |
-| `/nextai-complete <id>` | After testing passes | Generates summary, archives |
+| `/nextai-list` | Check status | Shows all features with phases |
+| `/nextai-show <id>` | Deep dive | Displays feature details and artifacts |
+| `/nextai-resume [id]` | Continue work | Shows where you left off, suggests next step |
+| `/nextai-sync` | After config changes | Re-syncs commands to AI client |
+| `/nextai-repair [id]` | Something's wrong | Diagnoses and fixes state issues |
 
 ---
 
 ## Typical Workflow Session
 
-```bash
-# Morning: Start a new feature
-nextai create "Add password reset flow"
+All commands below run in your AI client:
+
+```
+# Start a new feature
+/nextai-create
+> "I want to add a password reset flow with email verification"
 # → Created: 20251206_add-password-reset-flow
 
-# In Claude Code: Refine the feature
+# Refine the feature
 /nextai-refine 20251206_add-password-reset-flow
 # AI asks: "What email service? Token expiry? etc."
 # You answer questions, AI generates spec.md and tasks.md
 
-# In Claude Code: Implement
+# Implement
 /nextai-implement 20251206_add-password-reset-flow
 # AI works through tasks, you monitor
 
-# In Claude Code: Review
+# Review
 /nextai-review 20251206_add-password-reset-flow
 # AI checks against spec, outputs PASS or FAIL
 
-# If PASS, test manually
-nextai testing 20251206_add-password-reset-flow --status pass --notes "Tested reset flow end-to-end"
+# Test manually, then log results
+/nextai-testing 20251206_add-password-reset-flow
+# AI asks: "Did it pass? Any notes?"
+# You: "Pass - tested reset flow end-to-end"
 
 # Complete and archive
 /nextai-complete 20251206_add-password-reset-flow
@@ -306,12 +305,12 @@ my-project/
 
 | Phase | Trigger | Produces | Gate |
 |-------|---------|----------|------|
-| `created` | `nextai create` | `initialization.md` | Folder exists |
+| `created` | `/nextai-create` | `initialization.md` | Folder exists |
 | `product_refinement` | `/nextai-refine` | `requirements.md` | Q&A complete |
 | `tech_spec` | `/nextai-refine` (continues) | `spec.md`, `tasks.md` | Both files exist |
 | `implementation` | `/nextai-implement` | Code changes | All tasks checked |
 | `review` | `/nextai-review` | `review.md` | PASS verdict |
-| `testing` | `nextai testing` | `testing.md` | You mark pass |
+| `testing` | `/nextai-testing` | `testing.md` | You mark pass |
 | `complete` | `/nextai-complete` | `summary.md` | Archived to `done/` |
 
 ### Validation Gates
@@ -393,11 +392,11 @@ NextAI uses a **"Generate + Delegate"** architecture:
 NextAI itself is developed using NextAI. Here's the typical development cycle:
 
 ```
-1. Create a feature      →  nextai create "my feature"
+1. Create a feature      →  /nextai-create          (describe your idea)
 2. Refine with AI        →  /nextai-refine <id>     (answer questions, get spec)
 3. Implement with AI     →  /nextai-implement <id>  (AI codes, you monitor)
 4. Review with AI        →  /nextai-review <id>     (AI validates against spec)
-5. Test manually         →  nextai testing <id>     (you verify it works)
+5. Test manually         →  /nextai-testing <id>    (you verify it works)
 6. Complete & archive    →  /nextai-complete <id>   (AI summarizes, archives)
 ```
 
