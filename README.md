@@ -19,39 +19,36 @@ Key outcomes:
 
 ```
 ┌────────────────────┐
-│ Create Feature     │
+│ Create Feature     │  /nextai-create
 │ (describe idea)    │
 └────────┬───────────┘
-         │ /nextai-create
          ▼
 ┌────────────────────┐
-│ Refine Spec        │
-│ (Q&A with AI)      │◀──── you answer questions ────┐
-└────────┬───────────┘                               │
-         │ spec + tasks approved                     │
-         ▼                                           │
-┌────────────────────┐                               │
-│ Implement          │───────────────────────────────┘
-│ (AI writes code)   │       review failed? fix it
+│ Refine Spec        │◀─────────────────┐
+│ (Q&A with AI)      │                  │ more questions?
+└────────┬───────────┘──────────────────┘
+         │ spec approved
+         ▼
+┌────────────────────┐
+│ Implement          │◀─────────────────┐
+│ (AI writes code)   │                  │
+└────────┬───────────┘                  │
+         │ tasks complete               │ review/test failed
+         ▼                              │
+┌────────────────────┐                  │
+│ Review & Test      │──────────────────┘
+│ (AI + you)         │
 └────────┬───────────┘
-         │ all tasks complete
+         │ pass
          ▼
 ┌────────────────────┐
-│ Review & Test      │
-│ (AI reviews, you   │
-│  test manually)    │
-└────────┬───────────┘
-         │ tests pass
-         ▼
-┌────────────────────┐
-│ Complete & Archive │
-│ (summary → done/)  │
+│ Complete & Archive │  /nextai-complete
 └────────────────────┘
 
 1. Create a feature with your idea or proposal.
-2. Refine the spec by answering AI's clarifying questions.
-3. Implement the tasks—AI codes, you monitor progress.
-4. Review and test—AI validates, you verify manually.
+2. Refine the spec—AI asks questions, you answer until spec is approved.
+3. Implement—AI codes, you monitor. Loop back if review/test fails.
+4. Review & test—AI validates against spec, you verify manually.
 5. Archive the completed feature with a summary.
 ```
 
