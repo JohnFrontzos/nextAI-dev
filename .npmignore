@@ -1,0 +1,25 @@
+# Source files (dist is included)
+src/
+
+# Development files
+*.test.ts
+*.spec.ts
+vitest.config.ts
+tsconfig.json
+tsup.config.ts
+.eslintrc.json
+.prettierrc
+
+# IDE
+.vscode/
+.idea/
+
+# Test coverage
+coverage/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

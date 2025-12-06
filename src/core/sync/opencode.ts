@@ -1,0 +1,199 @@
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { ClientConfigurator, type ClientConfig, type SyncContext } from './base.js';
+import { ensureDir, getNextAIDir } from '../../cli/utils/config.js';
+
+export class OpenCodeConfigurator extends ClientConfigurator {
+  config: ClientConfig = {
+    name: 'opencode',
+    displayName: 'OpenCode',
+    configDir: '.opencode',
+    commandsDir: 'command', // Note: singular in OpenCode
+    agentsDir: 'agent',
+    skillsDir: null, // OpenCode uses agents, not skills
+    commandFilePattern: 'nextai-{name}.md',
+  };
+
+  async generateCommands(ctx: SyncContext): Promise<string[]> {
+    const { projectRoot, options, skipped } = ctx;
+    const commandsWritten: string[] = [];
+    const targetDir = join(projectRoot, this.config.configDir, this.config.commandsDir);
+    ensureDir(targetDir);
+
+    // CLI wrapper commands
+    const cliWrappers = [
+      { name: 'init', description: 'Initialize NextAI project' },
+      { name: 'create', description: 'Create a new feature, bug, or task' },
+      { name: 'sync', description: 'Sync NextAI to AI client' },
+      { name: 'repair', description: 'Repair project or feature state' },
+      { name: 'list', description: 'List all features' },
+      { name: 'show', description: 'Show feature details' },
+      { name: 'resume', description: 'Smart continuation' },
+      { name: 'testing', description: 'Log test results' },
+      { name: 'status', description: 'Update feature status (block, retry count)' },
+    ];
+
+    for (const cmd of cliWrappers) {
+      const filename = this.config.commandFilePattern.replace('{name}', cmd.name);
+      const targetPath = join(targetDir, filename);
+
+      // Check if file exists and force is not set
+      if (existsSync(targetPath) && !options.force) {
+        skipped.push(filename);
+        continue;
+      }
+
+      const content = this.generateCliWrapper(cmd.name, cmd.description);
+      writeFileSync(targetPath, content);
+      commandsWritten.push(filename);
+    }
+
+    // AI workflow commands - read from templates
+    const templatesDir = join(getNextAIDir(projectRoot), 'templates', 'commands');
+    if (existsSync(templatesDir)) {
+      const templates = readdirSync(templatesDir).filter((f) => f.endsWith('.md'));
+      for (const template of templates) {
+        const name = template.replace('.md', '');
+        const filename = this.config.commandFilePattern.replace('{name}', name);
+        const targetPath = join(targetDir, filename);
+
+        // Check if file exists and force is not set
+        if (existsSync(targetPath) && !options.force) {
+          skipped.push(filename);
+          continue;
+        }
+
+        const templateContent = readFileSync(join(templatesDir, template), 'utf-8');
+        const content = this.transformCommandTemplate(templateContent);
+        writeFileSync(targetPath, content);
+        commandsWritten.push(filename);
+      }
+    }
+
+    return commandsWritten;
+  }
+
+  async syncAgents(ctx: SyncContext): Promise<string[]> {
+    const { projectRoot, options, skipped } = ctx;
+    const agentsSynced: string[] = [];
+    const sourceDir = join(getNextAIDir(projectRoot), 'agents');
+    const targetDir = join(projectRoot, this.config.configDir, this.config.agentsDir!);
+
+    if (!existsSync(sourceDir)) {
+      return agentsSynced;
+    }
+
+    ensureDir(targetDir);
+
+    const agents = readdirSync(sourceDir).filter((f) => f.endsWith('.md'));
+    for (const agent of agents) {
+      const sourcePath = join(sourceDir, agent);
+      const targetFilename = `nextai-${agent}`;
+      const targetPath = join(targetDir, targetFilename);
+
+      // Check if file exists and force is not set
+      if (existsSync(targetPath) && !options.force) {
+        skipped.push(`agents/${targetFilename}`);
+        continue;
+      }
+
+      const content = readFileSync(sourcePath, 'utf-8');
+      // Transform for OpenCode format (add mode: subagent, use nextai- prefix)
+      const transformed = this.transformAgentManifest(content);
+      writeFileSync(targetPath, transformed);
+      agentsSynced.push(targetFilename);
+    }
+
+    return agentsSynced;
+  }
+
+  async syncSkills(ctx: SyncContext): Promise<string[]> {
+    const { projectRoot, options, skipped } = ctx;
+    // OpenCode doesn't use skills directly - convert skills to agent format
+    const skillsSynced: string[] = [];
+    const sourceDir = join(getNextAIDir(projectRoot), 'skills');
+    const targetDir = join(projectRoot, this.config.configDir, this.config.agentsDir!);
+
+    if (!existsSync(sourceDir)) {
+      return skillsSynced;
+    }
+
+    ensureDir(targetDir);
+
+    const skills = readdirSync(sourceDir);
+    for (const skill of skills) {
+      const srcSkillFile = join(sourceDir, skill, 'SKILL.md');
+
+      if (existsSync(srcSkillFile)) {
+        const targetFilename = `nextai-${skill}.md`;
+        const targetPath = join(targetDir, targetFilename);
+
+        // Check if file exists and force is not set
+        if (existsSync(targetPath) && !options.force) {
+          skipped.push(`skills/${skill}`);
+          continue;
+        }
+
+        const content = readFileSync(srcSkillFile, 'utf-8');
+        const transformed = this.transformSkillToAgent(content, skill);
+        writeFileSync(targetPath, transformed);
+        skillsSynced.push(skill);
+      }
+    }
+
+    return skillsSynced;
+  }
+
+  isConfigDirPresent(projectRoot: string): boolean {
+    return existsSync(join(projectRoot, this.config.configDir));
+  }
+
+  private generateCliWrapper(name: string, description: string): string {
+    return `---
+description: ${description}
+---
+
+Run the NextAI CLI command: \`nextai ${name}\`
+
+If arguments are provided via $ARGUMENTS, parse them and pass to the command.
+
+Instructions:
+1. Run: \`nextai ${name} $ARGUMENTS\`
+2. Display the output to the user
+3. Suggest next steps based on the result
+`;
+  }
+
+  private transformCommandTemplate(template: string): string {
+    // OpenCode format is simpler - remove Claude-specific references
+    let content = template;
+
+    // Remove Skill tool references (OpenCode uses agents)
+    content = content.replace(/Use the Skill tool to load.*?\n/g, '');
+
+    return content;
+  }
+
+  private transformAgentManifest(content: string): string {
+    // Add mode: subagent for OpenCode
+    if (!content.includes('mode:')) {
+      return content.replace('---\n', '---\nmode: subagent\n');
+    }
+    return content;
+  }
+
+  private transformSkillToAgent(skillContent: string, skillName: string): string {
+    // Extract description if present
+    const descMatch = skillContent.match(/description:\s*(.+)/i);
+    const description = descMatch
+      ? descMatch[1].trim()
+      : `NextAI ${skillName.replace(/-/g, ' ')} skill`;
+
+    return `---
+description: ${description}
+mode: subagent
+---
+
+${skillContent}`;
+  }
+}
