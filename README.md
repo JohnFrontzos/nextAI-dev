@@ -1,14 +1,59 @@
 <p align="center"><strong>NextAI Dev Framework</strong></p>
-<p align="center">AI Development Workflow Orchestrator</p>
-<p align="center">A framework <em>operated by you</em>, not a fully-automated agent.</p>
-<p align="center">
-  <a href="#why-operator-driven">Why Operator-Driven</a> •
-  <a href="#the-operator-workflow">Workflow</a> •
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#command-reference">Commands</a>
-</p>
+<p align="center">Spec-driven development workflow for AI coding assistants.</p>
 
----
+# NextAI Dev Framework
+
+NextAI Dev Framework is a spec-driven workflow for planning and executing software development with AI coding assistants. Instead of a magic autonomous agent, you get **structured phases, human checkpoints, and artifacts at every step**. No API keys required.
+
+## Why NextAI?
+
+AI coding assistants are powerful but chaotic without structure. They lose context, skip steps, and don't know when something is truly "done." NextAI adds a lightweight 7-phase workflow that keeps you in control while AI handles the heavy lifting.
+
+Key outcomes:
+- Specs are written and approved before implementation begins
+- Human checkpoints at every phase transition
+- Artifacts (requirements, specs, tasks, reviews) create an audit trail
+- Works with the AI tools you already use: Claude Code, OpenCode
+
+## How It Works
+
+```
+┌────────────────────┐
+│ Create Feature     │
+│ (describe idea)    │
+└────────┬───────────┘
+         │ /nextai-create
+         ▼
+┌────────────────────┐
+│ Refine Spec        │
+│ (Q&A with AI)      │◀──── you answer questions ────┐
+└────────┬───────────┘                               │
+         │ spec + tasks approved                     │
+         ▼                                           │
+┌────────────────────┐                               │
+│ Implement          │───────────────────────────────┘
+│ (AI writes code)   │       review failed? fix it
+└────────┬───────────┘
+         │ all tasks complete
+         ▼
+┌────────────────────┐
+│ Review & Test      │
+│ (AI reviews, you   │
+│  test manually)    │
+└────────┬───────────┘
+         │ tests pass
+         ▼
+┌────────────────────┐
+│ Complete & Archive │
+│ (summary → done/)  │
+└────────────────────┘
+
+1. Create a feature with your idea or proposal.
+2. Refine the spec by answering AI's clarifying questions.
+3. Implement the tasks—AI codes, you monitor progress.
+4. Review and test—AI validates, you verify manually.
+5. Archive the completed feature with a summary.
+```
 
 ## The Problem
 
@@ -82,52 +127,6 @@ Autonomous agents fail in real-world codebases because:
 | **Reusable Skills** | Structured prompts for common patterns (debugging, spec writing, reviewing) |
 | **Generate + Delegate** | NextAI generates commands, your AI client executes them—no API keys needed |
 | **Works With Your Tools** | Syncs slash commands to Claude Code, OpenCode |
-
----
-
-## The Operator Workflow
-
-As the operator, you drive the process entirely from your AI client. After the one-time `nextai init`, everything happens via slash commands:
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         Operator Workflow                                │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  YOU (in AI client)            AI                        ARTIFACT        │
-│  ──────────────────            ──                        ────────        │
-│                                                                          │
-│  1. /nextai-create             Captures your idea        initialization  │
-│     Describe your idea                                                   │
-│     ↓                                                                    │
-│  2. /nextai-refine             Product Owner asks Qs     requirements    │
-│     YOU answer questions       Technical Architect       spec + tasks    │
-│     ↓                                                                    │
-│  3. /nextai-implement          Developer codes           code changes    │
-│     YOU review progress        (checks off tasks)                        │
-│     ↓                                                                    │
-│  4. /nextai-review             Reviewer validates        review.md       │
-│     YOU check verdict                                                    │
-│     ↓                                                                    │
-│  5. /nextai-testing            Logs your results         testing.md      │
-│     YOU test manually                                                    │
-│     ↓                                                                    │
-│  6. /nextai-complete           Document Writer           summary.md      │
-│     DONE                       archives to done/                         │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-### Your Responsibilities as Operator
-
-| Phase | Your Action | Why It Matters |
-|-------|-------------|----------------|
-| **Create** | Describe what you want to build | Sets the scope |
-| **Refine** | Answer AI's clarifying questions | Ensures AI understands requirements |
-| **Implement** | Monitor progress, provide guidance | Catch issues early |
-| **Review** | Check if review passes, decide on fixes | Quality gate |
-| **Testing** | Test the feature yourself | Only you know if it works |
-| **Complete** | Trigger archival | Closes the loop |
 
 ---
 
