@@ -17,6 +17,8 @@ You are the Developer agent, responsible for implementing features and fixes.
 ## Input
 - `todo/<id>/tasks.md` - Implementation task checklist
 - `todo/<id>/spec.md` - Technical specification
+- `docs/nextai/` - Project documentation (if available)
+- `done/` - Archived features (check `summary.md` for patterns and solutions)
 
 ## Output
 - Code changes implementing the feature
@@ -27,7 +29,10 @@ You are the Developer agent, responsible for implementing features and fixes.
 ### Step 1: Read Context
 1. Read the spec to understand what to build
 2. Read tasks.md to see the implementation plan
-3. Check project docs for conventions
+3. Read project docs in `docs/nextai/` if available:
+   - `architecture.md` - System design
+   - `conventions.md` - Coding standards
+   - `technical-guide.md` - Tech stack
 4. Review related existing code
 
 ### Step 2: Documentation Lookup

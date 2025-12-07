@@ -65,8 +65,6 @@ AI can write code, analyze architecture, and generate tests—but today's tools 
 
 **We have powerful ingredients but no recipe.**
 
----
-
 ## What NextAI Is
 
 NextAI is the **workflow layer that AI coding tools are missing**—it turns AI from a reactive assistant into a predictable development partner.
@@ -79,8 +77,6 @@ It doesn't replace Claude Code or OpenCode—it makes them more effective by pro
 | A state manager for features | A replacement for your AI client |
 | A framework YOU operate | A "set it and forget it" tool |
 | Human-in-the-loop by design | Fully automated end-to-end |
-
----
 
 ## Why Operator-Driven (Not Fully Automated)
 
@@ -103,16 +99,12 @@ Autonomous agents fail in real-world codebases because:
 - More confidence (you test and approve)
 - A smooth path from idea → shipped feature
 
----
-
 ## Who It's For
 
 **Solo builders and small teams** who want AI leverage without losing control:
 
 - **Product-minded tech leads** — You steer the work, not write every line. You need structured refinement, architecture checks, and predictable checkpoints.
 - **Cross-stack developers** — You ship code across unfamiliar stacks. You need detailed specs, scaffolding, and AI that fills gaps without breaking things.
-
----
 
 ## Core Capabilities
 
@@ -124,8 +116,6 @@ Autonomous agents fail in real-world codebases because:
 | **Reusable Skills** | Structured prompts for common patterns (debugging, spec writing, reviewing) |
 | **Generate + Delegate** | NextAI generates commands, your AI client executes them—no API keys needed |
 | **Works With Your Tools** | Syncs slash commands to Claude Code, OpenCode |
-
----
 
 ## Getting Started
 
@@ -169,22 +159,20 @@ This scans your codebase and generates `docs/nextai/` with:
 
 **Without this step, agents won't understand your project.**
 
-### Step 5: Create Your First Feature
+### Step 5: Create Your First Item
 
 ```
 /nextai-create
 ```
 
-Describe your idea when prompted. The AI will:
+Describe your idea when prompted—whether it's a complex feature, a bug to fix, or a simple task. The AI will:
 - Capture your proposal
-- Scaffold the feature folder
+- Scaffold the item folder
 - Fill the initialization document
 
 ### Step 6: Run the Workflow
 
 Follow the suggested commands. Each phase produces artifacts and suggests the next step.
-
----
 
 ## Command Reference
 
@@ -211,8 +199,6 @@ All commands run in your AI client (Claude Code or OpenCode). The only terminal 
 | `/nextai-resume [id]` | Continue work | Shows where you left off, suggests next step |
 | `/nextai-sync` | After config changes | Re-syncs commands to AI client |
 | `/nextai-repair [id]` | Something's wrong | Diagnoses and fixes state issues |
-
----
 
 ## Typical Workflow Session
 
@@ -247,8 +233,6 @@ All commands below run in your AI client:
 # AI generates summary, moves to done/
 ```
 
----
-
 ## Project Structure
 
 After `nextai init`:
@@ -267,10 +251,14 @@ my-project/
 │       ├── session.json             # Current session info
 │       └── history.log              # Audit trail (JSONL)
 │
-├── .claude/                         # Claude Code integration (generated)
+├── .claude/                         # Claude Code integration (if selected)
 │   ├── commands/nextai-*.md         # Slash commands
 │   ├── agents/nextai/               # Subagents
 │   └── skills/nextai/               # Skills
+│
+├── .opencode/                       # OpenCode integration (if selected)
+│   ├── command/nextai-*.md          # Slash commands
+│   └── agent/nextai-*.md            # Agents (includes skills)
 │
 ├── todo/                            # Active features
 │   └── 20251206_add-user-auth/
@@ -295,8 +283,6 @@ my-project/
     └── history.md                   # Feature archive log
 ```
 
----
-
 ## The 7 Phases
 
 | Phase | Trigger | Produces | Gate |
@@ -317,8 +303,6 @@ Before any phase transition, NextAI validates:
 - Previous phase completed successfully
 
 Use `--force` to bypass (logged for audit).
-
----
 
 ## Agents & Skills
 
@@ -346,8 +330,6 @@ Use `--force` to bypass (logged for audit).
 | `root-cause-tracing` | Backward bug tracing |
 | `systematic-debugging` | 4-phase debugging framework |
 
----
-
 ## Configuration
 
 NextAI uses a **"Generate + Delegate"** architecture:
@@ -371,8 +353,6 @@ NextAI uses a **"Generate + Delegate"** architecture:
 }
 ```
 
----
-
 ## Supported AI Clients
 
 | Client | Status | Config Location |
@@ -380,8 +360,6 @@ NextAI uses a **"Generate + Delegate"** architecture:
 | **Claude Code** | Supported | `.claude/` |
 | **OpenCode** | Supported | `.opencode/` |
 | **Codex** | Phase 2 | — |
-
----
 
 ## Development Flow
 
@@ -411,8 +389,6 @@ npm run test      # Run tests
 npx tsc --noEmit  # Type check
 ```
 
----
-
 ## Philosophy
 
 1. **Operator-driven** — You are the operator. You control when to proceed, what to approve, what to reject.
@@ -423,19 +399,13 @@ npx tsc --noEmit  # Type check
 6. **Tool-agnostic** — Works with Claude Code, OpenCode, future clients.
 7. **Transparent** — Full audit trail in `history.log`.
 
----
-
 ## Acknowledgments
 
 NextAI Dev Framework builds on patterns from open-source projects including OpenSpec, Agent-OS, and OpenSkills.
 
----
-
 ## License
 
 MIT
-
----
 
 <p align="center">
   <strong>Ready to become the operator?</strong><br>

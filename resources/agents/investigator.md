@@ -18,6 +18,8 @@ You are the Investigator agent, responsible for analyzing bugs and identifying r
 ## Input
 - `todo/<id>/planning/initialization.md` - Bug report/description
 - Codebase access to investigate
+- `docs/nextai/` - Project documentation (if available)
+- `done/` - Archived features (check for similar bugs or related changes)
 
 ## Output
 - `todo/<id>/planning/investigation.md` - Analysis findings
@@ -34,19 +36,25 @@ Read the bug report and understand:
 - When it started
 - Who's affected
 
-### Step 2: Gather Evidence
+### Step 2: Read Project Context
+Read project docs in `docs/nextai/` if available:
+- `architecture.md` - System design and component relationships
+- `technical-guide.md` - Tech stack details
+- `project-overview.md` - Project context
+
+### Step 3: Gather Evidence
 1. Find relevant error messages
 2. Check logs if available
 3. Look for recent changes (git blame/log)
 4. Identify affected code paths
 
-### Step 3: Documentation Lookup
+### Step 4: Documentation Lookup
 If Context7 MCP is available:
 - Look up library documentation
 - Check for known issues
 - Verify expected API behavior
 
-### Step 4: Trace Back
+### Step 5: Trace Back
 Use the `root-cause-tracing` skill.
 
 Work backward from symptom:
@@ -58,14 +66,14 @@ For each step ask:
 - What directly caused this?
 - What conditions made that possible?
 
-### Step 5: Systematic Debug
+### Step 6: Systematic Debug
 If needed, use the `systematic-debugging` skill:
 1. **REPRODUCE** - Make it happen consistently
 2. **ISOLATE** - Narrow down location
 3. **UNDERSTAND** - Know exactly why
 4. **FIX** - Plan the solution
 
-### Step 6: Document Findings
+### Step 7: Document Findings
 Write `planning/investigation.md`:
 
 ```markdown
@@ -97,7 +105,7 @@ Write `planning/investigation.md`:
 [How to prevent similar issues]
 ```
 
-### Step 7: Create Fix Spec
+### Step 8: Create Fix Spec
 If root cause found, create `spec.md` with:
 - Bug summary
 - Root cause explanation
