@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "nextai": "./dist/cli/index.js"
+    "nextai": "./bin/nextai.js"
   },
   "scripts": {
     "dev": "tsx watch src/cli/index.ts",
@@ -55,6 +55,7 @@
   },
   "files": [
     "dist",
+    "bin",
     "resources"
   ],
   "optionalDependencies": {

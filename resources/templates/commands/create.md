@@ -30,18 +30,33 @@ If unclear, ask: "Is this a feature, bug, or task?"
 
 ## Step 3: Generate Title
 
-Create a short, descriptive title (3-6 words) from the idea. For example:
-- "Add user authentication"
-- "Fix login timeout error"
-- "Refactor database queries"
+Create a **short title (2-4 words max)** from the idea. This becomes the folder name, so keep it concise:
+
+**Good examples:**
+- "Add user auth"
+- "Fix login timeout"
+- "Refactor db queries"
+- "Import archived features"
+
+**Bad examples (too long):**
+- "Add user authentication system" → use "Add user auth"
+- "Import archived features from external frameworks" → use "Import archived features"
 
 ## Step 4: Run CLI Command
 
 Execute the CLI command to scaffold the feature:
 
 ```bash
-nextai create --type <type> "<title>"
+nextai create "<title>" --type <type> --description "<description>"
 ```
+
+**Arguments:**
+- `title` (required) - Feature title
+
+**Options:**
+- `--type <type>` - Type: feature, bug, task (default: "feature")
+- `--description <text>` - Feature description (optional)
+- `--external-id <id>` - External tracker ID (e.g., JIRA-123)
 
 The CLI will output:
 - Feature ID (format: `YYYYMMDD_slug-name`)

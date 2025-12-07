@@ -9,14 +9,25 @@ Help the operator pick up where they left off.
 ## Run Command
 
 ```bash
-nextai resume $ARGUMENTS
+nextai resume $ARGUMENTS [options]
 ```
 
-If `$ARGUMENTS` is not provided:
+**Arguments:**
+- `id` - Feature ID (required if multiple active features)
+
+**Options:**
+- `--sync` - Auto-sync ledger (must be explicit)
+- `--no-sync` - Do not sync ledger (default)
+- `--no-advance` - Do not auto-advance, just show status
+- `-f, --force` - Bypass validation errors
+
+If `$ARGUMENTS` is not provided and only one active feature exists:
 ```bash
 nextai resume
 ```
-This will show the most recently active feature.
+This will auto-select the single active feature.
+
+**Note:** If multiple features are active and no ID is provided, the command will error with a list of active features.
 
 ## Display Context
 

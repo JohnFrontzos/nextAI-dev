@@ -10,13 +10,25 @@ Diagnose and repair issues with NextAI state or feature artifacts.
 
 For a specific feature:
 ```bash
-nextai repair $ARGUMENTS
+nextai repair $ARGUMENTS [options]
 ```
 
 For overall health check:
 ```bash
-nextai repair
+nextai repair [options]
 ```
+
+**Arguments:**
+- `id` - Feature ID (repairs specific feature if provided)
+
+**Options:**
+- `--check-only` - Only check, don't fix (default if no --apply)
+- `--apply` - Apply automatic fixes
+- `-v, --verbose` - Show detailed checks
+
+**Exit Codes:**
+- `0` - No issues found, or issues were fixed successfully
+- `1` - Issues found (without --apply), or errors occurred
 
 ## Display Results
 
@@ -74,16 +86,18 @@ Suggested fix:
 ══════════════════════════════════════════════════════════
 ```
 
-## Interactive Repair
+## Applying Fixes
 
-If issues are found, ask the operator which fix to apply:
-- "Roll back to previous phase"
-- "Create missing artifact"
-- "Skip (leave as-is)"
-
-Then run:
+If issues are found that can be automatically fixed, run:
 ```bash
-nextai repair $ARGUMENTS --fix --action <chosen-action>
+nextai repair $ARGUMENTS --apply
+```
+
+The `--apply` flag is required to apply fixes. Without it, the command will only report issues and exit with code 1.
+
+For AI-driven workflows, always use `--apply` to fix issues automatically:
+```bash
+nextai repair $ARGUMENTS --apply
 ```
 
 ## Common Issues

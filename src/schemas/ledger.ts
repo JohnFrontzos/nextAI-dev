@@ -85,14 +85,18 @@ export const emptyLedger = (): Ledger => ({
 });
 
 /**
- * Generate a feature ID in the format: YYYYMMDD_slug-from-title
+ * Generate a feature ID in the format: YYYYMMDD_short-slug
+ * Simple approach: slugify title and cap at 30 chars
  */
 export function generateFeatureId(title: string, date: Date = new Date()): string {
   const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+
   const slug = title
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
-    .slice(0, 50); // Max 50 chars for slug
+    .slice(0, 30)
+    .replace(/-+$/, ''); // Remove trailing dashes
+
   return `${dateStr}_${slug}`;
 }

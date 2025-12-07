@@ -32,14 +32,22 @@ If review.md already exists:
 
 ## Review Process
 
-Use the **reviewer** subagent (or load the reviewer-checklist skill):
+Use the **reviewer** subagent to perform the code review. Also load the **reviewer-checklist** skill for review patterns.
 
-**Input:** `spec.md`, `tasks.md`, code changes
-**Output:** `nextai/todo/$ARGUMENTS/review.md`
+Provide to the subagent:
+- The specification: `nextai/todo/$ARGUMENTS/spec.md`
+- The task list: `nextai/todo/$ARGUMENTS/tasks.md`
+- Code changes (git diff or modified files)
+- Output path: `nextai/todo/$ARGUMENTS/review.md`
+
+Instruct the subagent to:
+1. Review all code changes against the specification
+2. Check each review category below
+3. Write the review document with verdict
 
 ### Review Categories
 
-Check each category:
+The subagent should check each category:
 
 1. **Specification Compliance**
    - All requirements from spec are implemented

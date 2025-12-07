@@ -4,7 +4,6 @@ import { join } from 'path';
 import ora from 'ora';
 import chalk from 'chalk';
 import { logger } from '../utils/logger.js';
-import { confirmAction } from '../utils/prompts.js';
 import {
   findProjectRoot,
   getNextAIDir,
@@ -27,7 +26,8 @@ interface RepairIssue {
 export const repairCommand = new Command('repair')
   .description('Health check and repair project or feature state')
   .argument('[id]', 'Feature ID (repairs specific feature if provided)')
-  .option('--check-only', 'Only check, don\'t fix', false)
+  .option('--check-only', 'Only check, don\'t fix (default if no --apply)')
+  .option('--apply', 'Apply automatic fixes')
   .option('-v, --verbose', 'Show detailed checks', false)
   .action(async (idArg, options) => {
     // Find project root
@@ -62,9 +62,10 @@ export const repairCommand = new Command('repair')
       const errors = issues.filter((i) => i.type === 'error');
       const warnings = issues.filter((i) => i.type === 'warning');
 
+      // No issues found = success
       if (issues.length === 0) {
         logger.success(idArg ? 'Feature is healthy' : 'Project is healthy');
-        return;
+        process.exit(0);
       }
 
       console.log();
@@ -82,30 +83,26 @@ export const repairCommand = new Command('repair')
         }
       }
 
-      if (options.checkOnly) {
+      // Apply fixes only with --apply flag (no prompts for AI-driven usage)
+      const fixableIssues = issues.filter((i) => i.fix);
+
+      if (!options.apply) {
+        // Issues found without --apply = exit 1 (mirrors lint tooling)
         logger.blank();
-        logger.dim('Check-only mode - no fixes applied');
-        return;
+        if (fixableIssues.length > 0) {
+          logger.dim(`Run with --apply to fix ${fixableIssues.length} issue(s)`);
+        } else {
+          logger.warn('No automatic fixes available');
+          logger.dim('Please address the issues manually');
+        }
+        process.exit(1);  // Non-zero: issues detected
       }
 
-      // Apply fixes
-      const fixableIssues = issues.filter((i) => i.fix);
       if (fixableIssues.length === 0) {
         logger.blank();
         logger.warn('No automatic fixes available');
         logger.dim('Please address the issues manually');
-        return;
-      }
-
-      logger.blank();
-      const shouldFix = await confirmAction(
-        `Apply ${fixableIssues.length} automatic fix(es)?`,
-        true
-      );
-
-      if (!shouldFix) {
-        logger.dim('Aborted');
-        return;
+        process.exit(1);
       }
 
       for (const issue of fixableIssues) {
@@ -129,6 +126,7 @@ export const repairCommand = new Command('repair')
 
       logger.blank();
       logger.success(`Repair complete: ${actions.length} fix(es) applied`);
+      process.exit(0);  // Success after applying
     } catch (error) {
       spinner.fail('Repair failed');
       logger.error(String(error));

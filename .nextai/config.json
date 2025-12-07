@@ -1,0 +1,16 @@
+{
+  "project": {
+    "id": "0d86c5bf-1044-47fa-8dee-f0419179fa51",
+    "name": "nextAI-dev",
+    "repo_root": "/Users/ifrontzos/Dev/Git/nextAI-dev"
+  },
+  "clients": {
+    "synced": [
+      "claude"
+    ],
+    "default": "claude"
+  },
+  "preferences": {
+    "verbose": false
+  }
+}

@@ -30,13 +30,14 @@ If resuming mid-implementation:
 
 ## Implementation Process
 
-Use the **developer** subagent (or load the executing-plans skill):
+Use the **developer** subagent to implement the feature. Also load the **executing-plans** skill for implementation patterns.
 
-**Input:** `nextai/todo/$ARGUMENTS/tasks.md` and `nextai/todo/$ARGUMENTS/spec.md`
-**Output:** Code changes, updated `tasks.md`
+Provide to the subagent:
+- The task list: `nextai/todo/$ARGUMENTS/tasks.md`
+- The specification: `nextai/todo/$ARGUMENTS/spec.md`
+- Project documentation: `nextai/docs/` (if available)
 
-### Steps:
-
+Instruct the subagent to:
 1. **Read Context**
    - Read the full spec
    - Read the task list
@@ -58,10 +59,12 @@ Use the **developer** subagent (or load the executing-plans skill):
    - Mark task complete: `- [x]`
 
 4. **Progress Updates**
-   After significant milestones, update the user:
+   After significant milestones, report back with:
    - Tasks completed
    - Any issues or deviations
    - Next steps
+
+The subagent will implement the code and update `tasks.md` as tasks are completed.
 
 ## Code Quality
 

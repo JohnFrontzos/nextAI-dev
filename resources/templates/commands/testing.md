@@ -40,6 +40,14 @@ Run the CLI command with their input:
 nextai testing $ARGUMENTS --status <pass|fail> --notes "<their notes>"
 ```
 
+**Arguments:**
+- `id` (required) - Feature ID
+
+**Options:**
+- `-s, --status <status>` (required) - Test status: pass or fail
+- `-n, --notes <text>` - Test notes (optional, defaults to "Logged via CLI")
+- `-a, --attachments <paths>` - Comma-separated paths to attachments
+
 The CLI will:
 - Create/update `nextai/todo/<id>/testing.md`
 - Update ledger phase to `testing`

@@ -34,3 +34,6 @@ pnpm-lock.yaml
 
 # Test artifacts
 .vitest/
+
+# Research
+research/

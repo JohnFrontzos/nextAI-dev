@@ -2,7 +2,6 @@ import { Command } from 'commander';
 import ora from 'ora';
 import chalk from 'chalk';
 import { logger } from '../utils/logger.js';
-import { confirmAction } from '../utils/prompts.js';
 import { findProjectRoot, appendHistory } from '../utils/config.js';
 import { findFeature, updateFeaturePhase } from '../../core/state/ledger.js';
 import { archiveFeature } from '../utils/archive.js';
@@ -36,17 +35,13 @@ export const completeCommand = new Command('complete')
         process.exit(1);
       }
 
-      const spinner = ora('Completing feature...').start();
-
       if (options.skipSummary) {
         // Simple archive without AI summary
-        spinner.text = 'Archiving artifacts...';
+        const spinner = ora('Archiving artifacts...').start();
         archiveFeature(projectRoot, feature.id);
         spinner.succeed('Feature archived');
       } else {
-        // With AI summary - instruct user to run slash command
-        spinner.stop();
-
+        // Without --skip-summary, instruct user to run slash command (no prompt!)
         logger.info('Feature ready for completion!');
         logger.blank();
         logger.info('Run in your AI client:');
@@ -58,19 +53,7 @@ export const completeCommand = new Command('complete')
         logger.dim('  • Refresh project documentation');
         logger.blank();
         logger.dim('Or use --skip-summary to archive without AI processing');
-
-        const shouldArchiveOnly = await confirmAction(
-          'Archive without AI summary?',
-          false
-        );
-
-        if (shouldArchiveOnly) {
-          const archiveSpinner = ora('Archiving...').start();
-          archiveFeature(projectRoot, feature.id);
-          archiveSpinner.succeed('Feature archived');
-        } else {
-          return;
-        }
+        process.exit(2);  // Action required: use slash command
       }
 
       // Update phase with validation

@@ -24,9 +24,14 @@ describe('Create Command Integration', () => {
   });
 
   // Helper to simulate CLI create command (addFeature + scaffoldFeature)
-  function createFeature(title: string, type: 'feature' | 'bug' | 'task' = 'feature', externalId?: string) {
+  function createFeature(
+    title: string,
+    type: 'feature' | 'bug' | 'task' = 'feature',
+    externalId?: string,
+    description?: string
+  ) {
     const feature = addFeature(testContext.projectRoot, title, type, externalId);
-    scaffoldFeature(testContext.projectRoot, feature.id, title, type);
+    scaffoldFeature(testContext.projectRoot, feature.id, title, type, description);
     return feature;
   }
 
@@ -99,6 +104,35 @@ describe('Create Command Integration', () => {
 
       // Folder should NOT exist since we only called addFeature
       expect(featureFolderExists(testContext.projectRoot, feature.id)).toBe(false);
+    });
+  });
+
+  describe('Create Command - Non-Interactive', () => {
+    it('accepts --description option', () => {
+      const feature = createFeature(
+        'My Feature',
+        'feature',
+        undefined,
+        'This is the description'
+      );
+
+      const initPath = path.join(
+        testContext.projectRoot,
+        'nextai',
+        'todo',
+        feature.id,
+        'planning',
+        'initialization.md'
+      );
+      const content = fs.readFileSync(initPath, 'utf-8');
+      expect(content).toContain('This is the description');
+    });
+
+    it('works without description (optional)', () => {
+      const feature = createFeature('No Description Feature');
+
+      expect(featureFolderExists(testContext.projectRoot, feature.id)).toBe(true);
+      expect(feature.phase).toBe('created');
     });
   });
 });

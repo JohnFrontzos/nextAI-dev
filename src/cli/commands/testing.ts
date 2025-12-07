@@ -3,7 +3,6 @@ import { writeFileSync, appendFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import chalk from 'chalk';
 import { logger } from '../utils/logger.js';
-import { selectOption, inputText } from '../utils/prompts.js';
 import { findProjectRoot } from '../utils/config.js';
 import { findFeature, updateFeaturePhase } from '../../core/state/ledger.js';
 import { getFeaturePath } from '../../core/scaffolding/feature.js';
@@ -12,7 +11,7 @@ import { printNextCommand } from '../utils/next-command.js';
 export const testingCommand = new Command('testing')
   .description('Log manual test results')
   .argument('<id>', 'Feature ID')
-  .option('-s, --status <status>', 'Test status: pass or fail')
+  .requiredOption('-s, --status <status>', 'Test status: pass or fail (required)')
   .option('-n, --notes <text>', 'Test notes')
   .option('-a, --attachments <paths>', 'Comma-separated paths to attachments')
   .action(async (idArg, options) => {
@@ -39,15 +38,8 @@ export const testingCommand = new Command('testing')
         process.exit(1);
       }
 
-      // Get test status
-      let status = options.status;
-      if (!status) {
-        status = await selectOption('Test result:', [
-          { value: 'pass', name: 'PASS - Feature works as expected' },
-          { value: 'fail', name: 'FAIL - Issues found' },
-        ]);
-      }
-
+      // Validate status (--status is required via requiredOption)
+      const status = options.status;
       if (!['pass', 'fail'].includes(status.toLowerCase())) {
         logger.error('Invalid status. Use "pass" or "fail"');
         process.exit(1);
@@ -55,11 +47,8 @@ export const testingCommand = new Command('testing')
 
       const normalizedStatus = status.toLowerCase() as 'pass' | 'fail';
 
-      // Get notes
-      let notes = options.notes;
-      if (!notes) {
-        notes = await inputText('Test notes (what was tested, results):');
-      }
+      // Notes are optional, default to CLI-generated message
+      const notes = options.notes || 'Logged via CLI';
 
       // Get attachments
       const attachments = options.attachments

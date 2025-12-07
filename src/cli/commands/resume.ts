@@ -2,7 +2,6 @@ import { Command } from 'commander';
 import { join } from 'path';
 import chalk from 'chalk';
 import { logger } from '../utils/logger.js';
-import { selectOption, confirmAction } from '../utils/prompts.js';
 import { findProjectRoot } from '../utils/config.js';
 import { findFeature, getActiveFeatures, updateFeaturePhase } from '../../core/state/ledger.js';
 import { getFeaturePath } from '../../core/scaffolding/feature.js';
@@ -23,9 +22,10 @@ import type { Feature } from '../../schemas/ledger.js';
 
 export const resumeCommand = new Command('resume')
   .description('Smart continuation - reads feature state and suggests next action')
-  .argument('[id]', 'Feature ID (auto-selects if only one active)')
+  .argument('[id]', 'Feature ID (required if multiple active)')
   .option('-f, --force', 'Bypass validation errors', false)
-  .option('--sync', 'Auto-sync ledger without prompting', false)
+  .option('--sync', 'Auto-sync ledger (must be explicit)')
+  .option('--no-sync', 'Do not sync ledger (default)')
   .option('--no-advance', 'Do not auto-advance, just show status', false)
   .action(async (idArg, options) => {
     // Find project root
@@ -60,17 +60,14 @@ export const resumeCommand = new Command('resume')
           feature = activeFeatures[0];
           logger.info(`Auto-selected: ${feature.id}`);
         } else {
-          // Multiple active features - prompt user
-          const choices = activeFeatures.map((f) => ({
-            value: f.id,
-            name: `${f.id} (${f.phase})`,
-          }));
-
-          const selectedId = await selectOption(
-            'Multiple features in progress. Select one:',
-            choices
-          );
-          feature = activeFeatures.find((f) => f.id === selectedId);
+          // Multiple active features - error with list (no prompts for AI-driven usage)
+          logger.error('Multiple active features - specify which one:');
+          for (const f of activeFeatures) {
+            logger.info(`  • ${f.id} (${f.phase})`);
+          }
+          logger.blank();
+          logger.dim('Usage: nextai resume <feature-id>');
+          process.exit(1);
         }
       }
 
@@ -117,13 +114,11 @@ export const resumeCommand = new Command('resume')
         // Determine target phase (next after detected)
         const targetPhase = getNextPhase(detectedPhase) || detectedPhase;
 
-        // Auto-sync or prompt
-        let shouldSync = options.sync;
+        // Sync only when explicitly requested (no prompts for AI-driven usage)
+        const shouldSync = options.sync === true;
+
         if (!shouldSync) {
-          shouldSync = await confirmAction(
-            `Update ledger to '${targetPhase}'?`,
-            true
-          );
+          logger.dim(`Ledger out of sync. Run with --sync to update to '${targetPhase}'`);
         }
 
         if (shouldSync) {

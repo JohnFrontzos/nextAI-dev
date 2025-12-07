@@ -18,7 +18,17 @@ Project not initialized. Run `nextai init` first.
 
 ## Analysis Process
 
-Use the **document-writer** subagent (or load the documentation-recaps skill) in **Analyze Mode**.
+Use the **document-writer** subagent to analyze the project and generate documentation. Also load the **documentation-recaps** skill for documentation patterns.
+
+Provide to the subagent:
+- Mode: **Analyze Mode** (scan project + generate docs)
+- Output location: `nextai/docs/`
+- Project root: current directory
+
+Instruct the subagent to:
+1. Scan the project structure and technologies
+2. Generate/update documentation files
+3. Follow the steps below
 
 ### Step 1: Scan Project
 

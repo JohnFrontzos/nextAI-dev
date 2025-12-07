@@ -33,7 +33,18 @@ Complete required phases first:
 
 ## Completion Process
 
-Use the **document-writer** subagent (or load the documentation-recaps skill) in **Complete Mode**.
+Use the **document-writer** subagent to generate the summary and update documentation. Also load the **documentation-recaps** skill for summary writing patterns.
+
+Provide to the subagent:
+- All feature artifacts (listed below)
+- Output path for summary: `nextai/done/$ARGUMENTS/summary.md`
+- Mode: **Complete Mode** (generate summary + update docs)
+
+Instruct the subagent to:
+1. Read all feature artifacts
+2. Generate a comprehensive summary
+3. Update changelog and history docs
+4. Follow the steps below
 
 ### Step 1: Read Feature Context
 
@@ -138,6 +149,18 @@ Files that will be deleted:
 nextai complete $ARGUMENTS --skip-summary
 ```
 
+**Arguments:**
+- `id` (required) - Feature ID
+
+**Options:**
+- `--skip-summary` - Archive without AI-generated summary
+- `-f, --force` - Bypass validation errors
+
+**Exit Codes:**
+- `0` - Feature archived successfully
+- `1` - Error (validation failed, feature not found, etc.)
+- `2` - Action required (no --skip-summary provided, use slash command)
+
 This command:
 - **Deletes** the `attachments/` folder (to reduce archive size)
 - **Moves** the remaining `nextai/todo/$ARGUMENTS/` directory to `nextai/done/$ARGUMENTS/` (preserving your summary.md)
@@ -157,8 +180,14 @@ nextai complete $ARGUMENTS --skip-summary --force
 
 ### Step 6: Update Project Documentation
 
-After archiving, run the **document-writer** subagent in **Analyze Mode** to refresh project documentation:
+After archiving, use the **document-writer** subagent in **Analyze Mode** to refresh project documentation. Also load the **documentation-recaps** skill.
 
+Provide to the subagent:
+- Mode: **Analyze Mode** (refresh project docs)
+- Documentation location: `nextai/docs/`
+- Context: Changes introduced by the completed feature
+
+Instruct the subagent to:
 1. **Re-scan project** for any changes introduced by this feature:
    - New dependencies or technologies
    - New architectural patterns or components

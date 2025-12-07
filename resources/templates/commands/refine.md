@@ -28,18 +28,21 @@ If `spec.md` and `tasks.md` already exist:
 
 ## Phase 1: Product Research
 
-Use the **product-owner** subagent (or load the refinement-questions skill):
+Use the **product-owner** subagent to gather and clarify requirements. Also load the **refinement-questions** skill for question generation patterns.
 
-**Input:** `nextai/todo/$ARGUMENTS/planning/initialization.md`
-**Output:** `nextai/todo/$ARGUMENTS/planning/requirements.md`
+Provide to the subagent:
+- The initialization document: `nextai/todo/$ARGUMENTS/planning/initialization.md`
+- The output path: `nextai/todo/$ARGUMENTS/planning/requirements.md`
 
-### Steps:
-1. Read the initialization document
+Instruct the subagent to:
+1. Read the initialization document thoroughly
 2. Generate 5-10 numbered clarifying questions with proposed answers
 3. Present questions and STOP - wait for user response
-4. After receiving answers, assess confidence
+4. After receiving answers, assess confidence level
 5. If <95% confident, ask 1-3 follow-up questions (max 3 rounds)
 6. Write confirmed requirements to `planning/requirements.md`
+
+The subagent will relay questions back to you. Present these to the user and wait for their response. Pass user answers back to the subagent.
 
 ### Always ask about:
 - Visual assets (mockups, screenshots) → store in `attachments/design/`
@@ -49,19 +52,23 @@ Use the **product-owner** subagent (or load the refinement-questions skill):
 
 ## Phase 2: Technical Specification
 
-Use the **technical-architect** subagent (or load the refinement-spec-writer skill):
+Use the **technical-architect** subagent to create the technical specification. Also load the **refinement-spec-writer** skill for spec writing patterns.
 
-**Input:** `nextai/todo/$ARGUMENTS/planning/requirements.md`
-**Output:** `nextai/todo/$ARGUMENTS/spec.md` and `nextai/todo/$ARGUMENTS/tasks.md`
+Provide to the subagent:
+- The requirements document: `nextai/todo/$ARGUMENTS/planning/requirements.md`
+- The output paths: `nextai/todo/$ARGUMENTS/spec.md` and `nextai/todo/$ARGUMENTS/tasks.md`
+- Project documentation location: `nextai/docs/` (if available)
 
-### Steps:
-1. Read the requirements
+Instruct the subagent to:
+1. Read the requirements document thoroughly
 2. Review project docs in `nextai/docs/` if available
 3. If Context7 MCP is available, look up relevant library docs
 4. Design the technical approach
 5. If uncertain, ask technical clarifying questions (max 3 rounds)
 6. Write `spec.md` with full technical specification
 7. Write `tasks.md` with implementation checklist
+
+The subagent may relay technical questions back to you. Present these to the user and wait for their response.
 
 ### spec.md required sections:
 - Overview
@@ -110,8 +117,19 @@ When both phases complete successfully:
 If the feature type is `bug`:
 - Check for evidence files in `attachments/evidence/` (logs, screenshots)
 - Ask for reproduction steps and error details
-- Use the **investigator** subagent for root-cause analysis
-- Then proceed to technical specification
+- Use the **investigator** subagent for root-cause analysis. Also load the **root-cause-tracing** skill.
+
+Provide to the investigator subagent:
+- The evidence files in `attachments/evidence/`
+- User-provided reproduction steps
+- Error details and logs
+
+Instruct the investigator to:
+1. Analyze the evidence
+2. Trace the root cause
+3. Document findings
+
+After investigation completes, proceed to Phase 2 (technical specification) with the investigator's findings.
 
 If evidence files are missing, ask:
 "Do you have any error logs, stack traces, or screenshots? Please add them to `attachments/evidence/`"
