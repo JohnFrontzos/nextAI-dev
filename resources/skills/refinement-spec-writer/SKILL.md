@@ -7,7 +7,7 @@ Transform product requirements into actionable technical specifications and impl
 
 ## Input
 - `planning/requirements.md` - Product Q&A and confirmed requirements
-- Project documentation in `docs/nextai/` (if available)
+- Project documentation in `nextai/docs/` (if available)
 
 ## Process
 

@@ -28,45 +28,45 @@ describe('Feature Scaffolding', () => {
   });
 
   describe('scaffoldFeature()', () => {
-    it('creates todo/<id>/ directory', () => {
+    it('creates nextai/todo/<id>/ directory', () => {
       scaffoldFeature(testContext.projectRoot, 'test-feature', 'Test Feature', 'feature');
 
-      const featureDir = path.join(testContext.projectRoot, 'todo', 'test-feature');
+      const featureDir = path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature');
       expect(fs.existsSync(featureDir)).toBe(true);
     });
 
     it('creates planning/ subdirectory', () => {
       scaffoldFeature(testContext.projectRoot, 'test-feature', 'Test Feature', 'feature');
 
-      const planningDir = path.join(testContext.projectRoot, 'todo', 'test-feature', 'planning');
+      const planningDir = path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature', 'planning');
       expect(fs.existsSync(planningDir)).toBe(true);
     });
 
     it('creates attachments/ directory', () => {
       scaffoldFeature(testContext.projectRoot, 'test-feature', 'Test Feature', 'feature');
 
-      const attachmentsDir = path.join(testContext.projectRoot, 'todo', 'test-feature', 'attachments');
+      const attachmentsDir = path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature', 'attachments');
       expect(fs.existsSync(attachmentsDir)).toBe(true);
     });
 
     it('creates attachments/design/ subdirectory', () => {
       scaffoldFeature(testContext.projectRoot, 'test-feature', 'Test Feature', 'feature');
 
-      const designDir = path.join(testContext.projectRoot, 'todo', 'test-feature', 'attachments', 'design');
+      const designDir = path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature', 'attachments', 'design');
       expect(fs.existsSync(designDir)).toBe(true);
     });
 
     it('creates attachments/evidence/ subdirectory', () => {
       scaffoldFeature(testContext.projectRoot, 'test-feature', 'Test Feature', 'feature');
 
-      const evidenceDir = path.join(testContext.projectRoot, 'todo', 'test-feature', 'attachments', 'evidence');
+      const evidenceDir = path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature', 'attachments', 'evidence');
       expect(fs.existsSync(evidenceDir)).toBe(true);
     });
 
     it('creates attachments/reference/ subdirectory', () => {
       scaffoldFeature(testContext.projectRoot, 'test-feature', 'Test Feature', 'feature');
 
-      const referenceDir = path.join(testContext.projectRoot, 'todo', 'test-feature', 'attachments', 'reference');
+      const referenceDir = path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature', 'attachments', 'reference');
       expect(fs.existsSync(referenceDir)).toBe(true);
     });
 
@@ -75,6 +75,7 @@ describe('Feature Scaffolding', () => {
 
       const initPath = path.join(
         testContext.projectRoot,
+        'nextai',
         'todo',
         'test-feature',
         'planning',
@@ -88,6 +89,7 @@ describe('Feature Scaffolding', () => {
 
       const initPath = path.join(
         testContext.projectRoot,
+        'nextai',
         'todo',
         'test-feature',
         'planning',
@@ -102,6 +104,7 @@ describe('Feature Scaffolding', () => {
 
       const initPath = path.join(
         testContext.projectRoot,
+        'nextai',
         'todo',
         'bug-fix',
         'planning',
@@ -122,6 +125,7 @@ describe('Feature Scaffolding', () => {
 
       const initPath = path.join(
         testContext.projectRoot,
+        'nextai',
         'todo',
         'test-feature',
         'planning',
@@ -136,6 +140,7 @@ describe('Feature Scaffolding', () => {
 
       const initPath = path.join(
         testContext.projectRoot,
+        'nextai',
         'todo',
         'test-feature',
         'planning',
@@ -153,7 +158,7 @@ describe('Feature Scaffolding', () => {
         'feature'
       );
 
-      expect(result).toBe(path.join(testContext.projectRoot, 'todo', 'test-feature'));
+      expect(result).toBe(path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature'));
     });
   });
 
@@ -171,27 +176,27 @@ describe('Feature Scaffolding', () => {
   describe('getFeaturePath()', () => {
     it('returns correct path', () => {
       const result = getFeaturePath(testContext.projectRoot, 'feature-1');
-      expect(result).toBe(path.join(testContext.projectRoot, 'todo', 'feature-1'));
+      expect(result).toBe(path.join(testContext.projectRoot, 'nextai', 'todo', 'feature-1'));
     });
   });
 
   describe('getDonePath()', () => {
     it('returns correct path', () => {
       const result = getDonePath(testContext.projectRoot, 'feature-1');
-      expect(result).toBe(path.join(testContext.projectRoot, 'done', 'feature-1'));
+      expect(result).toBe(path.join(testContext.projectRoot, 'nextai', 'done', 'feature-1'));
     });
   });
 
   describe('getArtifactPath()', () => {
     it('returns correct path for artifact', () => {
       const result = getArtifactPath(testContext.projectRoot, 'feature-1', 'spec.md');
-      expect(result).toBe(path.join(testContext.projectRoot, 'todo', 'feature-1', 'spec.md'));
+      expect(result).toBe(path.join(testContext.projectRoot, 'nextai', 'todo', 'feature-1', 'spec.md'));
     });
 
     it('handles nested artifacts', () => {
       const result = getArtifactPath(testContext.projectRoot, 'feature-1', 'planning/requirements.md');
       expect(result).toBe(
-        path.join(testContext.projectRoot, 'todo', 'feature-1', 'planning/requirements.md')
+        path.join(testContext.projectRoot, 'nextai', 'todo', 'feature-1', 'planning/requirements.md')
       );
     });
   });

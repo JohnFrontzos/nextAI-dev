@@ -45,12 +45,12 @@ nextai create --type <type> "<title>"
 
 The CLI will output:
 - Feature ID (format: `YYYYMMDD_slug-name`)
-- Folder location (`todo/<id>/`)
+- Folder location (`nextai/todo/<id>/`)
 - Path to initialization file
 
 ## Step 5: Fill Initialization Document
 
-Read the created `todo/<id>/planning/initialization.md` file and update it with the operator's full idea/proposal.
+Read the created `nextai/todo/<id>/planning/initialization.md` file and update it with the operator's full idea/proposal.
 
 The initialization.md should contain:
 ```markdown
@@ -77,13 +77,13 @@ The initialization.md should contain:
 If the operator provides files (screenshots, logs, docs):
 
 1. **Design files** (mockups, wireframes, UI screenshots):
-   → Place in `todo/<id>/attachments/design/`
+   → Place in `nextai/todo/<id>/attachments/design/`
 
 2. **Evidence files** (error logs, stack traces, reproduction screenshots):
-   → Place in `todo/<id>/attachments/evidence/`
+   → Place in `nextai/todo/<id>/attachments/evidence/`
 
 3. **Reference files** (docs, examples, external files):
-   → Place in `todo/<id>/attachments/reference/`
+   → Place in `nextai/todo/<id>/attachments/reference/`
 
 List them in the initialization.md under ## Attachments.
 
@@ -93,7 +93,7 @@ Output:
 ```
 ✓ Created: <id>
   Type: <type>
-  Folder: todo/<id>/
+  Folder: nextai/todo/<id>/
 
 Your idea has been captured in planning/initialization.md
 

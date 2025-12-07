@@ -37,7 +37,7 @@ export function createFeatureFixture(
   featureId: string,
   artifacts: Record<string, string>
 ): void {
-  const featureDir = path.join(projectRoot, 'todo', featureId);
+  const featureDir = path.join(projectRoot, 'nextai', 'todo', featureId);
 
   for (const [artifactPath, content] of Object.entries(artifacts)) {
     const fullPath = path.join(featureDir, artifactPath);
@@ -59,7 +59,7 @@ export function createDoneFeatureFixture(
   featureId: string,
   artifacts: Record<string, string>
 ): void {
-  const featureDir = path.join(projectRoot, 'done', featureId);
+  const featureDir = path.join(projectRoot, 'nextai', 'done', featureId);
 
   for (const [artifactPath, content] of Object.entries(artifacts)) {
     const fullPath = path.join(featureDir, artifactPath);
@@ -81,8 +81,10 @@ export function initNextAIStructure(projectRoot: string): void {
   const stateDir = path.join(nextaiDir, 'state');
 
   fs.mkdirSync(stateDir, { recursive: true });
-  fs.mkdirSync(path.join(projectRoot, 'todo'), { recursive: true });
-  fs.mkdirSync(path.join(projectRoot, 'done'), { recursive: true });
+  fs.mkdirSync(path.join(projectRoot, 'nextai', 'todo'), { recursive: true });
+  fs.mkdirSync(path.join(projectRoot, 'nextai', 'done'), { recursive: true });
+  fs.mkdirSync(path.join(projectRoot, 'nextai', 'docs'), { recursive: true });
+  fs.mkdirSync(path.join(projectRoot, 'nextai', 'metrics'), { recursive: true });
 
   // Create empty ledger
   fs.writeFileSync(

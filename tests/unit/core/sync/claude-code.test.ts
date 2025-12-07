@@ -145,4 +145,93 @@ describe('Claude Code Sync', () => {
       expect(content).toContain('nextai create');
     });
   });
+
+  describe('transformSkillForClaudeCode', () => {
+    // Access private method for unit testing
+    const transform = (content: string, skillName: string) =>
+      (configurator as any).transformSkillForClaudeCode(content, skillName);
+
+    it('adds frontmatter to skill without frontmatter', () => {
+      const content = `# My Skill\n\nThis is the description.\n\n## Purpose\n...`;
+      const result = transform(content, 'my-skill');
+
+      expect(result).toContain('---\nname: my-skill');
+      expect(result).toContain('description: This is the description.');
+      expect(result).toContain('# My Skill');
+    });
+
+    it('preserves existing frontmatter', () => {
+      const content = `---\nname: custom\ndescription: Custom desc\n---\n\n# My Skill`;
+      const result = transform(content, 'my-skill');
+
+      expect(result).toBe(content);
+    });
+
+    it('handles skill with only title', () => {
+      const content = `# Minimal Skill`;
+      const result = transform(content, 'minimal');
+
+      expect(result).toContain('name: minimal');
+      expect(result).toContain('description: NextAI minimal skill');
+    });
+
+    it('extracts description from first paragraph after title', () => {
+      const content = `# Code Review\n\nValidates code against specifications.\n\n## Details`;
+      const result = transform(content, 'code-review');
+
+      expect(result).toContain('description: Validates code against specifications.');
+    });
+  });
+
+  describe('syncSkills', () => {
+    it('transforms skills when syncing to Claude Code', async () => {
+      // Setup: create a skill without frontmatter
+      const skillDir = path.join(testContext.projectRoot, '.nextai', 'skills', 'test-skill');
+      fs.mkdirSync(skillDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(skillDir, 'SKILL.md'),
+        '# Test Skill\n\nTest description.\n\n## Purpose\n...'
+      );
+
+      // Run sync
+      await configurator.sync(testContext.projectRoot, {});
+
+      // Verify: skill should have frontmatter
+      const syncedSkill = fs.readFileSync(
+        path.join(testContext.projectRoot, '.claude', 'skills', 'nextai', 'test-skill', 'SKILL.md'),
+        'utf-8'
+      );
+
+      expect(syncedSkill).toMatch(/^---\nname: test-skill/);
+      expect(syncedSkill).toContain('description: Test description.');
+    });
+
+    it('preserves existing frontmatter in custom skills', async () => {
+      // Setup: create custom skill with frontmatter
+      const customSkillDir = path.join(testContext.projectRoot, '.nextai', 'skills', 'codex');
+      fs.mkdirSync(customSkillDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(customSkillDir, 'SKILL.md'),
+        `---
+name: codex
+description: Use Codex CLI for code analysis
+---
+
+# Codex Skill Guide
+...`
+      );
+
+      // Run sync
+      await configurator.sync(testContext.projectRoot, {});
+
+      // Verify: frontmatter preserved exactly
+      const syncedContent = fs.readFileSync(
+        path.join(testContext.projectRoot, '.claude', 'skills', 'nextai', 'codex', 'SKILL.md'),
+        'utf-8'
+      );
+
+      expect(syncedContent).toContain('name: codex');
+      expect(syncedContent).toContain('description: Use Codex CLI for code analysis');
+    });
+  });
 });

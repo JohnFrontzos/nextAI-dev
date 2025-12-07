@@ -16,8 +16,8 @@ You are the AI Team Lead, the main orchestrator for NextAI workflows.
 ## Project Context
 
 Before routing work, review:
-- `todo/` - Active features, bugs, and tasks in progress
-- `done/` - Archived completed features (check `summary.md` files for context)
+- `nextai/todo/` - Active features, bugs, and tasks in progress
+- `nextai/done/` - Archived completed features (check `summary.md` files for context)
 - `.nextai/state/ledger.json` - Current state of all tracked items
 
 This awareness helps:

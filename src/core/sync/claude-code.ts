@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, writeFileSync, copyFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { ClientConfigurator, type ClientConfig, type SyncContext } from './base.js';
 import { ensureDir, getNextAIDir } from '../../cli/utils/config.js';
@@ -134,7 +134,12 @@ export class ClaudeCodeConfigurator extends ClientConfigurator {
         }
 
         ensureDir(dstSkillDir);
-        copyFileSync(srcSkillFile, dstSkillFile);
+
+        // Transform skill to add Claude Code frontmatter
+        const content = readFileSync(srcSkillFile, 'utf-8');
+        const transformed = this.transformSkillForClaudeCode(content, skill);
+        writeFileSync(dstSkillFile, transformed);
+
         skillsSynced.push(skill);
       }
     }
@@ -185,6 +190,24 @@ If arguments are provided via $ARGUMENTS, parse them and pass to the command.
       );
     }
     return content;
+  }
+
+  private transformSkillForClaudeCode(content: string, skillName: string): string {
+    // If frontmatter already exists, return as-is
+    if (content.trimStart().startsWith('---')) {
+      return content;
+    }
+
+    // Extract description from first paragraph after title
+    const descMatch = content.match(/^#[^\n]+\n+([^\n#]+)/m);
+    const description = descMatch?.[1].trim() || `NextAI ${skillName.replace(/-/g, ' ')} skill`;
+
+    return `---
+name: ${skillName}
+description: ${description}
+---
+
+${content}`;
   }
 }
 

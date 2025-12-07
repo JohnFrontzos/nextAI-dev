@@ -12,8 +12,8 @@ Read `.nextai/state/session.json` for current timestamp.
 ## Pre-flight Checks
 
 Before starting:
-1. Verify `todo/$ARGUMENTS/spec.md` exists with content
-2. Verify `todo/$ARGUMENTS/tasks.md` exists with content
+1. Verify `nextai/todo/$ARGUMENTS/spec.md` exists with content
+2. Verify `nextai/todo/$ARGUMENTS/tasks.md` exists with content
 3. Check if any tasks are already completed (resume mid-implementation)
 4. Read the spec to understand what to build
 
@@ -32,7 +32,7 @@ If resuming mid-implementation:
 
 Use the **developer** subagent (or load the executing-plans skill):
 
-**Input:** `todo/$ARGUMENTS/tasks.md` and `todo/$ARGUMENTS/spec.md`
+**Input:** `nextai/todo/$ARGUMENTS/tasks.md` and `nextai/todo/$ARGUMENTS/spec.md`
 **Output:** Code changes, updated `tasks.md`
 
 ### Steps:
@@ -40,7 +40,7 @@ Use the **developer** subagent (or load the executing-plans skill):
 1. **Read Context**
    - Read the full spec
    - Read the task list
-   - Review project docs in `docs/nextai/`
+   - Review project docs in `nextai/docs/`
    - Scan related existing code
 
 2. **Documentation Lookup**

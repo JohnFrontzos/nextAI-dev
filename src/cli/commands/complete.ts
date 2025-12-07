@@ -113,7 +113,7 @@ export const completeCommand = new Command('complete')
         retry_count: feature.retry_count,
       });
 
-      logger.keyValue('Archive', `done/${feature.id}/`);
+      logger.keyValue('Archive', `nextai/done/${feature.id}/`);
     } catch (error) {
       logger.error('Failed to complete feature');
       logger.dim(String(error));

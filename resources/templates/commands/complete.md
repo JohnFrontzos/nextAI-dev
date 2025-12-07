@@ -12,10 +12,10 @@ Read `.nextai/state/session.json` for current timestamp.
 ## Pre-flight Checks
 
 Before starting, verify all prerequisite phases are complete:
-1. Verify `todo/$ARGUMENTS/spec.md` exists
-2. Verify `todo/$ARGUMENTS/tasks.md` exists with all tasks checked
-3. Verify `todo/$ARGUMENTS/review.md` exists with "## Verdict" containing "PASS"
-4. Verify `todo/$ARGUMENTS/testing.md` exists with passing test results
+1. Verify `nextai/todo/$ARGUMENTS/spec.md` exists
+2. Verify `nextai/todo/$ARGUMENTS/tasks.md` exists with all tasks checked
+3. Verify `nextai/todo/$ARGUMENTS/review.md` exists with "## Verdict" containing "PASS"
+4. Verify `nextai/todo/$ARGUMENTS/testing.md` exists with passing test results
 5. Read the spec and review results for context
 
 If any files are missing or incomplete:
@@ -38,13 +38,13 @@ Use the **document-writer** subagent (or load the documentation-recaps skill) in
 ### Step 1: Read Feature Context
 
 Read all feature artifacts:
-- `todo/$ARGUMENTS/planning/initialization.md`
-- `todo/$ARGUMENTS/planning/requirements.md`
-- `todo/$ARGUMENTS/spec.md`
-- `todo/$ARGUMENTS/tasks.md`
-- `todo/$ARGUMENTS/review.md`
-- `todo/$ARGUMENTS/testing.md`
-- `todo/$ARGUMENTS/attachments/` (check for any files)
+- `nextai/todo/$ARGUMENTS/planning/initialization.md`
+- `nextai/todo/$ARGUMENTS/planning/requirements.md`
+- `nextai/todo/$ARGUMENTS/spec.md`
+- `nextai/todo/$ARGUMENTS/tasks.md`
+- `nextai/todo/$ARGUMENTS/review.md`
+- `nextai/todo/$ARGUMENTS/testing.md`
+- `nextai/todo/$ARGUMENTS/attachments/` (check for any files)
 
 ### Step 1a: Document Attachments in Summary
 
@@ -66,7 +66,7 @@ Include these details in the summary's "Implementation Notes" section so the inf
 
 ### Step 2: Generate Summary
 
-Create the summary file at `done/$ARGUMENTS/summary.md` (create the `done/$ARGUMENTS/` directory if it doesn't exist):
+Create the summary file at `nextai/done/$ARGUMENTS/summary.md` (create the `nextai/done/$ARGUMENTS/` directory if it doesn't exist):
 
 ```markdown
 # Feature Complete: [Title]
@@ -98,23 +98,23 @@ Create the summary file at `done/$ARGUMENTS/summary.md` (create the `done/$ARGUM
 ```markdown
 ## [Date] [Type]: [Title]
 - Brief summary of what was added/changed
-- [Full details](done/$ARGUMENTS/summary.md)
+- [Full details](nextai/done/$ARGUMENTS/summary.md)
 ```
 
-**docs/nextai/history.md** - Add row:
+**nextai/docs/history.md** - Add row:
 ```markdown
 | Date | Feature ID | Summary | Archive |
 |------|------------|---------|---------|
-| [Date] | $ARGUMENTS | [Brief] | [details](../../done/$ARGUMENTS/summary.md) |
+| [Date] | $ARGUMENTS | [Brief] | [details](../done/$ARGUMENTS/summary.md) |
 ```
 
 **Other docs** - Only if significantly affected by the feature
 
 ### Step 4: Verify Summary Created
 
-Ensure `done/$ARGUMENTS/summary.md` was created successfully. This file's existence is required for the next step.
+Ensure `nextai/done/$ARGUMENTS/summary.md` was created successfully. This file's existence is required for the next step.
 
-**Do NOT manually move files from `todo/` to `done/`.** The CLI command in Step 5 will handle the file move automatically.
+**Do NOT manually move files from `nextai/todo/` to `nextai/done/`.** The CLI command in Step 5 will handle the file move automatically.
 
 ### Step 4a: Attachment Cleanup Warning
 
@@ -140,13 +140,13 @@ nextai complete $ARGUMENTS --skip-summary
 
 This command:
 - **Deletes** the `attachments/` folder (to reduce archive size)
-- **Moves** the remaining `todo/$ARGUMENTS/` directory to `done/$ARGUMENTS/` (preserving your summary.md)
+- **Moves** the remaining `nextai/todo/$ARGUMENTS/` directory to `nextai/done/$ARGUMENTS/` (preserving your summary.md)
 - Updates `.nextai/state/ledger.json` to set phase to `complete`
 - Logs the completion event to history
-- Deletes the `todo/$ARGUMENTS/` directory
+- Deletes the `nextai/todo/$ARGUMENTS/` directory
 
 **Do NOT skip this step.** Without it:
-- Files will remain in `todo/` instead of `done/`
+- Files will remain in `nextai/todo/` instead of `nextai/done/`
 - The ledger will still show `testing` phase
 - The workflow cannot finish
 
@@ -165,7 +165,7 @@ After archiving, run the **document-writer** subagent in **Analyze Mode** to ref
    - New coding conventions
    - Structure changes
 
-2. **Update relevant docs** in `docs/nextai/`:
+2. **Update relevant docs** in `nextai/docs/`:
    - `architecture.md` - if structure or patterns changed
    - `technical-guide.md` - if new setup steps or dependencies added
    - `conventions.md` - if new coding patterns introduced
@@ -186,13 +186,13 @@ When done:
 ```
 ✓ Feature $ARGUMENTS completed!
 
-Archive: done/$ARGUMENTS/
-Summary: done/$ARGUMENTS/summary.md
+Archive: nextai/done/$ARGUMENTS/
+Summary: nextai/done/$ARGUMENTS/summary.md
 
 Updated:
 - Changelog
-- docs/nextai/history.md
-- docs/nextai/*.md (project documentation refreshed)
+- nextai/docs/history.md
+- nextai/docs/*.md (project documentation refreshed)
 - Ledger: phase = complete
 
 🎉 Congratulations on completing the feature!
@@ -202,7 +202,7 @@ Updated:
 
 - Add signal, not noise
 - One-line changelog entry is better than duplication
-- `done/` folder is the authoritative history
+- `nextai/done/` folder is the authoritative history
 - Main docs just reference it
 
 ## Minimal Mode

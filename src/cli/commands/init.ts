@@ -114,7 +114,7 @@ export const initCommand = new Command('init')
       logger.blank();
       logger.box("Next steps:", [
         "1. Run '/nextai-analyze' in your AI client to generate project documentation",
-        "2. Use 'nextai create' to create a feature/bug/task",
+        "2. Use '/nextai-create' to create a feature/bug/task",
         "3. Use '/nextai-refine' to start the refinement process",
       ]);
     } catch (error) {

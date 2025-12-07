@@ -68,7 +68,7 @@ export const createCommand = new Command('create')
 
       spinner.succeed(`Created ${type}: ${feature.id}`);
 
-      logger.keyValue('Folder', `todo/${feature.id}/`);
+      logger.keyValue('Folder', `nextai/todo/${feature.id}/`);
       logger.keyValue('Phase', feature.phase);
       if (options.externalId) {
         logger.keyValue('External ID', options.externalId);
@@ -76,7 +76,7 @@ export const createCommand = new Command('create')
 
       logger.blank();
       logger.box('Next steps:', [
-        `1. Add context to todo/${feature.id}/planning/initialization.md`,
+        `1. Add context to nextai/todo/${feature.id}/planning/initialization.md`,
         `2. Run: /nextai-refine ${feature.id}`,
       ]);
     } catch (error) {

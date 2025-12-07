@@ -169,7 +169,7 @@ Instructions:
     let content = template;
 
     // Remove Skill tool references (OpenCode uses agents)
-    content = content.replace(/Use the Skill tool to load.*?\n/g, '');
+    content = content.replace(/Use the Skill tool to load.*?\r?\n/g, '');
 
     return content;
   }
@@ -183,11 +183,23 @@ Instructions:
   }
 
   private transformSkillToAgent(skillContent: string, skillName: string): string {
-    // Extract description if present
-    const descMatch = skillContent.match(/description:\s*(.+)/i);
-    const description = descMatch
-      ? descMatch[1].trim()
-      : `NextAI ${skillName.replace(/-/g, ' ')} skill`;
+    // Check if frontmatter already exists
+    if (skillContent.trimStart().startsWith('---')) {
+      // Extract frontmatter block to check for mode: field
+      const frontmatterEnd = skillContent.indexOf('---', 3);
+      if (frontmatterEnd !== -1) {
+        const frontmatter = skillContent.slice(0, frontmatterEnd);
+        // Only check within frontmatter block, not entire document
+        if (!frontmatter.includes('mode:')) {
+          return skillContent.replace('---\n', '---\nmode: subagent\n');
+        }
+      }
+      return skillContent;
+    }
+
+    // Extract description from first paragraph after title
+    const descMatch = skillContent.match(/^#[^\n]+\n+([^\n#]+)/m);
+    const description = descMatch?.[1].trim() || `NextAI ${skillName.replace(/-/g, ' ')} skill`;
 
     return `---
 description: ${description}

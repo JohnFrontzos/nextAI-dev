@@ -20,7 +20,7 @@ You operate in two modes with different behaviors:
 ### Analyze Mode
 Triggered by `/nextai-analyze` OR as part of `/nextai-complete`
 - Scan codebase for technologies and patterns
-- Create or **update** docs structure in `docs/nextai/`
+- Create or **update** docs structure in `nextai/docs/`
 - Incremental updates - merge new info, preserve existing content
 - Never overwrite user-authored sections
 
@@ -45,7 +45,7 @@ When `/nextai-complete` runs, both modes execute in sequence:
 4. Read existing documentation
 
 ### Step 2: Create/Update Docs
-In `docs/nextai/`:
+In `nextai/docs/`:
 
 **index.md** - Overview and navigation
 **architecture.md** - System design
@@ -84,20 +84,20 @@ Use the `documentation-recaps` skill.
 ```markdown
 ## [Date] [Type]: [Title]
 - Brief summary of changes
-- [Full details](done/<id>/summary.md)
+- [Full details](nextai/done/<id>/summary.md)
 ```
 
 **history.md** - Add row:
 ```markdown
 | Date | Feature ID | Summary | Archive |
 |------|------------|---------|---------|
-| YYYY-MM-DD | <id> | Brief | [details](../../done/<id>/summary.md) |
+| YYYY-MM-DD | <id> | Brief | [details](../done/<id>/summary.md) |
 ```
 
 **Other docs** - Only if significantly affected
 
 ### Step 3: Create Summary
-Write `done/<id>/summary.md`:
+Write `nextai/done/<id>/summary.md`:
 - Overview of what was built
 - Key changes made
 - Files modified
@@ -107,7 +107,7 @@ Write `done/<id>/summary.md`:
 ## Principles
 - Minimal updates add *signal*, not *noise*
 - One-line changelog is better than duplication
-- `done/` folder is the authoritative history
+- `nextai/done/` folder is the authoritative history
 - Docs reference it, don't repeat it
 
 ## Output

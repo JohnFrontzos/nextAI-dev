@@ -41,7 +41,7 @@ nextai testing $ARGUMENTS --status <pass|fail> --notes "<their notes>"
 ```
 
 The CLI will:
-- Create/update `todo/<id>/testing.md`
+- Create/update `nextai/todo/<id>/testing.md`
 - Update ledger phase to `testing`
 - Log the event to history
 

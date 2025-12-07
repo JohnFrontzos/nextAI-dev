@@ -70,7 +70,7 @@ describe('E2E Workflow Tests', () => {
       scaffoldGlobalDirs(testContext.projectRoot);
 
       const feature = createFeature('Test Feature', 'feature');
-      const featurePath = path.join(testContext.projectRoot, 'todo', feature.id);
+      const featurePath = path.join(testContext.projectRoot, 'nextai', 'todo', feature.id);
 
       // Show (get feature)
       const fetched = getFeature(testContext.projectRoot, feature.id);
@@ -92,7 +92,7 @@ describe('E2E Workflow Tests', () => {
       scaffoldGlobalDirs(testContext.projectRoot);
 
       const feature = createFeature('Full Workflow', 'feature');
-      const featurePath = path.join(testContext.projectRoot, 'todo', feature.id);
+      const featurePath = path.join(testContext.projectRoot, 'nextai', 'todo', feature.id);
 
       // Phase 1: Created -> Product Refinement
       // init.md already created by scaffoldFeature
@@ -181,7 +181,7 @@ describe('E2E Workflow Tests', () => {
       scaffoldGlobalDirs(testContext.projectRoot);
 
       const feature = createFeature('Test', 'feature');
-      const featurePath = path.join(testContext.projectRoot, 'todo', feature.id);
+      const featurePath = path.join(testContext.projectRoot, 'nextai', 'todo', feature.id);
 
       // Initially at 'created' (init.md exists)
       expect(detectPhaseFromArtifacts(featurePath)).toBe('created');

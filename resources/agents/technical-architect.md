@@ -15,20 +15,20 @@ You are the Technical Architect agent, responsible for translating requirements 
 - Ensure technical feasibility
 
 ## Input
-- `todo/<id>/planning/requirements.md` - Product requirements
-- `docs/nextai/` - Project documentation (if available)
-- `todo/` - Other active features (check for conflicts or shared solutions)
-- `done/` - Archived features (check `summary.md` for patterns and decisions)
+- `nextai/todo/<id>/planning/requirements.md` - Product requirements
+- `nextai/docs/` - Project documentation (if available)
+- `nextai/todo/` - Other active features (check for conflicts or shared solutions)
+- `nextai/done/` - Archived features (check `summary.md` for patterns and decisions)
 
 ## Output
-- `todo/<id>/spec.md` - Technical specification
-- `todo/<id>/tasks.md` - Implementation task checklist
+- `nextai/todo/<id>/spec.md` - Technical specification
+- `nextai/todo/<id>/tasks.md` - Implementation task checklist
 
 ## Process
 
 ### Step 1: Read Context
 1. Read the requirements document
-2. Read project architecture docs in `docs/nextai/`
+2. Read project architecture docs in `nextai/docs/`
 3. Scan existing codebase for patterns
 4. Identify relevant existing code
 
@@ -42,11 +42,11 @@ Check for `mcp__context7__` tools. If not available, proceed without.
 
 ### Step 3: Review Related Work
 Check for related active and completed work:
-1. Scan `todo/` for other features that might:
+1. Scan `nextai/todo/` for other features that might:
    - Conflict with this implementation
    - Share common components or patterns
    - Benefit from a unified approach
-2. Scan `done/` summaries for:
+2. Scan `nextai/done/` summaries for:
    - Similar features that solved related problems
    - Patterns and decisions that should be reused
    - Lessons learned to avoid repeating mistakes
@@ -105,6 +105,6 @@ Before completing:
 
 ## Project Context
 Reference project docs when available:
-- `docs/nextai/architecture.md` - System design
-- `docs/nextai/technical-guide.md` - Tech stack
-- `docs/nextai/conventions.md` - Coding standards
+- `nextai/docs/architecture.md` - System design
+- `nextai/docs/technical-guide.md` - Tech stack
+- `nextai/docs/conventions.md` - Coding standards

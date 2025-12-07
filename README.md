@@ -138,7 +138,7 @@ nextai init
 
 This creates:
 - `.nextai/` — Configuration, agents, skills
-- `todo/` and `done/` — Feature tracking directories
+- `nextai/` — Feature tracking directories (todo/, done/, docs/, metrics/)
 - Syncs slash commands to your AI client
 
 ### Step 3: Move to Your AI Client
@@ -151,7 +151,7 @@ From this point forward, **everything happens in your AI client** (Claude Code o
 /nextai-analyze
 ```
 
-This scans your codebase and generates `docs/nextai/` with:
+This scans your codebase and generates `nextai/docs/` with:
 - Architecture overview
 - Tech stack documentation
 - Coding conventions
@@ -230,7 +230,7 @@ All commands below run in your AI client:
 
 # Complete and archive
 /nextai-complete 20251206_add-password-reset-flow
-# AI generates summary, moves to done/
+# AI generates summary, moves to nextai/done/
 ```
 
 ## Project Structure
@@ -260,30 +260,33 @@ my-project/
 │   ├── command/nextai-*.md          # Slash commands
 │   └── agent/nextai-*.md            # Agents (includes skills)
 │
-├── todo/                            # Active features
-│   └── 20251206_add-user-auth/
-│       ├── planning/
-│       │   ├── initialization.md    # Your original request
-│       │   └── requirements.md      # Product Q&A results
-│       ├── attachments/
-│       │   ├── design/              # UI mockups, wireframes
-│       │   ├── evidence/            # Logs, bug screenshots
-│       │   └── reference/           # External docs, examples
-│       ├── spec.md                  # Technical specification
-│       ├── tasks.md                 # Implementation checklist
-│       ├── review.md                # AI review results
-│       └── testing.md               # Your test log
-│
-├── done/                            # Archived completed features
-│   └── 20251206_add-user-auth/
-│       ├── summary.md               # Completion summary
-│       └── [all artifacts]          # Preserved for history
-│
-└── docs/nextai/                     # Project docs (from /nextai-analyze)
-    ├── architecture.md
-    ├── technical-guide.md
-    ├── conventions.md
-    └── history.md                   # Feature archive log
+├── nextai/                          # NextAI content directory
+│   ├── todo/                        # Active features
+│   │   └── 20251206_add-user-auth/
+│   │       ├── planning/
+│   │       │   ├── initialization.md    # Your original request
+│   │       │   └── requirements.md      # Product Q&A results
+│   │       ├── attachments/
+│   │       │   ├── design/              # UI mockups, wireframes
+│   │       │   ├── evidence/            # Logs, bug screenshots
+│   │       │   └── reference/           # External docs, examples
+│   │       ├── spec.md                  # Technical specification
+│   │       ├── tasks.md                 # Implementation checklist
+│   │       ├── review.md                # AI review results
+│   │       └── testing.md               # Your test log
+│   │
+│   ├── done/                        # Archived completed features
+│   │   └── 20251206_add-user-auth/
+│   │       ├── summary.md               # Completion summary
+│   │       └── [all artifacts]          # Preserved for history
+│   │
+│   ├── docs/                        # Project docs (from /nextai-analyze)
+│   │   ├── architecture.md
+│   │   ├── technical-guide.md
+│   │   ├── conventions.md
+│   │   └── history.md                   # Feature archive log
+│   │
+│   └── metrics/                     # Metrics and analytics
 ```
 
 ## The 7 Phases
@@ -296,7 +299,7 @@ my-project/
 | `implementation` | `/nextai-implement` | Code changes | All tasks checked |
 | `review` | `/nextai-review` | `review.md` | PASS verdict |
 | `testing` | `/nextai-testing` | `testing.md` | You mark pass |
-| `complete` | `/nextai-complete` | `summary.md` | Archived to `done/` |
+| `complete` | `/nextai-complete` | `summary.md` | Archived to `nextai/done/` |
 
 ### Validation Gates
 

@@ -16,13 +16,13 @@ You are the Investigator agent, responsible for analyzing bugs and identifying r
 - Recommend fixes
 
 ## Input
-- `todo/<id>/planning/initialization.md` - Bug report/description
+- `nextai/todo/<id>/planning/initialization.md` - Bug report/description
 - Codebase access to investigate
-- `docs/nextai/` - Project documentation (if available)
-- `done/` - Archived features (check for similar bugs or related changes)
+- `nextai/docs/` - Project documentation (if available)
+- `nextai/done/` - Archived features (check for similar bugs or related changes)
 
 ## Output
-- `todo/<id>/planning/investigation.md` - Analysis findings
+- `nextai/todo/<id>/planning/investigation.md` - Analysis findings
 - Updated `initialization.md` with root cause
 - `spec.md` with fix specification
 
@@ -37,7 +37,7 @@ Read the bug report and understand:
 - Who's affected
 
 ### Step 2: Read Project Context
-Read project docs in `docs/nextai/` if available:
+Read project docs in `nextai/docs/` if available:
 - `architecture.md` - System design and component relationships
 - `technical-guide.md` - Tech stack details
 - `project-overview.md` - Project context

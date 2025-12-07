@@ -8,7 +8,7 @@ export const ConfigSchema = z.object({
     // TODO: Future - Populate during init by scanning package manifests (package.json,
     // requirements.txt, Cargo.toml, go.mod, etc.). Will enable multi-developer routing
     // based on tech stack (e.g., Python-specialist vs TypeScript-specialist).
-    // Currently, tech detection happens via /nextai-analyze → docs/nextai/architecture.md
+    // Currently, tech detection happens via /nextai-analyze → nextai/docs/architecture.md
     languages: z.array(
       z.object({
         name: z.string(),

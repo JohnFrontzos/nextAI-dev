@@ -52,4 +52,4 @@ Based on the current phase:
 - `implementation` → "Next: Complete remaining tasks, then /nextai-review $ARGUMENTS"
 - `review` → "Next: /nextai-testing $ARGUMENTS (if PASS) or /nextai-implement (if FAIL)"
 - `testing` → "Next: /nextai-complete $ARGUMENTS (if PASS)"
-- `complete` → "This feature is archived in done/$ARGUMENTS/"
+- `complete` → "This feature is archived in nextai/done/$ARGUMENTS/"

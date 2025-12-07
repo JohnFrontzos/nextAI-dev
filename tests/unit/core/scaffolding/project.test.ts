@@ -125,28 +125,28 @@ describe('Project Scaffolding', () => {
   });
 
   describe('scaffoldGlobalDirs()', () => {
-    it('creates todo/ directory', () => {
+    it('creates nextai/todo/ directory', () => {
       scaffoldGlobalDirs(testContext.projectRoot);
 
-      expect(fs.existsSync(path.join(testContext.projectRoot, 'todo'))).toBe(true);
+      expect(fs.existsSync(path.join(testContext.projectRoot, 'nextai', 'todo'))).toBe(true);
     });
 
-    it('creates done/ directory', () => {
+    it('creates nextai/done/ directory', () => {
       scaffoldGlobalDirs(testContext.projectRoot);
 
-      expect(fs.existsSync(path.join(testContext.projectRoot, 'done'))).toBe(true);
+      expect(fs.existsSync(path.join(testContext.projectRoot, 'nextai', 'done'))).toBe(true);
     });
 
-    it('creates docs/nextai/ directory', () => {
+    it('creates nextai/docs/ directory', () => {
       scaffoldGlobalDirs(testContext.projectRoot);
 
-      expect(fs.existsSync(path.join(testContext.projectRoot, 'docs', 'nextai'))).toBe(true);
+      expect(fs.existsSync(path.join(testContext.projectRoot, 'nextai', 'docs'))).toBe(true);
     });
 
-    it('creates metrics/ directory', () => {
+    it('creates nextai/metrics/ directory', () => {
       scaffoldGlobalDirs(testContext.projectRoot);
 
-      expect(fs.existsSync(path.join(testContext.projectRoot, 'metrics'))).toBe(true);
+      expect(fs.existsSync(path.join(testContext.projectRoot, 'nextai', 'metrics'))).toBe(true);
     });
 
     it('is idempotent', () => {

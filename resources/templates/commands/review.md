@@ -12,8 +12,8 @@ Read `.nextai/state/session.json` for current timestamp.
 ## Pre-flight Checks
 
 Before starting:
-1. Verify `todo/$ARGUMENTS/spec.md` exists
-2. Verify `todo/$ARGUMENTS/tasks.md` exists
+1. Verify `nextai/todo/$ARGUMENTS/spec.md` exists
+2. Verify `nextai/todo/$ARGUMENTS/tasks.md` exists
 3. Count tasks - verify all tasks are checked `- [x]`
 4. Identify what code changes were made (scan git diff or modified files)
 
@@ -35,7 +35,7 @@ If review.md already exists:
 Use the **reviewer** subagent (or load the reviewer-checklist skill):
 
 **Input:** `spec.md`, `tasks.md`, code changes
-**Output:** `todo/$ARGUMENTS/review.md`
+**Output:** `nextai/todo/$ARGUMENTS/review.md`
 
 ### Review Categories
 
@@ -83,7 +83,7 @@ If Context7 MCP is available:
 
 ## Write Review
 
-Create `todo/$ARGUMENTS/review.md` with this structure:
+Create `nextai/todo/$ARGUMENTS/review.md` with this structure:
 
 ```markdown
 # Code Review
@@ -157,7 +157,7 @@ The review phase is complete when review.md exists with a Verdict section contai
 
 Manual intervention required.
 Please review:
-- todo/$ARGUMENTS/review.md
+- nextai/todo/$ARGUMENTS/review.md
 
 Options:
 1. Fix issues manually, then run: nextai repair $ARGUMENTS

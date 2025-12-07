@@ -37,7 +37,7 @@ describe('Phase Validators', () => {
 
   beforeEach(() => {
     testContext = createTestProject();
-    featureDir = path.join(testContext.projectRoot, 'todo', 'test-feature');
+    featureDir = path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature');
     fs.mkdirSync(featureDir, { recursive: true });
   });
 

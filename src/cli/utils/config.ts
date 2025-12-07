@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -17,6 +17,7 @@ import {
 import { NextAIError, ERROR_CODES } from '../../types/index.js';
 
 const NEXTAI_DIR = '.nextai';
+const NEXTAI_CONTENT_DIR = 'nextai';
 const CONFIG_FILE = 'config.json';
 const PROFILE_FILE = 'profile.json';
 const LEDGER_FILE = 'state/ledger.json';
@@ -50,10 +51,18 @@ export function findProjectRoot(startDir: string = process.cwd()): string | null
 }
 
 /**
- * Get the .nextai directory path
+ * Get the .nextai directory path (hidden, system config)
  */
 export function getNextAIDir(projectRoot: string): string {
   return join(projectRoot, NEXTAI_DIR);
+}
+
+/**
+ * Get the nextai/ content directory path (visible, user-facing)
+ * This is separate from .nextai/ which holds system config
+ */
+export function getNextAIContentDir(projectRoot: string): string {
+  return join(projectRoot, NEXTAI_CONTENT_DIR);
 }
 
 /**
@@ -211,7 +220,6 @@ export function appendHistory(projectRoot: string, event: object): void {
   const historyPath = getHistoryPath(projectRoot);
   ensureDir(dirname(historyPath));
   const entry = JSON.stringify({ ts: new Date().toISOString(), ...event }) + '\n';
-  const { appendFileSync } = require('fs');
   appendFileSync(historyPath, entry, 'utf-8');
 }
 
@@ -226,13 +234,7 @@ export function updateSession(projectRoot: string, version: string): Session {
   return session;
 }
 
-// Package version helper
+// Package version helper (injected at build time via tsup define)
 export function getPackageVersion(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pkg = require('../../../package.json');
-    return pkg.version;
-  } catch {
-    return '1.0.0';
-  }
+  return process.env.PACKAGE_VERSION || '0.0.0';
 }

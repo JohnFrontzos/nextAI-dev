@@ -3,6 +3,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import {
   getNextAIDir,
+  getNextAIContentDir,
   ensureDir,
   initConfig,
   initProfile,
@@ -18,11 +19,30 @@ const __dirname = dirname(__filename);
 
 // Paths to resource templates (bundled with package)
 function getResourcesDir(): string {
-  // In development, resources are at project root
-  // In production, they're in the package
-  const devPath = join(__dirname, '..', '..', '..', 'resources');
-  const prodPath = join(__dirname, '..', '..', 'resources');
-  return existsSync(devPath) ? devPath : prodPath;
+  // When bundled with tsup, __dirname points to dist/cli/
+  // We need to find the resources folder relative to the package root
+  // Look for the resources folder that contains our specific templates structure
+  const candidates = [
+    join(__dirname, '..', 'resources'),        // dist/cli -> dist/resources (if copied)
+    join(__dirname, '..', '..', 'resources'),  // dist/cli -> resources (package root)
+  ];
+
+  for (const candidate of candidates) {
+    // Verify this is OUR resources folder by checking for templates/commands
+    const templatesDir = join(candidate, 'templates', 'commands');
+    if (existsSync(templatesDir)) {
+      return candidate;
+    }
+  }
+
+  // Fallback: return first existing candidate
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return candidates[0];
 }
 
 export interface ScaffoldOptions {
@@ -264,7 +284,7 @@ description: Run NextAI ${cmd} pipeline for a feature
 You are the NextAI ${cmd.charAt(0).toUpperCase() + cmd.slice(1)} Agent.
 
 ## Context
-- Feature folder: \`todo/$ARGUMENTS/\`
+- Feature folder: \`nextai/todo/$ARGUMENTS/\`
 
 ## Instructions
 Follow the ${cmd} workflow as documented.
@@ -274,12 +294,13 @@ Follow the ${cmd} workflow as documented.
 }
 
 /**
- * Create global directories (todo/, done/, docs/, metrics/)
+ * Create global directories inside nextai/ (todo/, done/, docs/, metrics/)
  */
 export function scaffoldGlobalDirs(projectRoot: string): void {
-  const dirs = ['todo', 'done', 'docs/nextai', 'metrics'];
+  const contentDir = getNextAIContentDir(projectRoot);
+  const dirs = ['todo', 'done', 'docs', 'metrics'];
   for (const dir of dirs) {
-    ensureDir(join(projectRoot, dir));
+    ensureDir(join(contentDir, dir));
   }
 }
 

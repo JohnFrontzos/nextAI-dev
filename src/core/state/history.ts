@@ -13,7 +13,7 @@ export function readHistory(projectRoot: string): HistoryEvent[] {
 
   const content = readFileSync(historyPath, 'utf-8');
   return content
-    .split('\n')
+    .split(/\r?\n/)
     .filter((line) => line.trim())
     .map((line) => JSON.parse(line) as HistoryEvent);
 }

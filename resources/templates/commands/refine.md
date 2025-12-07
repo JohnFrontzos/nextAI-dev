@@ -12,8 +12,8 @@ Read `.nextai/state/session.json` for current timestamp.
 ## Pre-flight Checks
 
 Before starting refinement, verify:
-1. Feature folder exists in `todo/$ARGUMENTS`
-2. `todo/$ARGUMENTS/planning/initialization.md` exists
+1. Feature folder exists in `nextai/todo/$ARGUMENTS`
+2. `nextai/todo/$ARGUMENTS/planning/initialization.md` exists
 
 If initialization file is missing:
 ```
@@ -30,8 +30,8 @@ If `spec.md` and `tasks.md` already exist:
 
 Use the **product-owner** subagent (or load the refinement-questions skill):
 
-**Input:** `todo/$ARGUMENTS/planning/initialization.md`
-**Output:** `todo/$ARGUMENTS/planning/requirements.md`
+**Input:** `nextai/todo/$ARGUMENTS/planning/initialization.md`
+**Output:** `nextai/todo/$ARGUMENTS/planning/requirements.md`
 
 ### Steps:
 1. Read the initialization document
@@ -51,12 +51,12 @@ Use the **product-owner** subagent (or load the refinement-questions skill):
 
 Use the **technical-architect** subagent (or load the refinement-spec-writer skill):
 
-**Input:** `todo/$ARGUMENTS/planning/requirements.md`
-**Output:** `todo/$ARGUMENTS/spec.md` and `todo/$ARGUMENTS/tasks.md`
+**Input:** `nextai/todo/$ARGUMENTS/planning/requirements.md`
+**Output:** `nextai/todo/$ARGUMENTS/spec.md` and `nextai/todo/$ARGUMENTS/tasks.md`
 
 ### Steps:
 1. Read the requirements
-2. Review project docs in `docs/nextai/` if available
+2. Review project docs in `nextai/docs/` if available
 3. If Context7 MCP is available, look up relevant library docs
 4. Design the technical approach
 5. If uncertain, ask technical clarifying questions (max 3 rounds)
@@ -87,9 +87,9 @@ Use the **technical-architect** subagent (or load the refinement-spec-writer ski
 When both phases complete successfully:
 
 1. Verify all required files were created:
-   - `todo/$ARGUMENTS/planning/requirements.md` - Product research results
-   - `todo/$ARGUMENTS/spec.md` - Technical specification
-   - `todo/$ARGUMENTS/tasks.md` - Implementation task list
+   - `nextai/todo/$ARGUMENTS/planning/requirements.md` - Product research results
+   - `nextai/todo/$ARGUMENTS/spec.md` - Technical specification
+   - `nextai/todo/$ARGUMENTS/tasks.md` - Implementation task list
 
 2. Inform the user:
    ```

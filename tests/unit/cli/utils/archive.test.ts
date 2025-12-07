@@ -34,7 +34,7 @@ describe('archiveFeature', () => {
   it('deletes attachments folder during archive', () => {
     // Setup: Create feature with attachments
     scaffoldFeature(testContext.projectRoot, 'test-feature', 'Test', 'feature');
-    const attachmentsDir = path.join(testContext.projectRoot, 'todo', 'test-feature', 'attachments');
+    const attachmentsDir = path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature', 'attachments');
     fs.mkdirSync(path.join(attachmentsDir, 'evidence'), { recursive: true });
     fs.writeFileSync(path.join(attachmentsDir, 'evidence', 'test.log'), 'test content');
 
@@ -42,32 +42,32 @@ describe('archiveFeature', () => {
     archiveFeature(testContext.projectRoot, 'test-feature');
 
     // Assert: Attachments not in done/
-    const doneAttachments = path.join(testContext.projectRoot, 'done', 'test-feature', 'attachments');
+    const doneAttachments = path.join(testContext.projectRoot, 'nextai', 'done', 'test-feature', 'attachments');
     expect(fs.existsSync(doneAttachments)).toBe(false);
 
     // Assert: Other artifacts preserved
-    const doneSummary = path.join(testContext.projectRoot, 'done', 'test-feature', 'summary.md');
+    const doneSummary = path.join(testContext.projectRoot, 'nextai', 'done', 'test-feature', 'summary.md');
     expect(fs.existsSync(doneSummary)).toBe(true);
   });
 
   it('preserves spec.md and tasks.md in archive', () => {
     // Setup
     scaffoldFeature(testContext.projectRoot, 'test-feature', 'Test', 'feature');
-    fs.writeFileSync(path.join(testContext.projectRoot, 'todo', 'test-feature', 'spec.md'), '# Spec');
-    fs.writeFileSync(path.join(testContext.projectRoot, 'todo', 'test-feature', 'tasks.md'), '# Tasks');
+    fs.writeFileSync(path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature', 'spec.md'), '# Spec');
+    fs.writeFileSync(path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature', 'tasks.md'), '# Tasks');
 
     // Act
     archiveFeature(testContext.projectRoot, 'test-feature');
 
     // Assert
-    expect(fs.existsSync(path.join(testContext.projectRoot, 'done', 'test-feature', 'spec.md'))).toBe(true);
-    expect(fs.existsSync(path.join(testContext.projectRoot, 'done', 'test-feature', 'tasks.md'))).toBe(true);
+    expect(fs.existsSync(path.join(testContext.projectRoot, 'nextai', 'done', 'test-feature', 'spec.md'))).toBe(true);
+    expect(fs.existsSync(path.join(testContext.projectRoot, 'nextai', 'done', 'test-feature', 'tasks.md'))).toBe(true);
   });
 
   it('warns when attachments folder has files', () => {
     // Setup: Create feature with attachments
     scaffoldFeature(testContext.projectRoot, 'test-feature', 'Test', 'feature');
-    const attachmentsDir = path.join(testContext.projectRoot, 'todo', 'test-feature', 'attachments');
+    const attachmentsDir = path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature', 'attachments');
     fs.mkdirSync(path.join(attachmentsDir, 'evidence'), { recursive: true });
     fs.writeFileSync(path.join(attachmentsDir, 'evidence', 'test.log'), 'test content');
 
@@ -93,14 +93,14 @@ describe('archiveFeature', () => {
   it('handles missing attachments folder gracefully', () => {
     // Setup: Create feature, then delete attachments folder
     scaffoldFeature(testContext.projectRoot, 'test-feature', 'Test', 'feature');
-    const attachmentsDir = path.join(testContext.projectRoot, 'todo', 'test-feature', 'attachments');
+    const attachmentsDir = path.join(testContext.projectRoot, 'nextai', 'todo', 'test-feature', 'attachments');
     fs.rmSync(attachmentsDir, { recursive: true, force: true });
 
     // Act: Should not throw
     expect(() => archiveFeature(testContext.projectRoot, 'test-feature')).not.toThrow();
 
     // Assert: Feature still archived
-    expect(fs.existsSync(path.join(testContext.projectRoot, 'done', 'test-feature'))).toBe(true);
+    expect(fs.existsSync(path.join(testContext.projectRoot, 'nextai', 'done', 'test-feature'))).toBe(true);
   });
 
   it('preserves planning directory in archive', () => {
@@ -111,7 +111,7 @@ describe('archiveFeature', () => {
     archiveFeature(testContext.projectRoot, 'test-feature');
 
     // Assert: Planning directory with initialization.md is preserved
-    expect(fs.existsSync(path.join(testContext.projectRoot, 'done', 'test-feature', 'planning', 'initialization.md'))).toBe(true);
+    expect(fs.existsSync(path.join(testContext.projectRoot, 'nextai', 'done', 'test-feature', 'planning', 'initialization.md'))).toBe(true);
   });
 });
 

@@ -28,7 +28,7 @@ Used when completing a feature - creates feature-specific artifacts only:
 4. Read existing documentation if any
 
 ### Phase 2: Generate Documentation
-Create/update files in `docs/nextai/`:
+Create/update files in `nextai/docs/`:
 
 **index.md** - Overview and navigation
 **architecture.md** - System design and patterns
@@ -48,7 +48,7 @@ Create/update files in `docs/nextai/`:
 When documentation already exists, follow this incremental update process:
 
 ### Step 1: Read Existing Content
-1. Read all files in `docs/nextai/`
+1. Read all files in `nextai/docs/`
 2. Identify user-authored sections (custom content, specific examples, personalized notes)
 3. Parse current structure and headings
 
@@ -110,7 +110,7 @@ Only update what's necessary:
 ```markdown
 ## [Date] Feature: [Title]
 - Brief summary of what was added/changed
-- Link to full details: `done/<id>/summary.md`
+- Link to full details: `nextai/done/<id>/summary.md`
 ```
 
 **Architecture docs** - Only if architecture changed significantly
@@ -121,11 +121,11 @@ Only update what's necessary:
 ```markdown
 | Date | Feature ID | Summary | Archive |
 |------|------------|---------|---------|
-| 2025-12-06 | 20251206_add-auth | Added authentication | [details](../../done/20251206_add-auth/summary.md) |
+| 2025-12-06 | 20251206_add-auth | Added authentication | [details](../done/20251206_add-auth/summary.md) |
 ```
 
 ### Phase 3: Generate Summary
-Write `done/<id>/summary.md`:
+Write `nextai/done/<id>/summary.md`:
 
 ```markdown
 # Feature Summary: [Title]
@@ -148,7 +148,7 @@ Links to updated docs.
 ## Principles
 - Complete mode adds *signal*, not *noise*
 - One-line changelog entry is better than duplicating the full summary
-- The `done/` folder is the authoritative history
+- The `nextai/done/` folder is the authoritative history
 - Docs just reference it
 
 ## Output

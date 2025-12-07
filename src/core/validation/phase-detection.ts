@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { join, dirname, basename } from 'path';
 import { Phase, PHASE_ORDER } from '../../schemas/ledger.js';
+import { getDonePath } from '../scaffolding/feature.js';
 
 export interface PhaseStatus {
   phase: Phase;
@@ -42,7 +43,7 @@ export function getTaskProgress(tasksPath: string): TaskProgress {
   }
 
   const content = readFileSync(tasksPath, 'utf-8');
-  const lines = content.split('\n');
+  const lines = content.split(/\r?\n/);
 
   const TASK_PATTERN = /^[-*]\s+\[[\sx]\]/i;
   const COMPLETED_PATTERN = /^[-*]\s+\[x\]/i;
@@ -119,10 +120,10 @@ export function isPhaseComplete(featureDir: string, phase: Phase): boolean {
 
     case 'complete':
       // For complete phase, check done/<id>/summary.md instead of todo/<id>/summary.md
-      // Derive done path from todo path: todo/<id> -> done/<id>
-      const projectRoot = dirname(dirname(featureDir)); // go up from todo/<id> to project root
+      // featureDir = /project/nextai/todo/<id> → go up 3 levels to reach project root
+      const projectRoot = dirname(dirname(dirname(featureDir)));
       const featureId = basename(featureDir);
-      const donePath = join(projectRoot, 'done', featureId);
+      const donePath = getDonePath(projectRoot, featureId);
       return existsWithContent(join(donePath, 'summary.md'));
 
     default:
@@ -338,9 +339,10 @@ export function getNextPhase(currentPhase: Phase): Phase | null {
  */
 export function detectPhaseFromArtifacts(featurePath: string): Phase {
   // Check if feature is archived (in done/ folder with summary.md)
-  const projectRoot = dirname(dirname(featurePath));
+  // featurePath = /project/nextai/todo/<id> → go up 3 levels to reach project root
+  const projectRoot = dirname(dirname(dirname(featurePath)));
   const featureId = basename(featurePath);
-  const donePath = join(projectRoot, 'done', featureId);
+  const donePath = getDonePath(projectRoot, featureId);
   if (existsWithContent(join(donePath, 'summary.md'))) {
     return 'complete'; // Feature is archived and complete
   }

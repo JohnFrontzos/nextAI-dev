@@ -77,6 +77,7 @@ describe('Create Command Integration', () => {
 
       const initPath = path.join(
         testContext.projectRoot,
+        'nextai',
         'todo',
         feature.id,
         'planning',

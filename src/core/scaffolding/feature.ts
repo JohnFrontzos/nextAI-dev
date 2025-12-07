@@ -1,6 +1,6 @@
 import { existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { ensureDir } from '../../cli/utils/config.js';
+import { ensureDir, getNextAIContentDir } from '../../cli/utils/config.js';
 import type { FeatureType } from '../../schemas/ledger.js';
 
 /**
@@ -13,7 +13,7 @@ export function scaffoldFeature(
   type: FeatureType,
   description?: string
 ): string {
-  const featureDir = join(projectRoot, 'todo', featureId);
+  const featureDir = join(getNextAIContentDir(projectRoot), 'todo', featureId);
 
   // Create directory structure
   ensureDir(featureDir);
@@ -64,21 +64,21 @@ ${type === 'bug' ? '- [ ] Bug is reproduced\n- [ ] Root cause identified\n- [ ] 
  * Check if feature folder exists
  */
 export function featureFolderExists(projectRoot: string, featureId: string): boolean {
-  return existsSync(join(projectRoot, 'todo', featureId));
+  return existsSync(join(getNextAIContentDir(projectRoot), 'todo', featureId));
 }
 
 /**
  * Get feature folder path
  */
 export function getFeaturePath(projectRoot: string, featureId: string): string {
-  return join(projectRoot, 'todo', featureId);
+  return join(getNextAIContentDir(projectRoot), 'todo', featureId);
 }
 
 /**
  * Get done folder path
  */
 export function getDonePath(projectRoot: string, featureId: string): string {
-  return join(projectRoot, 'done', featureId);
+  return join(getNextAIContentDir(projectRoot), 'done', featureId);
 }
 
 /**

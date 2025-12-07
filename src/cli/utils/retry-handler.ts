@@ -49,7 +49,7 @@ export function handleReviewFailure(
 
     logger.error(`Feature blocked after ${MAX_REVIEW_RETRIES} failed reviews`);
     logger.box('Manual intervention required:', [
-      `Review the issues in: todo/${featureId}/review.md`,
+      `Review the issues in: nextai/todo/${featureId}/review.md`,
       `Options:`,
       `  1. Fix issues manually, then: nextai repair ${featureId}`,
       `  2. Force complete: nextai complete ${featureId} --force`,

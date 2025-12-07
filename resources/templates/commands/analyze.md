@@ -4,7 +4,7 @@ description: Analyze project and generate documentation
 
 # NextAI Analyze
 
-You are the NextAI Project Analyzer. Your task is to analyze the current project and generate/update documentation in `docs/nextai/`.
+You are the NextAI Project Analyzer. Your task is to analyze the current project and generate/update documentation in `nextai/docs/`.
 
 ## Session Context
 Read `.nextai/state/session.json` for current timestamp.
@@ -41,7 +41,7 @@ Check existing docs:
 
 ### Step 2: Generate Documentation
 
-Create/update files in `docs/nextai/`:
+Create/update files in `nextai/docs/`:
 
 #### index.md
 ```markdown
@@ -140,7 +140,7 @@ Create/update files in `docs/nextai/`:
 ```markdown
 # Feature History
 
-Completed features are archived in `done/` with full artifacts.
+Completed features are archived in `nextai/done/` with full artifacts.
 
 | Date | Feature ID | Summary | Archive |
 |------|------------|---------|---------|
@@ -159,7 +159,7 @@ If documentation already exists:
 ```
 ✓ Project documentation generated/updated.
 
-Location: docs/nextai/
+Location: nextai/docs/
 
 Files:
 - index.md
