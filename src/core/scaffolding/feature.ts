@@ -18,7 +18,10 @@ export function scaffoldFeature(
   // Create directory structure
   ensureDir(featureDir);
   ensureDir(join(featureDir, 'planning'));
-  ensureDir(join(featureDir, 'planning', 'visuals'));
+  ensureDir(join(featureDir, 'attachments'));
+  ensureDir(join(featureDir, 'attachments', 'design'));
+  ensureDir(join(featureDir, 'attachments', 'evidence'));
+  ensureDir(join(featureDir, 'attachments', 'reference'));
 
   // Create initialization.md
   const initContent = generateInitializationContent(title, type, description);

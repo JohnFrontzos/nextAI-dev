@@ -42,9 +42,10 @@ Use the **product-owner** subagent (or load the refinement-questions skill):
 6. Write confirmed requirements to `planning/requirements.md`
 
 ### Always ask about:
-- Visual assets (mockups, screenshots)
+- Visual assets (mockups, screenshots) → store in `attachments/design/`
 - Reusability (existing similar features?)
 - Scope boundaries (what's out of scope?)
+- For bugs: reproduction steps, error logs → store in `attachments/evidence/`
 
 ## Phase 2: Technical Specification
 
@@ -107,9 +108,13 @@ When both phases complete successfully:
 ## Handling Bugs
 
 If the feature type is `bug`:
-- Skip Product Research
+- Check for evidence files in `attachments/evidence/` (logs, screenshots)
+- Ask for reproduction steps and error details
 - Use the **investigator** subagent for root-cause analysis
 - Then proceed to technical specification
+
+If evidence files are missing, ask:
+"Do you have any error logs, stack traces, or screenshots? Please add them to `attachments/evidence/`"
 
 ## Handling Tasks
 

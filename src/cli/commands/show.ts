@@ -99,7 +99,13 @@ export const showCommand = new Command('show')
       const suggestion = suggestNextAction(featurePath);
       console.log(chalk.bold('Next:'));
       console.log(`  ${suggestion.action}`);
-      console.log(`  ${chalk.cyan(suggestion.command.replace('<id>', feature.id))}`);
+      if (suggestion.aiCommand) {
+        console.log(`  ${chalk.cyan('AI:')}  ${suggestion.aiCommand.replace('<id>', feature.id)}`);
+      }
+      console.log(`  ${chalk.cyan('CLI:')} ${suggestion.cliCommand.replace('<id>', feature.id)}`);
+      if (suggestion.hint) {
+        console.log(chalk.dim(`  Hint: ${suggestion.hint}`));
+      }
     } catch (error) {
       logger.error('Failed to show feature');
       logger.dim(String(error));

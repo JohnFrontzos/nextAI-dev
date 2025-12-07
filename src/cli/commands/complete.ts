@@ -1,14 +1,11 @@
 import { Command } from 'commander';
-import { existsSync, readFileSync, writeFileSync, renameSync, cpSync, rmSync } from 'fs';
-import { join, dirname } from 'path';
 import ora from 'ora';
 import chalk from 'chalk';
 import { logger } from '../utils/logger.js';
 import { confirmAction } from '../utils/prompts.js';
 import { findProjectRoot, appendHistory } from '../utils/config.js';
 import { findFeature, updateFeaturePhase } from '../../core/state/ledger.js';
-import { getFeaturePath, getDonePath } from '../../core/scaffolding/feature.js';
-import { ensureDir } from '../utils/config.js';
+import { archiveFeature } from '../utils/archive.js';
 
 export const completeCommand = new Command('complete')
   .description('Archive a completed feature')
@@ -123,75 +120,3 @@ export const completeCommand = new Command('complete')
       process.exit(1);
     }
   });
-
-function archiveFeature(projectRoot: string, featureId: string): void {
-  const sourcePath = getFeaturePath(projectRoot, featureId);
-  const targetPath = getDonePath(projectRoot, featureId);
-
-  if (!existsSync(sourcePath)) {
-    throw new Error(`Feature directory not found: ${sourcePath}`);
-  }
-
-  // Ensure done/ parent directory exists
-  ensureDir(dirname(targetPath));
-
-  // If target already exists (e.g., AI already created summary.md there),
-  // copy source contents into it, then remove source
-  if (existsSync(targetPath)) {
-    // Copy all contents from source to target (preserving existing files like summary.md)
-    cpSync(sourcePath, targetPath, { recursive: true, force: false });
-    // Remove the source directory
-    rmSync(sourcePath, { recursive: true, force: true });
-  } else {
-    // Simple rename/move if target doesn't exist
-    try {
-      renameSync(sourcePath, targetPath);
-    } catch {
-      // Cross-device move: copy then delete
-      cpSync(sourcePath, targetPath, { recursive: true });
-      rmSync(sourcePath, { recursive: true, force: true });
-    }
-  }
-
-  // Create minimal summary.md if not present (for --skip-summary path)
-  const summaryPath = join(targetPath, 'summary.md');
-  if (!existsSync(summaryPath)) {
-    const summary = generateMinimalSummary(projectRoot, featureId);
-    writeFileSync(summaryPath, summary);
-  }
-}
-
-function generateMinimalSummary(projectRoot: string, featureId: string): string {
-  const now = new Date().toISOString();
-
-  // Try to read title from spec.md or initialization.md (now in done/ after archive)
-  let title = featureId;
-  const donePath = getDonePath(projectRoot, featureId);
-  const specPath = join(donePath, 'spec.md');
-  const initPath = join(donePath, 'planning', 'initialization.md');
-
-  if (existsSync(specPath)) {
-    const content = readFileSync(specPath, 'utf-8');
-    const titleMatch = content.match(/^#\s+(.+)/m);
-    if (titleMatch) title = titleMatch[1];
-  } else if (existsSync(initPath)) {
-    const content = readFileSync(initPath, 'utf-8');
-    const titleMatch = content.match(/^#\s+(.+)/m);
-    if (titleMatch) title = titleMatch[1];
-  }
-
-  return `# Feature Complete: ${title}
-
-## Summary
-Feature completed and archived.
-
-## Feature ID
-${featureId}
-
-## Completed
-${now}
-
-## Notes
-This is a minimal summary. Run \`/nextai-complete\` for AI-generated summary.
-`;
-}

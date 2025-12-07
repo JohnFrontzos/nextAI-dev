@@ -44,6 +44,25 @@ Read all feature artifacts:
 - `todo/$ARGUMENTS/tasks.md`
 - `todo/$ARGUMENTS/review.md`
 - `todo/$ARGUMENTS/testing.md`
+- `todo/$ARGUMENTS/attachments/` (check for any files)
+
+### Step 1a: Document Attachments in Summary
+
+Before generating the summary, review the `attachments/` folder:
+
+1. **Design files** (`attachments/design/`):
+   - Note any UI decisions or visual specifications
+   - Describe mockups if they influenced implementation
+
+2. **Evidence files** (`attachments/evidence/`):
+   - Summarize error patterns from logs
+   - Describe what screenshots showed (for bugs)
+
+3. **Reference files** (`attachments/reference/`):
+   - List external docs that were referenced
+   - Note any important decisions from reference materials
+
+Include these details in the summary's "Implementation Notes" section so the information survives attachment deletion.
 
 ### Step 2: Generate Summary
 
@@ -97,6 +116,20 @@ Ensure `done/$ARGUMENTS/summary.md` was created successfully. This file's existe
 
 **Do NOT manually move files from `todo/` to `done/`.** The CLI command in Step 5 will handle the file move automatically.
 
+### Step 4a: Attachment Cleanup Warning
+
+⚠️ **Note:** The `attachments/` folder will be deleted during archival to save space.
+
+If any attachment files are critical for future reference:
+1. Reference them in the summary (describe what they showed)
+2. Copy important files elsewhere before running the archive command
+3. Or embed small images directly in documentation
+
+Files that will be deleted:
+- `attachments/design/` - UI mockups, wireframes
+- `attachments/evidence/` - Test logs, bug screenshots
+- `attachments/reference/` - Reference docs, examples
+
 ### Step 5: Archive and Update Ledger (REQUIRED)
 
 **CRITICAL:** Run this CLI command to archive the feature and update the ledger:
@@ -106,7 +139,8 @@ nextai complete $ARGUMENTS --skip-summary
 ```
 
 This command:
-- **Moves** the entire `todo/$ARGUMENTS/` directory to `done/$ARGUMENTS/` (preserving your summary.md)
+- **Deletes** the `attachments/` folder (to reduce archive size)
+- **Moves** the remaining `todo/$ARGUMENTS/` directory to `done/$ARGUMENTS/` (preserving your summary.md)
 - Updates `.nextai/state/ledger.json` to set phase to `complete`
 - Logs the completion event to history
 - Deletes the `todo/$ARGUMENTS/` directory

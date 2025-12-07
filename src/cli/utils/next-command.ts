@@ -8,13 +8,15 @@ import {
 } from '../../core/validation/phase-detection.js';
 
 export interface NextCommandResult {
-  command: string;
-  isSlashCommand: boolean;
+  aiCommand?: string;   // Slash command for AI clients (optional)
+  cliCommand: string;   // CLI command for non-AI clients (always present)
   description: string;
+  hint?: string;
 }
 
 /**
  * Determines and prints the next command based on current phase and artifacts.
+ * Shows both AI (slash) and CLI commands to support all workflows.
  * This function MUST be called after every successful phase advance.
  */
 export function printNextCommand(
@@ -27,12 +29,15 @@ export function printNextCommand(
   console.log(chalk.bold('\nNext step:'));
   console.log(`  ${result.description}`);
 
-  if (result.isSlashCommand) {
-    console.log(chalk.cyan(`\n  Run in your AI client:`));
-    console.log(chalk.cyan(`    ${result.command}`));
-  } else {
-    console.log(chalk.cyan(`\n  Run:`));
-    console.log(chalk.cyan(`    ${result.command}`));
+  if (result.aiCommand) {
+    console.log(chalk.cyan(`\n  AI client:`));
+    console.log(chalk.cyan(`    ${result.aiCommand}`));
+  }
+  console.log(chalk.cyan(`\n  CLI:`));
+  console.log(chalk.cyan(`    ${result.cliCommand}`));
+
+  if (result.hint) {
+    console.log(chalk.dim(`\n  Hint: ${result.hint}`));
   }
 
   return result;
@@ -40,6 +45,7 @@ export function printNextCommand(
 
 /**
  * Get the next command to run based on current phase and artifact state.
+ * Returns both AI (slash) and CLI commands to support all workflows.
  * Does not print anything - use printNextCommand for output.
  */
 export function getNextCommand(
@@ -52,14 +58,13 @@ export function getNextCommand(
       const hasInit = existsWithContent(join(featurePath, 'planning', 'initialization.md'));
       if (!hasInit) {
         return {
-          command: `nextai repair ${featureId}`,
-          isSlashCommand: false,
+          cliCommand: `nextai repair ${featureId}`,
           description: 'Feature not properly initialized',
         };
       }
       return {
-        command: `/nextai-refine ${featureId}`,
-        isSlashCommand: true,
+        aiCommand: `/nextai-refine ${featureId}`,
+        cliCommand: `nextai advance ${featureId}`,
         description: 'Start product refinement and technical specification',
       };
     }
@@ -70,14 +75,14 @@ export function getNextCommand(
       const hasTasks = existsWithContent(join(featurePath, 'tasks.md'));
       if (!hasSpec || !hasTasks) {
         return {
-          command: `/nextai-refine ${featureId}`,
-          isSlashCommand: true,
+          aiCommand: `/nextai-refine ${featureId}`,
+          cliCommand: `nextai advance ${featureId}`,
           description: 'Complete technical specification',
         };
       }
       return {
-        command: `/nextai-implement ${featureId}`,
-        isSlashCommand: true,
+        aiCommand: `/nextai-implement ${featureId}`,
+        cliCommand: `nextai advance ${featureId}`,
         description: 'Implement the feature tasks',
       };
     }
@@ -86,14 +91,14 @@ export function getNextCommand(
       const progress = getTaskProgress(join(featurePath, 'tasks.md'));
       if (!progress.isComplete) {
         return {
-          command: `/nextai-implement ${featureId}`,
-          isSlashCommand: true,
+          aiCommand: `/nextai-implement ${featureId}`,
+          cliCommand: `nextai advance ${featureId}`,
           description: `Continue implementation (${progress.completed}/${progress.total} tasks done)`,
         };
       }
       return {
-        command: `/nextai-review ${featureId}`,
-        isSlashCommand: true,
+        aiCommand: `/nextai-review ${featureId}`,
+        cliCommand: `nextai advance ${featureId}`,
         description: 'Run code review',
       };
     }
@@ -102,45 +107,43 @@ export function getNextCommand(
       const outcome = getReviewOutcome(join(featurePath, 'review.md'));
       if (!outcome.isComplete) {
         return {
-          command: `/nextai-review ${featureId}`,
-          isSlashCommand: true,
+          aiCommand: `/nextai-review ${featureId}`,
+          cliCommand: `nextai advance ${featureId}`,
           description: 'Complete code review',
         };
       }
       if (outcome.verdict === 'fail') {
         return {
-          command: `/nextai-implement ${featureId}`,
-          isSlashCommand: true,
+          aiCommand: `/nextai-implement ${featureId}`,
+          cliCommand: `nextai status ${featureId} --retry-increment`,
           description: 'Fix review issues and re-implement',
+          hint: 'Increment retry count, then fix issues and advance',
         };
       }
       return {
-        command: `nextai testing ${featureId}`,
-        isSlashCommand: false,
+        cliCommand: `nextai testing ${featureId} --status pass`,
         description: 'Run manual testing and log results',
       };
     }
 
     case 'testing': {
       return {
-        command: `/nextai-complete ${featureId}`,
-        isSlashCommand: true,
+        aiCommand: `/nextai-complete ${featureId}`,
+        cliCommand: `nextai complete ${featureId} --skip-summary`,
         description: 'Complete and archive the feature',
       };
     }
 
     case 'complete': {
       return {
-        command: `nextai show ${featureId}`,
-        isSlashCommand: false,
+        cliCommand: `nextai show ${featureId}`,
         description: 'Feature is complete!',
       };
     }
 
     default:
       return {
-        command: `nextai resume ${featureId}`,
-        isSlashCommand: false,
+        cliCommand: `nextai resume ${featureId}`,
         description: 'Check feature status',
       };
   }

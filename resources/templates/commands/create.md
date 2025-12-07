@@ -66,8 +66,26 @@ The initialization.md should contain:
 <Any additional context, constraints, or goals mentioned>
 
 ## Attachments
-<List any screenshots, logs, or files if mentioned>
+<List any files provided, stored in attachments/ folder>
+- Design: attachments/design/<filename>
+- Evidence: attachments/evidence/<filename>
+- Reference: attachments/reference/<filename>
 ```
+
+## Attachment Guidance
+
+If the operator provides files (screenshots, logs, docs):
+
+1. **Design files** (mockups, wireframes, UI screenshots):
+   → Place in `todo/<id>/attachments/design/`
+
+2. **Evidence files** (error logs, stack traces, reproduction screenshots):
+   → Place in `todo/<id>/attachments/evidence/`
+
+3. **Reference files** (docs, examples, external files):
+   → Place in `todo/<id>/attachments/reference/`
+
+List them in the initialization.md under ## Attachments.
 
 ## Step 6: Confirm Creation
 

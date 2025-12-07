@@ -8,7 +8,6 @@ import { findProjectRoot } from '../utils/config.js';
 import { findFeature, updateFeaturePhase } from '../../core/state/ledger.js';
 import { getFeaturePath } from '../../core/scaffolding/feature.js';
 import { printNextCommand } from '../utils/next-command.js';
-import { handleTestFailure, handleTestSuccess } from '../utils/retry-handler.js';
 
 export const testingCommand = new Command('testing')
   .description('Log manual test results')
@@ -84,27 +83,18 @@ export const testingCommand = new Command('testing')
 
       // Update phase based on result
       if (normalizedStatus === 'pass') {
-        // Handle test success - reset retry count if any
-        handleTestSuccess(projectRoot, feature.id);
-
         logger.blank();
         logger.success('Testing passed! Feature is ready for completion.');
         logger.dim('The next command will generate a summary, archive artifacts, and update the ledger.');
         printNextCommand(feature.id, 'testing', featurePath);
       } else {
-        // Handle test failure - track retries
-        const { blocked } = handleTestFailure(projectRoot, feature.id);
-
-        if (blocked) {
-          // Feature is blocked, don't transition
-          return;
-        }
-
         // Return to implementation (skip validation since we're going backwards)
+        // No retry limit for operator testing - they can test as many times as needed
         const result = await updateFeaturePhase(projectRoot, feature.id, 'implementation', { skipValidation: true });
         if (result.success) {
           logger.blank();
           logger.warn('Testing failed - returning to implementation');
+          logger.dim('Fix the issues and run through review again before re-testing.');
           printNextCommand(feature.id, 'implementation', featurePath);
         }
       }

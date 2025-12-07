@@ -37,8 +37,9 @@ Example:
 
 ### Phase 3: Visual Assets
 Always ask:
-- Do you have any mockups, wireframes, or screenshots to share?
+- Do you have any mockups, wireframes, or screenshots to share? → Store in `attachments/design/`
 - Are there any existing visual references we should follow?
+- Run `ls attachments/design/` to check for any images the user added; describe what you find.
 
 ### Phase 4: Reusability Check
 Always ask:

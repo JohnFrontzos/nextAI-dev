@@ -218,20 +218,29 @@ export function canTransitionTo(
 }
 
 /**
- * Suggest the next action for a feature based on its current state
+ * Suggestion returned by suggestNextAction()
+ * - aiCommand: Slash command for AI clients (optional, undefined for CLI-only actions)
+ * - cliCommand: CLI command for non-AI clients (always present)
  */
-export function suggestNextAction(featureDir: string): {
+export interface NextActionSuggestion {
   suggestedPhase: Phase;
   action: string;
-  command: string;
+  aiCommand?: string;   // Slash command for AI clients (optional)
+  cliCommand: string;   // CLI command for non-AI clients (always present)
   hint?: string;
-} {
+}
+
+/**
+ * Suggest the next action for a feature based on its current state.
+ * Returns both AI (slash) and CLI commands to support both AI and non-AI workflows.
+ */
+export function suggestNextAction(featureDir: string): NextActionSuggestion {
   // Check phases in order
   if (!isPhaseComplete(featureDir, 'created')) {
     return {
       suggestedPhase: 'created',
       action: 'Feature not properly initialized',
-      command: 'nextai repair <id>',
+      cliCommand: 'nextai repair <id>',
     };
   }
 
@@ -239,7 +248,8 @@ export function suggestNextAction(featureDir: string): {
     return {
       suggestedPhase: 'product_refinement',
       action: 'Run refinement to gather requirements and create tech spec',
-      command: '/nextai-refine <id>',
+      aiCommand: '/nextai-refine <id>',
+      cliCommand: 'nextai advance <id>',
     };
   }
 
@@ -248,7 +258,8 @@ export function suggestNextAction(featureDir: string): {
     return {
       suggestedPhase: 'implementation',
       action: `Implement tasks (${progress.completed}/${progress.total} done)`,
-      command: '/nextai-implement <id>',
+      aiCommand: '/nextai-implement <id>',
+      cliCommand: 'nextai advance <id>',
     };
   }
 
@@ -258,7 +269,8 @@ export function suggestNextAction(featureDir: string): {
     return {
       suggestedPhase: 'review',
       action: 'Run code review',
-      command: '/nextai-review <id>',
+      aiCommand: '/nextai-review <id>',
+      cliCommand: 'nextai advance <id>',
     };
   }
 
@@ -266,8 +278,9 @@ export function suggestNextAction(featureDir: string): {
     return {
       suggestedPhase: 'implementation',
       action: 'Review failed - fix issues and re-implement',
-      command: '/nextai-implement <id>',
-      hint: 'Run `nextai status <id> --retry-increment` to track retry count',
+      aiCommand: '/nextai-implement <id>',
+      cliCommand: 'nextai status <id> --retry-increment',
+      hint: 'Increment retry count, then fix issues and advance',
     };
   }
 
@@ -275,7 +288,7 @@ export function suggestNextAction(featureDir: string): {
     return {
       suggestedPhase: 'testing',
       action: 'Run manual testing',
-      command: 'nextai testing <id>',
+      cliCommand: 'nextai testing <id> --status pass',
     };
   }
 
@@ -283,14 +296,15 @@ export function suggestNextAction(featureDir: string): {
     return {
       suggestedPhase: 'complete',
       action: 'Complete and archive the feature',
-      command: '/nextai-complete <id>',
+      aiCommand: '/nextai-complete <id>',
+      cliCommand: 'nextai complete <id> --skip-summary',
     };
   }
 
   return {
     suggestedPhase: 'complete',
     action: 'Feature is complete!',
-    command: 'nextai show <id>',
+    cliCommand: 'nextai show <id>',
   };
 }
 
@@ -323,6 +337,14 @@ export function getNextPhase(currentPhase: Phase): Phase | null {
  * the target phase for advancement.
  */
 export function detectPhaseFromArtifacts(featurePath: string): Phase {
+  // Check if feature is archived (in done/ folder with summary.md)
+  const projectRoot = dirname(dirname(featurePath));
+  const featureId = basename(featurePath);
+  const donePath = join(projectRoot, 'done', featureId);
+  if (existsWithContent(join(donePath, 'summary.md'))) {
+    return 'complete'; // Feature is archived and complete
+  }
+
   // Check for testing.md with PASS status (testing phase complete)
   const testingPath = join(featurePath, 'testing.md');
   if (existsWithContent(testingPath)) {

@@ -264,8 +264,11 @@ my-project/
 │   └── 20251206_add-user-auth/
 │       ├── planning/
 │       │   ├── initialization.md    # Your original request
-│       │   ├── requirements.md      # Product Q&A results
-│       │   └── visuals/             # Screenshots, diagrams
+│       │   └── requirements.md      # Product Q&A results
+│       ├── attachments/
+│       │   ├── design/              # UI mockups, wireframes
+│       │   ├── evidence/            # Logs, bug screenshots
+│       │   └── reference/           # External docs, examples
 │       ├── spec.md                  # Technical specification
 │       ├── tasks.md                 # Implementation checklist
 │       ├── review.md                # AI review results
