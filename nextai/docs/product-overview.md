@@ -147,6 +147,21 @@ NextAI never calls AI APIs directly:
    Phase: complete
 ```
 
+### Removing Unwanted Features
+
+```
+1. /nextai-remove 20251208_obsolete-feature
+
+2. Confirm removal (required)
+
+3. Feature safely archived:
+   From: nextai/todo/20251208_obsolete-feature/
+   To:   nextai/removed/20251208_obsolete-feature/
+
+4. Ledger entry removed, history logged
+   Event: feature_removed
+```
+
 ## Who It's For
 
 **Solo builders and small teams** who want AI leverage without losing control:
@@ -171,3 +186,5 @@ NextAI never calls AI APIs directly:
 | Claude Code | Supported | `.claude/` |
 | OpenCode | Supported | `.opencode/` |
 | Codex | Planned | - |
+
+<!-- Updated: 2025-12-09 - Added "Removing Unwanted Features" user flow -->

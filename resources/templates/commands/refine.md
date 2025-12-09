@@ -79,6 +79,15 @@ Invoke the Task tool with:
 - Output: `nextai/todo/$ARGUMENTS/planning/requirements.md`
 
 **Instructions for the product-owner subagent:**
+
+FIRST ACTION - Load Your Skill:
+Before starting refinement, you MUST load your assigned skill:
+1. Use the Skill tool: Skill("refinement-questions")
+2. This skill provides question generation patterns and refinement best practices
+3. Follow the skill's guidance for generating clarifying questions
+
+Then proceed with your workflow:
+
 1. Read the initialization document thoroughly
 2. Generate 5-10 numbered clarifying questions with proposed answers
 3. Present questions to the user and STOP - wait for user response
@@ -108,6 +117,15 @@ Invoke the Task tool with:
 - Project docs: `nextai/docs/` (if available)
 
 **Instructions for the technical-architect subagent:**
+
+FIRST ACTION - Load Your Skill:
+Before creating the specification, you MUST load your assigned skill:
+1. Use the Skill tool: Skill("refinement-spec-writer")
+2. This skill provides spec structure templates and task breakdown patterns
+3. Follow the skill's guidance for writing spec.md and tasks.md
+
+Then proceed with your workflow:
+
 1. Read the requirements document thoroughly
 2. Review project docs in `nextai/docs/` if available
 3. If Context7 MCP is available, look up relevant library docs
@@ -134,7 +152,7 @@ Invoke the Task tool with:
 ### tasks.md structure:
 - Pre-implementation tasks
 - Core implementation tasks (checkbox format)
-- Automated tests (unit tests, integration tests - NOT manual testing)
+- Automated tests (unit tests, - NOT manual testing)
 
 > Do NOT include documentation or review tasks - these are handled by their respective phases.
 
@@ -184,6 +202,16 @@ Invoke the Task tool with:
 - Error details and logs
 
 **Instructions for the investigator subagent:**
+
+FIRST ACTION - Load Your Skills:
+Before starting investigation, you MUST load your assigned skills:
+1. Use the Skill tool: Skill("root-cause-tracing")
+2. Use the Skill tool: Skill("systematic-debugging")
+3. These skills provide debugging methodologies and tracing patterns
+4. Follow the skills' guidance throughout the investigation
+
+Then proceed with your workflow:
+
 1. Analyze the evidence
 2. Trace the root cause
 3. Document findings
@@ -207,6 +235,15 @@ Invoke the Task tool with:
 - Project docs: `nextai/docs/` (if available)
 
 **Instructions for the technical-architect subagent:**
+
+FIRST ACTION - Load Your Skill:
+Before creating the specification, you MUST load your assigned skill:
+1. Use the Skill tool: Skill("refinement-spec-writer")
+2. This skill provides spec structure templates and task breakdown patterns
+3. Follow the skill's guidance for writing spec.md and tasks.md
+
+Then proceed with your workflow:
+
 1. Read the investigation document thoroughly
 2. Read the original bug report for context
 3. Review project docs in `nextai/docs/` if available

@@ -85,9 +85,17 @@ Invoke the Task tool with:
 - Task list: `nextai/todo/$ARGUMENTS/tasks.md`
 - Specification: `nextai/todo/$ARGUMENTS/spec.md`
 - Project documentation: `nextai/docs/` (if available)
-- Load the **executing-plans** skill for implementation patterns
 
 **Instructions for the developer subagent:**
+
+FIRST ACTION - Load Your Skill:
+Before starting implementation, you MUST load your assigned skill:
+1. Use the Skill tool: Skill("executing-plans")
+2. This skill provides implementation patterns and task execution best practices
+3. Follow the skill's guidance throughout your work
+
+Then proceed with your workflow:
+
 1. **Read Context**
    - Read the full spec
    - Read the task list

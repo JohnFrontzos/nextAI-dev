@@ -175,6 +175,7 @@ Feature lifecycle tracking:
 | `nextai list` | List features |
 | `nextai show <id>` | Show feature details |
 | `nextai resume [id]` | Resume work on feature |
+| `nextai remove <id>` | Remove unwanted feature (moves to `nextai/removed/`) |
 | `nextai sync` | Re-sync to AI clients |
 | `nextai repair [id]` | Repair state issues |
 | `nextai testing <id>` | Log test results |
@@ -211,6 +212,7 @@ All events are logged to `.nextai/state/history.log` (JSONL format):
 ```json
 {"timestamp":"2025-12-08T10:00:00.000Z","event":"feature_created","feature_id":"20251208_add-user-auth","title":"Add user authentication"}
 {"timestamp":"2025-12-08T10:30:00.000Z","event":"phase_transition","feature_id":"20251208_add-user-auth","from_phase":"created","to_phase":"product_refinement"}
+{"timestamp":"2025-12-09T14:00:00.000Z","event":"feature_removed","feature_id":"20251209_obsolete-feature","title":"Obsolete feature"}
 ```
 
 ### Repair Utilities
@@ -290,7 +292,20 @@ updateLedgerPhase(projectRoot, featureId, 'complete', { logBypass: force });
 
 This ensures the ledger always reflects the actual state of artifacts on disk.
 
-<!-- Updated: 2025-12-09 - Added API reference for phase management functions -->
+#### `removeFeature(projectRoot, featureId)`
+
+Removes a feature from the ledger and logs the removal to history. Used after moving the feature folder to `nextai/removed/`.
+
+```typescript
+import { removeFeature } from './core/state/ledger.js';
+
+// After moving feature to nextai/removed/
+removeFeature(projectRoot, featureId);
+```
+
+**Important:** This only updates the ledger - you must handle folder movement separately using utilities from `src/cli/utils/remove.ts`.
+
+<!-- Updated: 2025-12-09 - Added API reference for phase management and removal functions -->
 
 ## Extending NextAI
 

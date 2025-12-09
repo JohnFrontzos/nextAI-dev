@@ -64,6 +64,7 @@ nextai init
 | `/nextai-list` | Show all features with phases |
 | `/nextai-show <id>` | Display feature details and artifacts |
 | `/nextai-resume [id]` | Smart continuation - shows where you left off |
+| `/nextai-remove <id>` | Remove unwanted features (moves to nextai/removed/) |
 | `/nextai-sync` | Re-sync commands to AI client |
 | `/nextai-repair [id]` | Diagnose and fix state issues |
 | `/nextai-import <framework>` | Import archived features from external frameworks |
@@ -87,6 +88,7 @@ my-project/
 └── nextai/                     # Content directory
     ├── todo/                   # Active features
     ├── done/                   # Archived completed features
+    ├── removed/                # Removed features (safe archive)
     ├── docs/                   # Project documentation
     └── metrics/                # Analytics
 ```
@@ -96,3 +98,5 @@ my-project/
 - Run `/nextai-resume` to see where you left off
 - Run `/nextai-list` to see all features and their phases
 - Run `/nextai-repair` if something seems wrong
+
+<!-- Updated: 2025-12-09 - Added /nextai-remove command and nextai/removed/ directory -->

@@ -51,9 +51,6 @@ Authentication, authorization, data protection.
 ## Error Handling
 How errors and edge cases are handled.
 
-## Testing Strategy
-How this feature should be tested.
-
 ## Alternatives Considered
 What other approaches were considered and why this one was chosen.
 ```
@@ -73,9 +70,8 @@ Create a step-by-step implementation checklist containing ONLY implementation-ph
 - [ ] Task 2: Description
 - [ ] ...additional tasks based on spec
 
-## Automated Tests
+## Automated Tests ()
 - [ ] Write unit tests for new functionality
-- [ ] Write integration tests
 - [ ] Ensure existing tests pass
 ```
 
@@ -83,6 +79,7 @@ Create a step-by-step implementation checklist containing ONLY implementation-ph
 - Manual testing → `/nextai-testing` phase (human task)
 - Documentation → document-writer agent during `/nextai-complete`
 - Review/feedback → reviewer agent during `/nextai-review`
+- Automated Tests -> read the nextai/docs/technical-guide.md to review if the project has unit tests.
 
 ### Guidelines
 - Tasks should be specific and actionable

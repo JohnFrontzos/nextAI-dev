@@ -96,6 +96,14 @@ export const RetryResetEventSchema = BaseEventSchema.extend({
   feature_id: z.string(),
 });
 
+export const FeatureRemovedEventSchema = BaseEventSchema.extend({
+  event: z.literal('feature_removed'),
+  feature_id: z.string(),
+  title: z.string(),
+  type: z.enum(['feature', 'bug', 'task']),
+  phase: z.string(),
+});
+
 export const HistoryEventSchema = z.discriminatedUnion('event', [
   PhaseTransitionEventSchema,
   ValidationEventSchema,
@@ -110,6 +118,7 @@ export const HistoryEventSchema = z.discriminatedUnion('event', [
   FeatureUnblockedEventSchema,
   RetryIncrementedEventSchema,
   RetryResetEventSchema,
+  FeatureRemovedEventSchema,
 ]);
 
 export type HistoryEvent = z.infer<typeof HistoryEventSchema>;
@@ -126,3 +135,4 @@ export type FeatureBlockedEvent = z.infer<typeof FeatureBlockedEventSchema>;
 export type FeatureUnblockedEvent = z.infer<typeof FeatureUnblockedEventSchema>;
 export type RetryIncrementedEvent = z.infer<typeof RetryIncrementedEventSchema>;
 export type RetryResetEvent = z.infer<typeof RetryResetEventSchema>;
+export type FeatureRemovedEvent = z.infer<typeof FeatureRemovedEventSchema>;

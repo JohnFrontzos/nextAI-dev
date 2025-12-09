@@ -10,7 +10,7 @@ export class ClaudeCodeConfigurator extends ClientConfigurator {
     configDir: '.claude',
     commandsDir: 'commands',
     agentsDir: 'agents/nextai',
-    skillsDir: 'skills/nextai',
+    skillsDir: 'skills',
     commandFilePattern: 'nextai-{name}.md',
   };
 

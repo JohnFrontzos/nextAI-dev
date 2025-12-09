@@ -45,6 +45,7 @@ Entry point and command handlers for the `nextai` CLI tool.
 | `commands/list.ts` | List features |
 | `commands/show.ts` | Show feature details |
 | `commands/resume.ts` | Smart continuation |
+| `commands/remove.ts` | Remove unwanted features |
 | `commands/repair.ts` | State repair utilities |
 | `commands/testing.ts` | Log test results |
 | `commands/complete.ts` | Archive completed features |
@@ -58,7 +59,7 @@ Business logic for state management, scaffolding, sync, and validation.
 
 | File | Purpose |
 |------|---------|
-| `ledger.ts` | Feature CRUD, phase transitions with validation |
+| `ledger.ts` | Feature CRUD, phase transitions with validation, removal |
 | `history.ts` | Audit logging (JSONL format) |
 
 #### Scaffolding (`src/core/scaffolding/`)
@@ -128,6 +129,12 @@ Zod schemas for runtime validation.
    └─► Document Writer generates summary
    └─► Feature archived to nextai/done/
        └─► Phase: complete
+
+7. User: /nextai-remove <id> (optional - for unwanted features)
+   └─► Confirms removal
+   └─► Feature moved to nextai/removed/
+   └─► Ledger entry removed
+   └─► History logged (feature_removed event)
 ```
 
 ### Sync Flow
@@ -135,7 +142,7 @@ Zod schemas for runtime validation.
 ```
 .nextai/                          .claude/ (or .opencode/)
 ├── agents/*.md          ──►      ├── agents/nextai/*.md
-├── skills/*/SKILL.md    ──►      ├── skills/nextai/*/SKILL.md
+├── skills/*/SKILL.md    ──►      ├── skills/*/SKILL.md
 └── templates/commands/  ──►      └── commands/nextai-*.md
 ```
 
@@ -182,5 +189,35 @@ Every phase produces reviewable outputs:
 ### Client-Agnostic
 
 Sync adapters transform NextAI resources for each supported AI client:
-- Claude Code: `.claude/commands/`, `.claude/agents/nextai/`, `.claude/skills/nextai/`
+- Claude Code: `.claude/commands/`, `.claude/agents/nextai/`, `.claude/skills/`
 - OpenCode: `.opencode/command/`, `.opencode/agent/`
+
+### Explicit Skill Loading
+
+Subagents must explicitly load their assigned skills via the Skill tool. Agent frontmatter `skills:` fields serve as documentation, but Claude Code does not automatically load them when spawning subagents via the Task tool.
+
+**Implementation Pattern:**
+
+Command templates instruct subagents to load skills as their first action:
+
+```markdown
+FIRST ACTION - Load Your Skill:
+Before starting work, you MUST load your assigned skill:
+1. Use the Skill tool: Skill("[skill-name]")
+2. This skill provides [description]
+3. Follow the skill's guidance throughout your work
+```
+
+**Agent-Skill Mappings:**
+- developer → executing-plans
+- product-owner → refinement-questions
+- technical-architect → refinement-spec-writer
+- reviewer → reviewer-checklist
+- document-writer → documentation-recaps
+- investigator → root-cause-tracing, systematic-debugging
+
+This ensures subagents have access to their specialized skill instructions, improving output quality and consistency.
+
+**Note:** Skills are stored at `.claude/skills/` (root level) not in subdirectories. Claude Code only discovers skills that are direct children of the skills directory.
+
+<!-- Updated: 2025-12-09 - Added /nextai-remove command, CLI table, and feature removal flow -->

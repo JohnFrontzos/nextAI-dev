@@ -12,6 +12,7 @@ import { repairCommand } from './commands/repair.js';
 import { testingCommand } from './commands/testing.js';
 import { completeCommand } from './commands/complete.js';
 import { statusCommand } from './commands/status.js';
+import { removeCommand } from './commands/remove.js';
 import { getPackageVersion, updateSession, findProjectRoot } from './utils/config.js';
 
 const program = new Command();
@@ -44,5 +45,6 @@ program.addCommand(repairCommand);
 program.addCommand(testingCommand);
 program.addCommand(completeCommand);
 program.addCommand(statusCommand);
+program.addCommand(removeCommand);
 
 program.parse(process.argv);

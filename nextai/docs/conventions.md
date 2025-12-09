@@ -118,10 +118,15 @@ Bundled templates (copied during init):
 ```
 resources/
 ├── agents/                 # Agent markdown files
-├── skills/                 # Skill directories
+├── skills/                 # Skill directories (flat, no subdirectories)
+│   ├── documentation-recaps/
+│   ├── executing-plans/
+│   └── ...
 └── templates/
     └── commands/           # Command templates
 ```
+
+**Important:** Skills must be direct children of `resources/skills/`. Claude Code only discovers skills at the root level, not in subdirectories.
 
 ## Git Workflow
 
@@ -254,3 +259,42 @@ Follow the artifact templates:
 | `review.md` | Review results | Verdict, findings |
 | `testing.md` | Test log | Results, notes |
 | `summary.md` | Completion summary | Changes, highlights |
+
+## Command Template Conventions
+
+### Subagent Skill Loading
+
+When command templates delegate to subagents, they must explicitly instruct the subagent to load its assigned skills before beginning work. This ensures subagents have access to their specialized skill instructions.
+
+**Pattern:**
+
+```markdown
+**Instructions for the [subagent] subagent:**
+
+FIRST ACTION - Load Your Skill:
+Before starting [task], you MUST load your assigned skill:
+1. Use the Skill tool: Skill("[skill-name]")
+2. This skill provides [description]
+3. Follow the skill's guidance throughout your work
+
+Then proceed with your workflow:
+
+1. [Step 1]
+2. [Step 2]
+...
+```
+
+**Agent-Skill Mappings:**
+
+| Agent | Skills | Usage |
+|-------|--------|-------|
+| developer | executing-plans | Implementation task execution |
+| product-owner | refinement-questions | Requirements gathering Q&A |
+| technical-architect | refinement-spec-writer | Spec and task authoring |
+| reviewer | reviewer-checklist | Code review validation |
+| document-writer | documentation-recaps | Summary and docs updates |
+| investigator | root-cause-tracing, systematic-debugging | Bug investigation |
+
+**Note:** Skills must be direct children of `.claude/skills/` (no subdirectories). Use bare skill names without namespace prefixes when invoking skills.
+
+<!-- Updated: 2025-12-09 - Removed namespace prefixes, documented flat directory requirement -->

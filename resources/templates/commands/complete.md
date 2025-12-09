@@ -95,9 +95,17 @@ Invoke the Task tool with:
 - All feature artifacts (listed below in Step 1)
 - Output path for summary: `nextai/done/$ARGUMENTS/summary.md`
 - Mode: **Complete Mode** (generate summary + update docs)
-- Load the **documentation-recaps** skill for summary writing patterns
 
 **Instructions for the document-writer subagent:**
+
+FIRST ACTION - Load Your Skill:
+Before generating the summary, you MUST load your assigned skill:
+1. Use the Skill tool: Skill("documentation-recaps")
+2. This skill provides summary writing patterns and documentation standards
+3. Follow the skill's guidance throughout the summary generation
+
+Then proceed with your workflow:
+
 1. Read all feature artifacts
 2. Generate a comprehensive summary
 3. Update changelog and history docs
@@ -253,9 +261,17 @@ Invoke the Task tool with:
 - Mode: **Analyze Mode** (refresh project docs)
 - Documentation location: `nextai/docs/`
 - Context: Changes introduced by the completed feature
-- Load the **documentation-recaps** skill
 
 **Instructions for the document-writer subagent:**
+
+FIRST ACTION - Load Your Skill:
+Before updating documentation, you MUST load your assigned skill:
+1. Use the Skill tool: Skill("documentation-recaps")
+2. This skill provides documentation patterns and update best practices
+3. Follow the skill's guidance for refreshing project docs
+
+Then proceed with your workflow:
+
 1. **Re-scan project** for any changes introduced by this feature:
    - New dependencies or technologies
    - New architectural patterns or components

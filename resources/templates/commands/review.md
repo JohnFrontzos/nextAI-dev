@@ -89,9 +89,17 @@ Invoke the Task tool with:
 - Task list: `nextai/todo/$ARGUMENTS/tasks.md`
 - Code changes (git diff or modified files)
 - Output path: `nextai/todo/$ARGUMENTS/review.md`
-- Load the **reviewer-checklist** skill for review patterns
 
 **Instructions for the reviewer subagent:**
+
+FIRST ACTION - Load Your Skill:
+Before starting the review, you MUST load your assigned skill:
+1. Use the Skill tool: Skill("reviewer-checklist")
+2. This skill provides code review checklists and evaluation patterns
+3. Follow the skill's guidance for thorough code review
+
+Then proceed with your workflow:
+
 1. Review all code changes against the specification
 2. Check each review category below
 3. Write the review document with verdict

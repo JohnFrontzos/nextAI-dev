@@ -367,3 +367,31 @@ export function resetRetryCount(projectRoot: string, featureId: string): void {
   ledger.features[featureIndex].updated_at = new Date().toISOString();
   saveLedger(projectRoot, ledger);
 }
+
+/**
+ * Remove a feature from the ledger
+ */
+export function removeFeature(projectRoot: string, featureId: string): void {
+  const ledger = loadLedger(projectRoot);
+  const featureIndex = ledger.features.findIndex((f) => f.id === featureId);
+
+  if (featureIndex === -1) {
+    throw new Error(`Feature '${featureId}' not found in ledger`);
+  }
+
+  // Get feature info for history log
+  const feature = ledger.features[featureIndex];
+
+  // Remove from array
+  ledger.features.splice(featureIndex, 1);
+  saveLedger(projectRoot, ledger);
+
+  // Log to history
+  appendHistory(projectRoot, {
+    event: 'feature_removed',
+    feature_id: featureId,
+    title: feature.title,
+    type: feature.type,
+    phase: feature.phase,
+  });
+}
