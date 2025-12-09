@@ -1,0 +1,335 @@
+# Technical Guide
+
+## Prerequisites
+
+- **Node.js >= 18.0.0**
+- **An AI coding assistant** - Claude Code or OpenCode
+
+## Installation
+
+### Global Install (Recommended)
+
+```bash
+npm install -g nextai
+```
+
+### Development Install
+
+```bash
+git clone https://github.com/anthropics/nextai.git
+cd nextai
+npm install
+npm link  # Makes 'nextai' available globally
+```
+
+## Setup
+
+### Initialize a Project
+
+```bash
+cd my-project
+nextai init
+```
+
+This creates:
+- `.nextai/` - Configuration directory (source of truth)
+- `nextai/` - Content directory (todo, done, docs, metrics)
+- Syncs slash commands to detected AI clients
+
+### Select AI Client
+
+During init, choose your AI client:
+- **Claude Code** - Syncs to `.claude/`
+- **OpenCode** - Syncs to `.opencode/`
+- **Both** - Syncs to both directories
+
+### Generate Project Context
+
+After init, run in your AI client:
+
+```
+/nextai-analyze
+```
+
+This scans your codebase and generates documentation in `nextai/docs/`.
+
+## Build
+
+```bash
+npm run build       # Production build (tsup)
+npm run dev         # Development with watch mode
+```
+
+Build output goes to `dist/` directory.
+
+### Build Configuration
+
+The project uses `tsup` for building:
+- Entry: `src/index.ts`, `src/cli/index.ts`
+- Output: ESM format
+- Target: Node 18
+
+## Test
+
+```bash
+npm test            # Run all tests
+npm run test:watch  # Watch mode
+npm run test:coverage  # Coverage report
+```
+
+### Test Structure
+
+```
+tests/
+├── unit/           # Unit tests (fast, isolated)
+│   ├── cli/utils/
+│   ├── core/
+│   └── schemas/
+├── integration/    # Integration tests
+│   └── cli/
+├── e2e/            # End-to-end workflow tests
+├── fixtures/       # Test data
+└── helpers/        # Test utilities
+```
+
+## Type Checking
+
+```bash
+npx tsc --noEmit    # Type check without emitting
+npm run typecheck   # Same via npm script
+```
+
+## Configuration
+
+### .nextai/config.json
+
+Project settings:
+
+```json
+{
+  "project": {
+    "id": "uuid",
+    "name": "my-project",
+    "repo_root": "/path/to/project"
+  },
+  "clients": {
+    "synced": ["claude"],
+    "default": "claude"
+  },
+  "preferences": {
+    "verbose": false
+  }
+}
+```
+
+### .nextai/profile.json
+
+Project identity (used by agents for context):
+
+```json
+{
+  "name": "my-project",
+  "description": "What this project does",
+  "tech_stack": ["typescript", "react", "node"]
+}
+```
+
+### .nextai/state/session.json
+
+Current session info (auto-updated):
+
+```json
+{
+  "timestamp": "2025-12-08T20:44:32.501Z",
+  "cli_version": "0.1.0"
+}
+```
+
+### .nextai/state/ledger.json
+
+Feature lifecycle tracking:
+
+```json
+{
+  "features": [
+    {
+      "id": "20251208_add-user-auth",
+      "title": "Add user authentication",
+      "type": "feature",
+      "phase": "implementation",
+      "blocked_reason": null,
+      "retry_count": 0,
+      "created_at": "2025-12-08T10:00:00.000Z",
+      "updated_at": "2025-12-08T15:30:00.000Z"
+    }
+  ]
+}
+```
+
+## CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `nextai init` | Initialize project |
+| `nextai create <title>` | Create feature/bug/task |
+| `nextai list` | List features |
+| `nextai show <id>` | Show feature details |
+| `nextai resume [id]` | Resume work on feature |
+| `nextai sync` | Re-sync to AI clients |
+| `nextai repair [id]` | Repair state issues |
+| `nextai testing <id>` | Log test results |
+| `nextai complete <id>` | Archive completed feature (`--skip-summary`, `--force`) |
+| `nextai status <id>` | Update feature status |
+| `nextai advance <id> <phase>` | Advance to phase (internal) |
+
+## Environment Variables
+
+None required. NextAI uses the local filesystem for all state.
+
+## Debugging
+
+### Verbose Output
+
+```bash
+nextai list --verbose
+```
+
+Or set in config:
+
+```json
+{
+  "preferences": {
+    "verbose": true
+  }
+}
+```
+
+### History Log
+
+All events are logged to `.nextai/state/history.log` (JSONL format):
+
+```json
+{"timestamp":"2025-12-08T10:00:00.000Z","event":"feature_created","feature_id":"20251208_add-user-auth","title":"Add user authentication"}
+{"timestamp":"2025-12-08T10:30:00.000Z","event":"phase_transition","feature_id":"20251208_add-user-auth","from_phase":"created","to_phase":"product_refinement"}
+```
+
+### Repair Utilities
+
+If state gets corrupted:
+
+```bash
+nextai repair              # Repair project state
+nextai repair <id>         # Repair specific feature
+nextai repair --force      # Force repair without confirmation
+```
+
+## Core API Reference
+
+### Ledger Module (`src/core/state/ledger.ts`)
+
+The ledger module provides three functions for phase management:
+
+#### `validateFeatureForPhase(projectRoot, featureId, newPhase, options?)`
+
+Validates that a feature is ready to transition to the target phase. Does NOT modify the ledger.
+
+```typescript
+const result = await validateFeatureForPhase(projectRoot, featureId, 'complete');
+if (!result.success) {
+  // Handle validation errors
+  console.error(result.errors);
+}
+```
+
+**Options:**
+- `basePath: 'todo' | 'done'` - Where to find artifacts (default: 'todo')
+
+**Returns:** `PhaseUpdateResult` with success flag, errors, and warnings
+
+#### `updateLedgerPhase(projectRoot, featureId, newPhase, options?)`
+
+Updates the ledger phase without validation. Use after validation has been performed.
+
+```typescript
+const result = updateLedgerPhase(projectRoot, featureId, 'complete', {
+  logBypass: false  // Set to true if validation was bypassed
+});
+```
+
+**Options:**
+- `logBypass: boolean` - Whether to log validation bypass to history
+
+**Returns:** `PhaseUpdateResult` with success flag and bypass status
+
+#### `updateFeaturePhase(projectRoot, featureId, newPhase, options?)`
+
+Backward-compatible wrapper that validates and updates in one call. For complex workflows (like complete command), prefer using the separate functions.
+
+```typescript
+const result = await updateFeaturePhase(projectRoot, featureId, 'testing', {
+  force: false,         // Bypass validation errors
+  skipValidation: false // Skip validation entirely
+});
+```
+
+**Best Practice:** For commands that need to perform actions between validation and ledger update (e.g., archiving), use the three-step workflow:
+
+```typescript
+// Step 1: Validate from source location
+const validation = await validateFeatureForPhase(projectRoot, featureId, 'complete');
+if (!validation.success && !force) {
+  return; // Exit if validation fails
+}
+
+// Step 2: Perform action (e.g., archive feature)
+archiveFeature(projectRoot, featureId);
+
+// Step 3: Update ledger
+updateLedgerPhase(projectRoot, featureId, 'complete', { logBypass: force });
+```
+
+This ensures the ledger always reflects the actual state of artifacts on disk.
+
+<!-- Updated: 2025-12-09 - Added API reference for phase management functions -->
+
+## Extending NextAI
+
+### Adding Custom Agents
+
+Add agent files to `.nextai/agents/`:
+
+```markdown
+# My Custom Agent
+
+You are a specialized agent for...
+
+## Instructions
+...
+```
+
+Run `nextai sync` to sync to AI clients.
+
+### Adding Custom Skills
+
+Add skill directories to `.nextai/skills/`:
+
+```
+.nextai/skills/my-skill/
+└── SKILL.md
+```
+
+### Adding Custom Commands
+
+Add command templates to `.nextai/templates/commands/`:
+
+```markdown
+---
+description: My custom command
+---
+
+# My Command
+
+Instructions for the AI...
+```
+
+Run `nextai sync` to sync to AI clients.

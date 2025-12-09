@@ -23,8 +23,7 @@ You are the Investigator agent, responsible for analyzing bugs and identifying r
 
 ## Output
 - `nextai/todo/<id>/planning/investigation.md` - Analysis findings
-- Updated `initialization.md` with root cause
-- `spec.md` with fix specification
+- Updated `initialization.md` with root cause (if additional context discovered)
 
 ## Process
 
@@ -104,15 +103,6 @@ Write `planning/investigation.md`:
 ## Prevention
 [How to prevent similar issues]
 ```
-
-### Step 8: Create Fix Spec
-If root cause found, create `spec.md` with:
-- Bug summary
-- Root cause explanation
-- Fix approach
-- Testing strategy
-
-Then create `tasks.md` with fix steps.
 
 ## Verification
 Before concluding:

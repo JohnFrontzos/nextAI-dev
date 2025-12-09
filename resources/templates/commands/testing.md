@@ -15,24 +15,69 @@ The operator has implemented and reviewed a feature. Now they need to test it ma
 If `$ARGUMENTS` is provided, use it as the feature ID.
 If not, run `nextai list --phase review` to show features ready for testing, and ask which one.
 
-## Step 2: Check Current State
+## Step 2: Phase Validation
 
-Run:
-```bash
-nextai show $ARGUMENTS
+Check current phase AND artifact state:
+1. Run: `nextai show $ARGUMENTS --json`
+2. Parse the `phase` field from output
+3. Read `nextai/todo/$ARGUMENTS/review.md` and verify PASS verdict (check for "## Verdict" section with "PASS")
+
+**Phase handling:**
+
+If phase is `review`:
+- Normal start - verify review.md has PASS, then proceed to advance
+
+If phase is `testing`:
+- Resume mode - continue with testing workflow
+- Log: "Resuming testing - checking previous test status..."
+- Skip the start advance (ledger is already correct)
+
+If phase is before `review` (`created`, `product_refinement`, `tech_spec`, `implementation`):
+- Error and stop:
+```
+Error: Cannot run /nextai-testing - feature is at phase '[current_phase]'.
+
+Required phase: review (with PASS verdict)
+
+Run this command first:
+  /nextai-review $ARGUMENTS
 ```
 
-Verify the feature is in `review` phase with a PASS verdict. If not, inform the operator:
-- If still in `implementation` → "Run /nextai-review first"
-- If review is FAIL → "Review failed. Run /nextai-implement to fix issues, then /nextai-review again"
+If phase is beyond `testing` (`complete`):
+- Error and stop:
+```
+Error: Cannot run /nextai-testing - feature is already at phase 'complete'.
 
-## Step 3: Gather Test Results
+This phase has already been completed.
+
+Suggested next command:
+  /nextai-show $ARGUMENTS (to check status)
+```
+
+If phase is `review` but review.md is missing or has FAIL verdict:
+- Error and stop:
+```
+Error: Review not passed.
+
+Run /nextai-review $ARGUMENTS to complete review.
+```
+
+**IMPORTANT:** Both conditions must be met - ledger at `review` (or `testing` for resume) AND artifact shows PASS.
+
+## Step 3: Advance Phase (Start)
+
+**Only if phase was `review` (not resuming):**
+Run: `nextai advance $ARGUMENTS --to testing --quiet`
+
+This updates the ledger to reflect that testing is now in progress.
+
+## Step 4: Gather Test Results
 
 Ask the operator:
 1. "Did the feature work as expected? (pass/fail)"
 2. "What did you test? Any notes?"
 
-## Step 4: Log Results
+## Step 5: Log Results
 
 Run the CLI command with their input:
 
@@ -50,10 +95,11 @@ nextai testing $ARGUMENTS --status <pass|fail> --notes "<their notes>"
 
 The CLI will:
 - Create/update `nextai/todo/<id>/testing.md`
-- Update ledger phase to `testing`
 - Log the event to history
 
-## Step 5: Show Next Steps
+**Note:** The ledger was already advanced to `testing` in Step 3. The CLI command logs the test results without changing the phase.
+
+## Step 6: Show Next Steps
 
 **If PASS:**
 ```

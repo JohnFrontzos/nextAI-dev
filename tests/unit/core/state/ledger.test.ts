@@ -7,6 +7,8 @@ import {
   listFeatures,
   getActiveFeatures,
   updateFeaturePhase,
+  validateFeatureForPhase,
+  updateLedgerPhase,
   blockFeature,
   unblockFeature,
   incrementRetryCount,
@@ -177,6 +179,223 @@ describe('Ledger State', () => {
       const active = getActiveFeatures(testContext.projectRoot);
       expect(active).toHaveLength(2);
       expect(active.every((f) => f.phase !== 'complete')).toBe(true);
+    });
+  });
+
+  describe('validateFeatureForPhase()', () => {
+    it('validates artifacts without modifying ledger', async () => {
+      const feature = addFeature(testContext.projectRoot, 'Test', 'feature');
+      createFeatureFixture(testContext.projectRoot, feature.id, createdPhaseArtifacts);
+
+      const result = await validateFeatureForPhase(
+        testContext.projectRoot,
+        feature.id,
+        'product_refinement'
+      );
+
+      expect(result.success).toBe(true);
+      // Ledger should NOT be modified
+      const unchanged = getFeature(testContext.projectRoot, feature.id);
+      expect(unchanged?.phase).toBe('created');
+    });
+
+    it('returns errors without modifying ledger', async () => {
+      const feature = addFeature(testContext.projectRoot, 'Test', 'feature');
+      // No artifacts created
+
+      const result = await validateFeatureForPhase(
+        testContext.projectRoot,
+        feature.id,
+        'product_refinement'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.errors).toBeDefined();
+      expect(result.errors?.length).toBeGreaterThan(0);
+      // Ledger should NOT be modified
+      const unchanged = getFeature(testContext.projectRoot, feature.id);
+      expect(unchanged?.phase).toBe('created');
+    });
+
+    it('returns error for invalid phase transition', async () => {
+      const feature = addFeature(testContext.projectRoot, 'Test', 'feature');
+
+      const result = await validateFeatureForPhase(
+        testContext.projectRoot,
+        feature.id,
+        'implementation' // Skip from created to implementation is invalid
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Cannot transition');
+    });
+
+    it('returns error for missing feature', async () => {
+      const result = await validateFeatureForPhase(
+        testContext.projectRoot,
+        'nonexistent-id',
+        'product_refinement'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('not found');
+    });
+
+    it('returns warnings along with success', async () => {
+      const feature = addFeature(testContext.projectRoot, 'Test', 'feature');
+      createFeatureFixture(testContext.projectRoot, feature.id, createdPhaseArtifacts);
+
+      const result = await validateFeatureForPhase(
+        testContext.projectRoot,
+        feature.id,
+        'product_refinement'
+      );
+
+      expect(result.success).toBe(true);
+      // Warnings may or may not be present, but should be defined if present
+      if (result.warnings) {
+        expect(Array.isArray(result.warnings)).toBe(true);
+      }
+    });
+
+    it('succeeds for phases without validators', async () => {
+      const feature = addFeature(testContext.projectRoot, 'Test', 'feature');
+      createFeatureFixture(testContext.projectRoot, feature.id, createdPhaseArtifacts);
+
+      // Move to product_refinement first
+      await updateFeaturePhase(testContext.projectRoot, feature.id, 'product_refinement');
+      createFeatureFixture(testContext.projectRoot, feature.id, productRefinementArtifacts);
+
+      // Move to tech_spec
+      await updateFeaturePhase(testContext.projectRoot, feature.id, 'tech_spec');
+      createFeatureFixture(testContext.projectRoot, feature.id, techSpecArtifacts);
+
+      // Now validate for implementation (tech_spec has no validator)
+      const result = await validateFeatureForPhase(
+        testContext.projectRoot,
+        feature.id,
+        'implementation'
+      );
+
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('updateLedgerPhase()', () => {
+    it('updates ledger without validation', () => {
+      const feature = addFeature(testContext.projectRoot, 'Test', 'feature');
+      // No artifacts created - would fail validation
+
+      const result = updateLedgerPhase(
+        testContext.projectRoot,
+        feature.id,
+        'product_refinement'
+      );
+
+      expect(result.success).toBe(true);
+      const updated = getFeature(testContext.projectRoot, feature.id);
+      expect(updated?.phase).toBe('product_refinement');
+    });
+
+    it('returns error for missing feature', () => {
+      const result = updateLedgerPhase(
+        testContext.projectRoot,
+        'nonexistent-id',
+        'product_refinement'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('not found');
+    });
+
+    it('clears blocked_reason on update', () => {
+      const feature = addFeature(testContext.projectRoot, 'Test', 'feature');
+      blockFeature(testContext.projectRoot, feature.id, 'Some blocking reason');
+
+      updateLedgerPhase(testContext.projectRoot, feature.id, 'product_refinement');
+
+      const updated = getFeature(testContext.projectRoot, feature.id);
+      expect(updated?.blocked_reason).toBeNull();
+    });
+
+    it('updates timestamps', () => {
+      const feature = addFeature(testContext.projectRoot, 'Test', 'feature');
+      const originalUpdatedAt = feature.updated_at;
+
+      // Wait a tiny bit to ensure timestamp changes
+      const start = Date.now();
+      while (Date.now() - start < 10);
+
+      updateLedgerPhase(testContext.projectRoot, feature.id, 'product_refinement');
+
+      const updated = getFeature(testContext.projectRoot, feature.id);
+      expect(updated?.updated_at).not.toBe(originalUpdatedAt);
+    });
+
+    it('logs phase_transition event', () => {
+      const feature = addFeature(testContext.projectRoot, 'Test', 'feature');
+
+      updateLedgerPhase(testContext.projectRoot, feature.id, 'product_refinement');
+
+      const fs = require('fs');
+      const historyPath = path.join(testContext.projectRoot, '.nextai', 'state', 'history.log');
+      const historyContent = fs.readFileSync(historyPath, 'utf-8');
+      const events = historyContent.trim().split('\n').filter(Boolean).map(JSON.parse);
+
+      const transitionEvent = events.find(
+        (e: { event: string; feature_id: string; from_phase: string; to_phase: string }) =>
+          e.event === 'phase_transition' &&
+          e.feature_id === feature.id &&
+          e.from_phase === 'created' &&
+          e.to_phase === 'product_refinement'
+      );
+      expect(transitionEvent).toBeDefined();
+    });
+
+    it('logs validation_bypass when logBypass is true', () => {
+      const feature = addFeature(testContext.projectRoot, 'Test', 'feature');
+
+      const result = updateLedgerPhase(
+        testContext.projectRoot,
+        feature.id,
+        'product_refinement',
+        { logBypass: true }
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.bypassed).toBe(true);
+
+      const fs = require('fs');
+      const historyPath = path.join(testContext.projectRoot, '.nextai', 'state', 'history.log');
+      const historyContent = fs.readFileSync(historyPath, 'utf-8');
+      const events = historyContent.trim().split('\n').filter(Boolean).map(JSON.parse);
+
+      expect(events.some((e: { event: string }) => e.event === 'validation_bypass')).toBe(true);
+    });
+
+    it('does not log validation_bypass when logBypass is false', () => {
+      const feature = addFeature(testContext.projectRoot, 'Test', 'feature');
+
+      const result = updateLedgerPhase(
+        testContext.projectRoot,
+        feature.id,
+        'product_refinement',
+        { logBypass: false }
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.bypassed).toBeFalsy(); // false or undefined when not bypassing
+
+      const fs = require('fs');
+      const historyPath = path.join(testContext.projectRoot, '.nextai', 'state', 'history.log');
+      const historyContent = fs.readFileSync(historyPath, 'utf-8');
+      const events = historyContent.trim().split('\n').filter(Boolean).map(JSON.parse);
+
+      // Should have phase_transition but not validation_bypass
+      const bypassEvents = events.filter((e: { event: string; feature_id: string }) =>
+        e.event === 'validation_bypass' && e.feature_id === feature.id
+      );
+      expect(bypassEvents.length).toBe(0);
     });
   });
 

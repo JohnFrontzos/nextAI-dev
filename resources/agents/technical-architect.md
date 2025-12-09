@@ -85,11 +85,12 @@ Required sections:
 - Alternatives Considered
 
 ### Step 7: Write tasks.md
-Create actionable implementation checklist:
+Create actionable implementation checklist containing ONLY implementation-phase work:
 - Pre-implementation tasks
 - Core implementation (broken into logical steps)
-- Testing tasks
-- Documentation tasks
+- Automated tests (unit tests, integration tests - NOT manual testing)
+
+Do NOT include documentation or review tasks - these are handled by document-writer and reviewer agents.
 
 Each task should be:
 - Specific and actionable

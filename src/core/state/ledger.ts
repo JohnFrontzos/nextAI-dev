@@ -9,7 +9,7 @@ import {
 import { loadLedger, saveLedger, appendHistory } from '../../cli/utils/config.js';
 import { getValidatorForPhase } from '../validation/phase-validators.js';
 import { logValidation, logValidationBypass } from './history.js';
-import { getFeaturePath } from '../scaffolding/feature.js';
+import { getFeaturePath, getDonePath } from '../scaffolding/feature.js';
 
 /**
  * Add a new feature to the ledger
@@ -117,15 +117,82 @@ export interface PhaseUpdateResult {
 }
 
 /**
- * Update a feature's phase with validation
- * Validates the current phase's work is complete before allowing transition
+ * Validates that a feature is ready to transition to the target phase.
+ * Does NOT modify the ledger - only validates artifacts.
+ *
+ * @param projectRoot - Project root directory
+ * @param featureId - Feature ID to validate
+ * @param newPhase - Target phase to transition to
+ * @param options - Validation options
+ * @returns Validation result with errors/warnings
  */
-export async function updateFeaturePhase(
+export async function validateFeatureForPhase(
   projectRoot: string,
   featureId: string,
   newPhase: Phase,
-  options: { force?: boolean; skipValidation?: boolean } = {}
+  options: { basePath?: 'todo' | 'done' } = {}
 ): Promise<PhaseUpdateResult> {
+  const ledger = loadLedger(projectRoot);
+  const feature = ledger.features.find((f) => f.id === featureId);
+
+  if (!feature) {
+    return { success: false, error: `Feature '${featureId}' not found` };
+  }
+
+  const fromPhase = feature.phase;
+
+  // Check if transition is valid (phase order)
+  if (!VALID_TRANSITIONS[fromPhase].includes(newPhase)) {
+    return {
+      success: false,
+      error: `Cannot transition from '${fromPhase}' to '${newPhase}'`,
+    };
+  }
+
+  // Run validation for current phase
+  const validator = getValidatorForPhase(fromPhase);
+  if (validator) {
+    const basePath = options.basePath || 'todo';
+    const featurePath = basePath === 'done'
+      ? getDonePath(projectRoot, featureId)
+      : getFeaturePath(projectRoot, featureId);
+
+    const result = await validator.validate(featurePath);
+
+    if (!result.valid) {
+      return {
+        success: false,
+        error: 'Validation failed',
+        errors: result.errors,
+        warnings: result.warnings,
+      };
+    }
+
+    return {
+      success: true,
+      warnings: result.warnings,
+    };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Updates the ledger phase without validation.
+ * Use after validation has already been performed or when forcing.
+ *
+ * @param projectRoot - Project root directory
+ * @param featureId - Feature ID to update
+ * @param newPhase - New phase to set
+ * @param options - Update options
+ * @returns Update result
+ */
+export function updateLedgerPhase(
+  projectRoot: string,
+  featureId: string,
+  newPhase: Phase,
+  options: { logBypass?: boolean } = {}
+): PhaseUpdateResult {
   const ledger = loadLedger(projectRoot);
   const featureIndex = ledger.features.findIndex((f) => f.id === featureId);
 
@@ -135,44 +202,6 @@ export async function updateFeaturePhase(
 
   const feature = ledger.features[featureIndex];
   const fromPhase = feature.phase;
-
-  // Check if transition is valid (phase order)
-  if (!options.force && !VALID_TRANSITIONS[fromPhase].includes(newPhase)) {
-    return {
-      success: false,
-      error: `Cannot transition from '${fromPhase}' to '${newPhase}'`,
-    };
-  }
-
-  // Run validation for current phase (unless skipped)
-  let bypassed = false;
-  if (!options.skipValidation) {
-    const validator = getValidatorForPhase(fromPhase);
-    if (validator) {
-      const featurePath = getFeaturePath(projectRoot, featureId);
-      const result = await validator.validate(featurePath);
-
-      if (!result.valid) {
-        if (options.force) {
-          // Log the bypass and proceed
-          logValidationBypass(projectRoot, featureId, newPhase, result.errors, result.warnings);
-          bypassed = true;
-        } else {
-          // Log failed validation and block
-          logValidation(projectRoot, featureId, newPhase, 'failed', result.errors, result.warnings);
-          return {
-            success: false,
-            error: 'Validation failed',
-            errors: result.errors,
-            warnings: result.warnings,
-          };
-        }
-      } else {
-        // Log successful validation
-        logValidation(projectRoot, featureId, newPhase, 'passed', [], result.warnings);
-      }
-    }
-  }
 
   // Update feature
   feature.phase = newPhase;
@@ -190,7 +219,91 @@ export async function updateFeaturePhase(
     to_phase: newPhase,
   });
 
-  return { success: true, bypassed };
+  // Log bypass if requested
+  if (options.logBypass) {
+    logValidationBypass(projectRoot, featureId, newPhase, [], []);
+  }
+
+  return { success: true, bypassed: options.logBypass };
+}
+
+/**
+ * Update a feature's phase with validation (backward-compatible wrapper).
+ * Validates the current phase's work is complete before allowing transition.
+ *
+ * For the 'complete' phase, use the new workflow:
+ * 1. validateFeatureForPhase()
+ * 2. archiveFeature()
+ * 3. updateLedgerPhase()
+ *
+ * @param projectRoot - Project root directory
+ * @param featureId - Feature ID to update
+ * @param newPhase - New phase to transition to
+ * @param options - Update options
+ * @returns Update result
+ */
+export async function updateFeaturePhase(
+  projectRoot: string,
+  featureId: string,
+  newPhase: Phase,
+  options: { force?: boolean; skipValidation?: boolean } = {}
+): Promise<PhaseUpdateResult> {
+  // Skip validation if requested (for complete command after archiving)
+  if (options.skipValidation) {
+    return updateLedgerPhase(projectRoot, featureId, newPhase, {
+      logBypass: options.force,
+    });
+  }
+
+  // Validate first
+  const validationResult = await validateFeatureForPhase(
+    projectRoot,
+    featureId,
+    newPhase
+  );
+
+  if (!validationResult.success) {
+    if (options.force) {
+      // Log validation errors but proceed
+      const feature = getFeature(projectRoot, featureId);
+      if (feature) {
+        logValidationBypass(
+          projectRoot,
+          featureId,
+          newPhase,
+          validationResult.errors || [],
+          validationResult.warnings || []
+        );
+      }
+      return updateLedgerPhase(projectRoot, featureId, newPhase, {
+        logBypass: true,
+      });
+    } else {
+      // Log failed validation
+      logValidation(
+        projectRoot,
+        featureId,
+        newPhase,
+        'failed',
+        validationResult.errors || [],
+        validationResult.warnings || []
+      );
+      return validationResult;
+    }
+  }
+
+  // Log successful validation
+  logValidation(
+    projectRoot,
+    featureId,
+    newPhase,
+    'passed',
+    [],
+    validationResult.warnings || []
+  );
+
+  // Update ledger
+  return updateLedgerPhase(projectRoot, featureId, newPhase);
 }
 
 /**

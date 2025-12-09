@@ -15,8 +15,56 @@ Before starting, verify all prerequisite phases are complete:
 1. Verify `nextai/todo/$ARGUMENTS/spec.md` exists
 2. Verify `nextai/todo/$ARGUMENTS/tasks.md` exists with all tasks checked
 3. Verify `nextai/todo/$ARGUMENTS/review.md` exists with "## Verdict" containing "PASS"
-4. Verify `nextai/todo/$ARGUMENTS/testing.md` exists with passing test results
+4. Verify `nextai/todo/$ARGUMENTS/testing.md` exists with passing test results (check for "Status: pass" or "**Status:** pass")
 5. Read the spec and review results for context
+
+## Phase Validation
+
+Check current phase AND artifact state:
+1. Run: `nextai show $ARGUMENTS --json`
+2. Parse the `phase` field from output
+3. Read `nextai/todo/$ARGUMENTS/testing.md` and verify PASS status
+
+**Phase handling:**
+
+If phase is `testing`:
+- Normal completion - verify testing.md has PASS status, then proceed
+
+If phase is before `testing` (`created`, `product_refinement`, `tech_spec`, `implementation`, `review`):
+- Error and stop:
+```
+Error: Cannot run /nextai-complete - feature is at phase '[current_phase]'.
+
+Required phase: testing (with PASS status)
+
+Run this command first:
+  /nextai-testing $ARGUMENTS
+```
+
+If phase is `complete`:
+- Error and stop:
+```
+Error: Feature already completed.
+
+The feature has already been archived.
+
+Check status with:
+  /nextai-show $ARGUMENTS
+```
+
+If phase is `testing` but testing.md is missing or doesn't have PASS status:
+- Error and stop:
+```
+Error: Testing not passed.
+
+Run /nextai-testing $ARGUMENTS to log test results.
+```
+
+**IMPORTANT:** Both conditions must be met - ledger at `testing` AND artifact shows PASS.
+
+## Advance Phase (On Completion Only)
+
+This command does NOT advance on start - only on successful completion. The phase advances when the CLI `nextai complete` command is run at the end.
 
 If any files are missing or incomplete:
 ```
@@ -28,23 +76,32 @@ Missing or incomplete:
 Complete required phases first:
 - Run: /nextai-implement $ARGUMENTS (if tasks incomplete)
 - Run: /nextai-review $ARGUMENTS (if review missing/failed)
-- Run: nextai testing $ARGUMENTS (if testing missing)
+- Run: /nextai-testing $ARGUMENTS (if testing missing)
 ```
 
 ## Completion Process
 
-Use the **document-writer** subagent to generate the summary and update documentation. Also load the **documentation-recaps** skill for summary writing patterns.
+<DELEGATION_REQUIRED>
+You MUST delegate this phase using the Task tool. DO NOT perform this work yourself.
 
-Provide to the subagent:
-- All feature artifacts (listed below)
+Invoke the Task tool with:
+- subagent_type: "document-writer"
+- description: "Summary generation for $ARGUMENTS"
+- prompt: Include ALL of the following context and instructions below
+</DELEGATION_REQUIRED>
+
+**Context to provide the document-writer subagent:**
+- Feature ID: $ARGUMENTS
+- All feature artifacts (listed below in Step 1)
 - Output path for summary: `nextai/done/$ARGUMENTS/summary.md`
 - Mode: **Complete Mode** (generate summary + update docs)
+- Load the **documentation-recaps** skill for summary writing patterns
 
-Instruct the subagent to:
+**Instructions for the document-writer subagent:**
 1. Read all feature artifacts
 2. Generate a comprehensive summary
 3. Update changelog and history docs
-4. Follow the steps below
+4. Follow the steps below (Step 1 through Step 5)
 
 ### Step 1: Read Feature Context
 
@@ -178,16 +235,27 @@ If the command fails with validation errors, you may use `--force` to bypass:
 nextai complete $ARGUMENTS --skip-summary --force
 ```
 
+**Wait for the document-writer subagent to complete Steps 1-5 before proceeding to Step 6.**
+
 ### Step 6: Update Project Documentation
 
-After archiving, use the **document-writer** subagent in **Analyze Mode** to refresh project documentation. Also load the **documentation-recaps** skill.
+<DELEGATION_REQUIRED>
+You MUST delegate this step using the Task tool. DO NOT perform this work yourself.
 
-Provide to the subagent:
+Invoke the Task tool with:
+- subagent_type: "document-writer"
+- description: "Project documentation update for $ARGUMENTS"
+- prompt: Include ALL of the following context and instructions below
+</DELEGATION_REQUIRED>
+
+**Context to provide the document-writer subagent:**
+- Feature ID: $ARGUMENTS
 - Mode: **Analyze Mode** (refresh project docs)
 - Documentation location: `nextai/docs/`
 - Context: Changes introduced by the completed feature
+- Load the **documentation-recaps** skill
 
-Instruct the subagent to:
+**Instructions for the document-writer subagent:**
 1. **Re-scan project** for any changes introduced by this feature:
    - New dependencies or technologies
    - New architectural patterns or components
@@ -207,6 +275,8 @@ Instruct the subagent to:
    - Mark updated sections with timestamp
 
 Note: This is the same process as `/nextai-analyze` but runs automatically after feature completion.
+
+**Wait for the document-writer subagent to complete before proceeding to Completion Message.**
 
 ## Completion Message
 

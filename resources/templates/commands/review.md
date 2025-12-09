@@ -25,22 +25,73 @@ Found X/Y tasks completed in tasks.md.
 Run: /nextai-implement $ARGUMENTS to complete remaining tasks.
 ```
 
-If review.md already exists:
-- Inform user that review already exists
-- Show previous verdict (PASS/FAIL)
-- Ask if they want to re-run review
+## Phase Validation
+
+Check current phase:
+1. Run: `nextai show $ARGUMENTS --json`
+2. Parse the `phase` field from output
+3. Store whether this is a resume (phase is already `review`)
+
+**Phase handling:**
+
+If phase is `implementation`:
+- Normal start - proceed to advance phase
+
+If phase is `review`:
+- Resume mode - check for existing review.md
+- If review.md exists with verdict, show previous result and ask to re-run
+- Log: "Resuming review - checking previous review status..."
+- Skip the start advance (ledger is already correct)
+
+If phase is before `implementation` (`created`, `product_refinement`, `tech_spec`):
+- Error and stop:
+```
+Error: Cannot run /nextai-review - feature is at phase '[current_phase]'.
+
+Required phase: implementation
+
+Run this command first:
+  /nextai-implement $ARGUMENTS
+```
+
+If phase is beyond `review` (`testing`, `complete`):
+- Error and stop:
+```
+Error: Cannot run /nextai-review - feature is already at phase '[current_phase]'.
+
+This phase has already been completed.
+
+Suggested next command:
+  /nextai-show $ARGUMENTS (to check status)
+```
+
+## Advance Phase (Start)
+
+**Only if phase was `implementation` (not resuming):**
+Run: `nextai advance $ARGUMENTS --to review --quiet`
+
+This updates the ledger to reflect that review is now in progress.
 
 ## Review Process
 
-Use the **reviewer** subagent to perform the code review. Also load the **reviewer-checklist** skill for review patterns.
+<DELEGATION_REQUIRED>
+You MUST delegate this phase using the Task tool. DO NOT perform this work yourself.
 
-Provide to the subagent:
-- The specification: `nextai/todo/$ARGUMENTS/spec.md`
-- The task list: `nextai/todo/$ARGUMENTS/tasks.md`
+Invoke the Task tool with:
+- subagent_type: "reviewer"
+- description: "Code review for $ARGUMENTS"
+- prompt: Include ALL of the following context and instructions below
+</DELEGATION_REQUIRED>
+
+**Context to provide the reviewer subagent:**
+- Feature ID: $ARGUMENTS
+- Specification: `nextai/todo/$ARGUMENTS/spec.md`
+- Task list: `nextai/todo/$ARGUMENTS/tasks.md`
 - Code changes (git diff or modified files)
 - Output path: `nextai/todo/$ARGUMENTS/review.md`
+- Load the **reviewer-checklist** skill for review patterns
 
-Instruct the subagent to:
+**Instructions for the reviewer subagent:**
 1. Review all code changes against the specification
 2. Check each review category below
 3. Write the review document with verdict
@@ -89,6 +140,8 @@ If Context7 MCP is available:
 - Verify correct API usage
 - Check for deprecated patterns
 
+**Wait for the reviewer subagent to complete before proceeding to Write Review.**
+
 ## Write Review
 
 Create `nextai/todo/$ARGUMENTS/review.md` with this structure:
@@ -124,53 +177,96 @@ IMPORTANT: The `## Verdict` section MUST be present with the exact text "PASS" o
 
 ### If PASS:
 1. Verify review.md was created with "## Verdict" section containing "PASS"
-2. Inform the user:
+2. **DO NOT advance phase** - the ledger stays at `review`. Testing comes next, triggered by `/nextai-testing`.
+3. Inform the user:
 ```
 ✓ Review PASSED for $ARGUMENTS.
 
 The implementation meets the specification.
 Ready for testing.
 
-Next: Run `nextai testing $ARGUMENTS` to log test results
+Next: Run /nextai-testing $ARGUMENTS to log test results
 ```
 
 ### If FAIL:
-1. Verify review.md was created with "## Verdict" section containing "FAIL"
-2. List specific issues to fix
-3. Increment retry count: `nextai status $ARGUMENTS --retry-increment`
-4. User must return to implementation phase
 
+1. Verify review.md was created with "## Verdict" section containing "FAIL"
+
+2. Transition back to implementation:
+   Run: `nextai advance $ARGUMENTS --to implementation --quiet`
+
+3. Increment retry count:
+   Run: `nextai status $ARGUMENTS --retry-increment`
+
+4. Check current retry count:
+   Run: `nextai show $ARGUMENTS --json`
+   Parse the `retry_count` field from the JSON output
+
+5. Handle based on retry count:
+
+**If retry_count < 5 (auto-retry):**
+
+1. Inform user with retry count:
 ```
-✗ Review FAILED for $ARGUMENTS.
+✗ Review FAILED for $ARGUMENTS (Attempt X/5).
 
 Issues to fix:
 1. [Issue description]
 2. [Issue description]
 
-Retry count incremented.
-Run: /nextai-implement $ARGUMENTS to address these issues.
+Automatically restarting implementation to address issues...
 ```
 
-The review phase is complete when review.md exists with a Verdict section containing PASS or FAIL.
+2. Auto-restart implementation using SlashCommand tool:
+   - Tool: SlashCommand
+   - Command: `/nextai-implement $ARGUMENTS`
 
-## Review Loop
+**If retry_count >= 5 (escalate to manual intervention):**
 
-- Maximum 5 automatic retry cycles
-- Track retry count via `nextai status $ARGUMENTS --retry-increment`
-- Check current count via `nextai status $ARGUMENTS`
-- After 5 failures, escalate:
+1. Append Resolution placeholder to review.md:
+   - Read current content of `nextai/todo/$ARGUMENTS/review.md`
+   - Append the following section to the end:
+   ```markdown
+   ## Resolution
 
+   <!--
+   MANUAL INTERVENTION REQUIRED
+
+   The auto-loop has failed 5 times. Please review the issues above and provide your resolution below.
+   Options:
+   - Clarify requirements or acceptance criteria
+   - Provide specific implementation guidance
+   - Decide to skip/defer certain issues
+   - Any other direction for the implementation
+
+   After adding your resolution, run: /nextai-implement $ARGUMENTS
+   -->
+
+   [Add your resolution here]
+   ```
+
+2. Display escalation message to user:
 ```
 ⚠ Review failed 5 times for $ARGUMENTS.
 
-Manual intervention required.
-Please review:
-- nextai/todo/$ARGUMENTS/review.md
+Issues found:
+1. [Issue description]
+2. [Issue description]
 
-Options:
-1. Fix issues manually, then run: nextai repair $ARGUMENTS
-2. Force complete: nextai complete $ARGUMENTS --force
+Manual intervention required.
+
+Please:
+1. Review: nextai/todo/$ARGUMENTS/review.md
+2. Fill in the "## Resolution" section with your decision or fix approach
+3. Run: /nextai-implement $ARGUMENTS
+
+The retry count will reset after your intervention.
 ```
+
+3. **DO NOT** use SlashCommand tool - require manual user action
+4. **DO NOT** auto-restart implementation
+
+The review phase is complete when review.md exists with a Verdict section containing PASS or FAIL.
 
 ## Review Philosophy
 

@@ -59,7 +59,7 @@ What other approaches were considered and why this one was chosen.
 ```
 
 ### Phase 3: Write tasks.md
-Create a step-by-step implementation checklist:
+Create a step-by-step implementation checklist containing ONLY implementation-phase work:
 
 ```markdown
 # Implementation Tasks
@@ -71,21 +71,18 @@ Create a step-by-step implementation checklist:
 ## Core Implementation
 - [ ] Task 1: Description
 - [ ] Task 2: Description
-- [ ] Task 3: Description
+- [ ] ...additional tasks based on spec
 
-## Testing
-- [ ] Write unit tests
+## Automated Tests
+- [ ] Write unit tests for new functionality
 - [ ] Write integration tests
-- [ ] Manual testing
-
-## Documentation
-- [ ] Update relevant docs
-- [ ] Add code comments where needed
-
-## Review
-- [ ] Self-review code
-- [ ] Address review feedback
+- [ ] Ensure existing tests pass
 ```
+
+**IMPORTANT:** Do NOT include these sections - they are handled by other phases:
+- Manual testing → `/nextai-testing` phase (human task)
+- Documentation → document-writer agent during `/nextai-complete`
+- Review/feedback → reviewer agent during `/nextai-review`
 
 ### Guidelines
 - Tasks should be specific and actionable
