@@ -83,7 +83,7 @@ my-project/
 ├── .claude/                    # Claude Code integration
 │   ├── commands/nextai-*.md    # Synced slash commands
 │   ├── agents/nextai/          # Synced agents
-│   └── skills/nextai/          # Synced skills
+│   └── skills/                 # Synced skills (flat structure)
 │
 └── nextai/                     # Content directory
     ├── todo/                   # Active features
@@ -99,4 +99,4 @@ my-project/
 - Run `/nextai-list` to see all features and their phases
 - Run `/nextai-repair` if something seems wrong
 
-<!-- Updated: 2025-12-09 - Added /nextai-remove command and nextai/removed/ directory -->
+<!-- Updated: 2025-12-10 - Updated skills directory from skills/nextai/ to flat skills/ structure -->
