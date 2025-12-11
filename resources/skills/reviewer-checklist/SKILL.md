@@ -1,6 +1,6 @@
 # Reviewer Checklist
 
-AI code review validation skill.
+Use when reviewing code — provides comprehensive review categories and evaluation checklists.
 
 ## Purpose
 Review implemented code against the specification and identify issues before testing.

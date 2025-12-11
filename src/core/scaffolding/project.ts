@@ -1,6 +1,5 @@
 import { existsSync, writeFileSync, copyFileSync, readdirSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { join } from 'path';
 import {
   getNextAIDir,
   getNextAIContentDir,
@@ -12,38 +11,8 @@ import {
   updateSession,
 } from '../../cli/utils/config.js';
 import { logInit } from '../state/history.js';
+import { getResourcesDir } from '../sync/resources.js';
 import type { SupportedClient } from '../../types/index.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Paths to resource templates (bundled with package)
-function getResourcesDir(): string {
-  // When bundled with tsup, __dirname points to dist/cli/
-  // We need to find the resources folder relative to the package root
-  // Look for the resources folder that contains our specific templates structure
-  const candidates = [
-    join(__dirname, '..', 'resources'),        // dist/cli -> dist/resources (if copied)
-    join(__dirname, '..', '..', 'resources'),  // dist/cli -> resources (package root)
-  ];
-
-  for (const candidate of candidates) {
-    // Verify this is OUR resources folder by checking for templates/commands
-    const templatesDir = join(candidate, 'templates', 'commands');
-    if (existsSync(templatesDir)) {
-      return candidate;
-    }
-  }
-
-  // Fallback: return first existing candidate
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) {
-      return candidate;
-    }
-  }
-
-  return candidates[0];
-}
 
 export interface ScaffoldOptions {
   /** Overwrite existing template files when true */

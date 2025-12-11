@@ -1,6 +1,6 @@
 # Root Cause Tracing
 
-Backward bug tracing technique for identifying the source of issues.
+Use when investigating bugs — provides backward tracing methodology from symptom to root cause.
 
 ## Purpose
 Systematically trace bugs from symptoms back to their root cause.

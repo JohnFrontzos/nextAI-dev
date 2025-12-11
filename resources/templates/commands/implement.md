@@ -97,43 +97,16 @@ Before starting implementation, you MUST load your assigned skill:
 Then proceed with your workflow:
 
 1. **Read Context**
-   - Read the full spec
-   - Read the task list
-   - Review project docs in `nextai/docs/`
-   - Scan related existing code
+   - Read spec.md, tasks.md, and project docs in `nextai/docs/`
 
-2. **Documentation Lookup**
-   If Context7 MCP is available, look up:
-   - API references for libraries being used
-   - Best practices for the technologies involved
+2. **Execute Tasks**
+   - Follow the executing-plans skill for systematic task execution
+   - The skill provides detailed guidance for each task
 
-3. **Execute Tasks**
-   For each unchecked task in order:
-   - Understand the task
-   - Read relevant existing code
-   - Plan the changes
-   - Implement the code
-   - Verify it works
-   - Mark task complete: `- [x]`
-
-4. **Progress Updates**
-   After significant milestones, report back with:
-   - Tasks completed
-   - Any issues or deviations
-   - Next steps
+3. **Progress Updates**
+   - Report progress after significant milestones
 
 **Wait for the developer subagent to complete before proceeding to Completion.**
-
-## Code Quality
-
-While implementing:
-- Follow existing code patterns
-- Match project style and conventions
-- Add appropriate error handling
-- Keep code simple and readable
-- Only add comments where logic is complex
-- Don't refactor unrelated code
-- Don't add features beyond the spec
 
 ## Handling Blockers
 
@@ -150,56 +123,21 @@ Before declaring implementation complete, verify:
 3. No TODO comments left in code
 4. No obvious bugs in the new code
 
-## Completion
+## Completion and Auto-Review
 
-When all tasks are complete:
+When the developer subagent completes, you MUST follow these steps in order:
 
-1. Verify implementation is complete:
-   - Count tasks: all should be `- [x]` format
-   - Confirm with user if uncertain
+### Step 1: Check for Escalation Resolution (Resume Only)
 
-2. **DO NOT advance phase** - the ledger stays at `implementation`. Review comes next, triggered separately.
-
-3. Update the user:
-```
-✓ Implementation complete for $ARGUMENTS.
-
-Tasks completed: X/Y
-Files modified: [list key files]
-
-The feature is ready for review.
-Next: Run /nextai-review $ARGUMENTS
-```
-
-If there are issues:
-```
-⚠ Implementation paused for $ARGUMENTS.
-
-Completed: X/Y tasks
-Blocked: [describe blockers]
-
-Please address the blockers, then run:
-/nextai-implement $ARGUMENTS
-```
-
-## Auto-continue to Review
-
-After implementation completes successfully, automatically start the review phase.
-
-**Step 1: Check for Manual Intervention (Escalation Handling)**
-
-If this is a resume after escalation, check for user's resolution:
+If this is a resume after escalation:
 1. Read `nextai/todo/$ARGUMENTS/review.md` if it exists
-2. Look for `## Resolution` section
-3. Check if Resolution has user content (not just the placeholder comment)
+2. Look for `## Resolution` section with user content
 
-**If Resolution section exists with user content:**
-- Reset retry count: Run `nextai status $ARGUMENTS --retry-reset`
-- Use the Resolution content as additional context for implementation
-- Log: "User resolution found - retry count reset, proceeding with guidance..."
+**If Resolution exists with content:**
+- Run `nextai status $ARGUMENTS --retry-reset`
+- Log: "User resolution found - retry count reset"
 
-**If Resolution section is placeholder only or empty:**
-- Warn user:
+**If Resolution is empty/placeholder:**
 ```
 ⚠ Manual intervention required but Resolution section is not filled in.
 
@@ -208,20 +146,22 @@ Fill in the "## Resolution" section with your decision or guidance.
 
 Then run: /nextai-implement $ARGUMENTS
 ```
-- **STOP** - do not proceed with implementation
+- **STOP** - do not proceed
 
-**Step 2: Verify Readiness for Auto-Transition**
+### Step 2: Verify Implementation Readiness
 
-Check if implementation is ready for review:
+Check implementation status:
 1. Count tasks in tasks.md: all must be `- [x]` format
-2. Verify no blockers were encountered during implementation
-3. Verify implementation was completed (not paused)
+2. Verify no blockers were encountered
+3. Verify build passes (if applicable)
 
-**Step 3: Handle Based on Readiness**
+### Step 3: Handle Based on Readiness
 
 **If READY (all tasks complete, no blockers):**
 
-1. Inform user:
+1. **DO NOT advance phase** - ledger stays at `implementation`
+
+2. Inform user and AUTO-START review:
 ```
 ✓ Implementation complete for $ARGUMENTS.
 
@@ -231,13 +171,15 @@ Files modified: [list key files]
 Starting code review automatically...
 ```
 
-2. Auto-start review using SlashCommand tool:
-   - Tool: SlashCommand
-   - Command: `/nextai-review $ARGUMENTS`
+3. **IMMEDIATELY** invoke the review command using SlashCommand tool:
+```
+Tool: SlashCommand
+Command: /nextai-review $ARGUMENTS
+```
 
-**If NOT READY (blockers present or tasks incomplete):**
+**If NOT READY (blockers or incomplete tasks):**
 
-1. Inform user and list issues:
+1. Inform user:
 ```
 ⚠ Implementation paused for $ARGUMENTS.
 
@@ -248,6 +190,12 @@ Please address the blockers, then run:
 /nextai-implement $ARGUMENTS
 ```
 
-2. **DO NOT** auto-start review - require user intervention
+2. **DO NOT** auto-start review - stop here
 
-**IMPORTANT:** Only auto-start review if implementation is fully complete without issues.
+### CRITICAL: You MUST Auto-Start Review
+
+When implementation is complete and ready:
+- You MUST use the SlashCommand tool to invoke `/nextai-review $ARGUMENTS`
+- Do NOT just tell the user to run it manually
+- Do NOT stop after showing the completion message
+- The auto-transition is REQUIRED, not optional

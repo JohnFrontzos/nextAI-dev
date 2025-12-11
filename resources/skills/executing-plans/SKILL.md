@@ -1,6 +1,6 @@
 # Executing Plans
 
-Step-by-step task execution skill for implementing features.
+Use when implementing features — provides systematic task execution patterns for checking off implementation tasks.
 
 ## Purpose
 Execute implementation tasks systematically, checking each item as completed.

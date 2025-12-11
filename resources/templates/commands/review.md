@@ -100,55 +100,15 @@ Before starting the review, you MUST load your assigned skill:
 
 Then proceed with your workflow:
 
-1. Review all code changes against the specification
-2. Check each review category below
-3. Write the review document with verdict
+1. **Review Changes**
+   - Follow the reviewer-checklist skill for comprehensive code review
+   - The skill provides all review categories and evaluation patterns
 
-### Review Categories
+2. **Write Review**
+   - Create review.md with results from the skill's checklist
+   - Ensure Verdict section has "PASS" or "FAIL"
 
-The subagent should check each category:
-
-1. **Specification Compliance**
-   - All requirements from spec are implemented
-   - Implementation matches technical approach
-   - API/interfaces match spec definitions
-
-2. **Task Completion**
-   - All tasks in tasks.md are checked `[x]`
-   - No TODO comments left in code
-   - No placeholder implementations
-
-3. **Code Quality**
-   - Code follows project conventions
-   - No code duplication introduced
-   - Clear naming and structure
-   - Appropriate comments where needed
-
-4. **Error Handling**
-   - Edge cases are handled
-   - Error messages are helpful
-   - Graceful degradation where appropriate
-
-5. **Security**
-   - No hardcoded secrets
-   - User input validated
-   - No obvious vulnerabilities
-
-6. **Performance**
-   - No obvious N+1 queries
-   - Large data sets paginated
-   - Expensive operations optimized
-
-7. **Testing**
-   - Tests added/updated
-   - Tests cover key functionality
-
-### Documentation Lookup
-If Context7 MCP is available:
-- Verify correct API usage
-- Check for deprecated patterns
-
-**Wait for the reviewer subagent to complete before proceeding to Write Review.**
+**Wait for the reviewer subagent to complete before proceeding to Handle Result.**
 
 ## Write Review
 

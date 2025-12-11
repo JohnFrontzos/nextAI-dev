@@ -1,6 +1,6 @@
 # Systematic Debugging
 
-4-phase debugging framework for methodical problem-solving.
+Use when debugging issues — provides structured debugging process (reproduce, isolate, understand, fix).
 
 ## Purpose
 Provide a structured approach to debugging complex issues.

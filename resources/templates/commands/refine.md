@@ -87,15 +87,7 @@ Before starting refinement, you MUST load your assigned skill:
 3. Follow the skill's guidance for generating clarifying questions
 
 Then proceed with your workflow:
-
-1. Read the initialization document thoroughly
-2. Generate 5-10 numbered clarifying questions with proposed answers
-3. Present questions to the user and STOP - wait for user response
-4. After receiving answers, assess confidence level
-5. If <95% confident, ask 1-3 follow-up questions (max 3 rounds)
-6. Write confirmed requirements to `planning/requirements.md`
-7. Always ask about: visual assets, reusability, scope boundaries
-8. For bugs: ask about reproduction steps, error logs
+1. Follow the refinement-questions skill for Q&A-based requirements gathering
 
 **Wait for the product-owner subagent to complete Phase 1 before proceeding to Phase 2.**
 
@@ -125,14 +117,7 @@ Before creating the specification, you MUST load your assigned skill:
 3. Follow the skill's guidance for writing spec.md and tasks.md
 
 Then proceed with your workflow:
-
-1. Read the requirements document thoroughly
-2. Review project docs in `nextai/docs/` if available
-3. If Context7 MCP is available, look up relevant library docs
-4. Design the technical approach
-5. If uncertain, ask technical clarifying questions (max 3 rounds)
-6. Write `spec.md` with full technical specification
-7. Write `tasks.md` with implementation checklist
+1. Follow the refinement-spec-writer skill for writing spec.md and tasks.md
 
 **Wait for the technical-architect subagent to complete Phase 2 before proceeding to Completion.**
 
@@ -152,7 +137,7 @@ Then proceed with your workflow:
 ### tasks.md structure:
 - Pre-implementation tasks
 - Core implementation tasks (checkbox format)
-- Automated tests (unit tests, - NOT manual testing)
+- Unit tests (only if project has test framework - check nextai/docs/technical-guide.md)
 
 > Do NOT include documentation or review tasks - these are handled by their respective phases.
 

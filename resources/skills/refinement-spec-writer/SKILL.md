@@ -1,6 +1,6 @@
 # Refinement Spec Writer
 
-Technical specification and task authoring skill.
+Use when creating specifications — provides templates and patterns for writing technical specs and task lists.
 
 ## Purpose
 Transform product requirements into actionable technical specifications and implementation tasks.
@@ -70,16 +70,18 @@ Create a step-by-step implementation checklist containing ONLY implementation-ph
 - [ ] Task 2: Description
 - [ ] ...additional tasks based on spec
 
-## Automated Tests ()
+## Unit Tests (if applicable)
+Check `nextai/docs/technical-guide.md` to see if this project has unit tests configured. If yes:
 - [ ] Write unit tests for new functionality
 - [ ] Ensure existing tests pass
+
+> Skip this section if the project does not have a test framework configured.
 ```
 
 **IMPORTANT:** Do NOT include these sections - they are handled by other phases:
 - Manual testing → `/nextai-testing` phase (human task)
 - Documentation → document-writer agent during `/nextai-complete`
 - Review/feedback → reviewer agent during `/nextai-review`
-- Automated Tests -> read the nextai/docs/technical-guide.md to review if the project has unit tests.
 
 ### Guidelines
 - Tasks should be specific and actionable

@@ -106,146 +106,30 @@ Before generating the summary, you MUST load your assigned skill:
 
 Then proceed with your workflow:
 
-1. Read all feature artifacts
-2. Generate a comprehensive summary
-3. Update changelog and history docs
-4. Follow the steps below (Step 1 through Step 5)
-
 ### Step 1: Read Feature Context
 
 Read all feature artifacts:
-- `nextai/todo/$ARGUMENTS/planning/initialization.md`
-- `nextai/todo/$ARGUMENTS/planning/requirements.md`
-- `nextai/todo/$ARGUMENTS/spec.md`
-- `nextai/todo/$ARGUMENTS/tasks.md`
-- `nextai/todo/$ARGUMENTS/review.md`
-- `nextai/todo/$ARGUMENTS/testing.md`
-- `nextai/todo/$ARGUMENTS/attachments/` (check for any files)
-
-### Step 1a: Document Attachments in Summary
-
-Before generating the summary, review the `attachments/` folder:
-
-1. **Design files** (`attachments/design/`):
-   - Note any UI decisions or visual specifications
-   - Describe mockups if they influenced implementation
-
-2. **Evidence files** (`attachments/evidence/`):
-   - Summarize error patterns from logs
-   - Describe what screenshots showed (for bugs)
-
-3. **Reference files** (`attachments/reference/`):
-   - List external docs that were referenced
-   - Note any important decisions from reference materials
-
-Include these details in the summary's "Implementation Notes" section so the information survives attachment deletion.
+- planning/initialization.md, planning/requirements.md
+- spec.md, tasks.md, review.md, testing.md
+- attachments/ folder (if exists)
 
 ### Step 2: Generate Summary
 
-Create the summary file at `nextai/done/$ARGUMENTS/summary.md` (create the `nextai/done/$ARGUMENTS/` directory if it doesn't exist):
+Follow the documentation-recaps skill (Complete Mode) to:
+- Create summary.md in nextai/done/$ARGUMENTS/
+- Document key changes and implementation highlights
+- Capture attachment details before deletion
+- Update changelog and history.md
 
-```markdown
-# Feature Complete: [Title]
+### Step 3: Archive Feature
 
-## Summary
-[2-3 sentence description of what was built]
+Run CLI command: `nextai complete $ARGUMENTS --skip-summary`
 
-## Key Changes
-- [Main capability added]
-- [Files/components created or modified]
-- [Dependencies added if any]
+This moves files from todo/ to done/ and updates ledger.
 
-## Implementation Highlights
-[Notable decisions, patterns used, or interesting solutions]
+**Wait for the document-writer subagent to complete before proceeding to Step 4.**
 
-## Testing Notes
-[How it was tested, any edge cases covered]
-
-## Related Documentation
-[Links to any updated docs]
-
-## Completed
-[Timestamp]
-```
-
-### Step 3: Update Documentation
-
-**Changelog** - Append entry:
-```markdown
-## [Date] [Type]: [Title]
-- Brief summary of what was added/changed
-- [Full details](nextai/done/$ARGUMENTS/summary.md)
-```
-
-**nextai/docs/history.md** - Add row:
-```markdown
-| Date | Feature ID | Summary | Archive |
-|------|------------|---------|---------|
-| [Date] | $ARGUMENTS | [Brief] | [details](../done/$ARGUMENTS/summary.md) |
-```
-
-**Other docs** - Only if significantly affected by the feature
-
-### Step 4: Verify Summary Created
-
-Ensure `nextai/done/$ARGUMENTS/summary.md` was created successfully. This file's existence is required for the next step.
-
-**Do NOT manually move files from `nextai/todo/` to `nextai/done/`.** The CLI command in Step 5 will handle the file move automatically.
-
-### Step 4a: Attachment Cleanup Warning
-
-⚠️ **Note:** The `attachments/` folder will be deleted during archival to save space.
-
-If any attachment files are critical for future reference:
-1. Reference them in the summary (describe what they showed)
-2. Copy important files elsewhere before running the archive command
-3. Or embed small images directly in documentation
-
-Files that will be deleted:
-- `attachments/design/` - UI mockups, wireframes
-- `attachments/evidence/` - Test logs, bug screenshots
-- `attachments/reference/` - Reference docs, examples
-
-### Step 5: Archive and Update Ledger (REQUIRED)
-
-**CRITICAL:** Run this CLI command to archive the feature and update the ledger:
-
-```bash
-nextai complete $ARGUMENTS --skip-summary
-```
-
-**Arguments:**
-- `id` (required) - Feature ID
-
-**Options:**
-- `--skip-summary` - Archive without AI-generated summary
-- `-f, --force` - Bypass validation errors
-
-**Exit Codes:**
-- `0` - Feature archived successfully
-- `1` - Error (validation failed, feature not found, etc.)
-- `2` - Action required (no --skip-summary provided, use slash command)
-
-This command:
-- **Deletes** the `attachments/` folder (to reduce archive size)
-- **Moves** the remaining `nextai/todo/$ARGUMENTS/` directory to `nextai/done/$ARGUMENTS/` (preserving your summary.md)
-- Updates `.nextai/state/ledger.json` to set phase to `complete`
-- Logs the completion event to history
-- Deletes the `nextai/todo/$ARGUMENTS/` directory
-
-**Do NOT skip this step.** Without it:
-- Files will remain in `nextai/todo/` instead of `nextai/done/`
-- The ledger will still show `testing` phase
-- The workflow cannot finish
-
-If the command fails with validation errors, you may use `--force` to bypass:
-```bash
-nextai complete $ARGUMENTS --skip-summary --force
-```
-
-**Wait for the document-writer subagent to complete Steps 1-5 before proceeding to Step 6.**
-
-### Step 6: Update Project Documentation
+### Step 4: Update Project Documentation
 
 <DELEGATION_REQUIRED>
 You MUST delegate this step using the Task tool. DO NOT perform this work yourself.

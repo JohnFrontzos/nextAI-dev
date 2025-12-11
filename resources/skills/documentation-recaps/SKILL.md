@@ -1,6 +1,6 @@
 # Documentation Recaps
 
-Documentation and changelog update skill.
+Use when updating documentation — provides patterns for generating summaries and maintaining project docs.
 
 ## Purpose
 Update project documentation and changelog when features are completed.

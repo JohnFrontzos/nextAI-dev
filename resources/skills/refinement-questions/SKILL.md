@@ -1,6 +1,6 @@
 # Refinement Questions
 
-Product research Q&A loop for gathering requirements.
+Use when gathering requirements — provides Q&A patterns for clarifying feature requests.
 
 ## Purpose
 Generate numbered clarifying questions with proposed answers to gather complete product requirements before technical specification.

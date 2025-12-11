@@ -8,6 +8,9 @@ import { loadConfig, saveConfig } from '../../cli/utils/config.js';
 export * from './base.js';
 export * from './claude-code.js';
 export * from './opencode.js';
+export * from './version.js';
+export * from './resources.js';
+export * from './client-selection.js';
 
 const configurators: Record<SupportedClient, () => ClientConfigurator> = {
   claude: () => new ClaudeCodeConfigurator(),

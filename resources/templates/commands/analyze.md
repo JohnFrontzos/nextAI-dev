@@ -18,174 +18,39 @@ Project not initialized. Run `nextai init` first.
 
 ## Analysis Process
 
-Use the **document-writer** subagent to analyze the project and generate documentation. Also load the **documentation-recaps** skill for documentation patterns.
+<DELEGATION_REQUIRED>
+You MUST delegate this phase using the Task tool.
 
-Provide to the subagent:
+Invoke the Task tool with:
+- subagent_type: "document-writer"
+- description: "Project analysis for documentation"
+- prompt: Include ALL of the following context and instructions below
+</DELEGATION_REQUIRED>
+
+**Context to provide the document-writer subagent:**
 - Mode: **Analyze Mode** (scan project + generate docs)
 - Output location: `nextai/docs/`
 - Project root: current directory
 
-Instruct the subagent to:
-1. Scan the project structure and technologies
-2. Generate/update documentation files
-3. Follow the steps below
+**Instructions for the document-writer subagent:**
 
-### Step 1: Scan Project
+FIRST ACTION - Load Your Skill:
+Before starting analysis, you MUST load your assigned skill:
+1. Use the Skill tool: Skill("documentation-recaps")
+2. This skill provides documentation patterns and update best practices
+3. Follow the skill's guidance for Analyze Mode
 
-Detect technologies:
-1. Read `package.json` (Node.js/JavaScript)
-2. Read `requirements.txt` or `pyproject.toml` (Python)
-3. Read `Cargo.toml` (Rust)
-4. Read `go.mod` (Go)
-5. Check for frameworks (React, Vue, Django, etc.)
+Then proceed with your workflow:
+1. Scan project structure and technologies
+2. Generate/update documentation files in nextai/docs/
+3. Follow the skill's preservation rules and merge strategies
 
-Scan structure:
-1. Map folder structure
-2. Identify entry points
-3. Note key directories
-
-Check existing docs:
-1. Read any existing `docs/` content
-2. Read README.md if present
-3. Note what's already documented
-
-### Step 2: Generate Documentation
-
-Create/update files in `nextai/docs/`:
-
-#### index.md
-```markdown
-# [Project Name] Documentation
-
-## Overview
-[Brief description of what this project does]
-
-## Quick Start
-[How to get started]
-
-## Documentation
-- [Architecture](architecture.md)
-- [Product Overview](product-overview.md)
-- [Technical Guide](technical-guide.md)
-- [Conventions](conventions.md)
-- [History](history.md)
-
-## NextAI Commands
-- `/nextai-analyze` - Update this documentation
-- `/nextai-refine <id>` - Start refinement
-- `/nextai-implement <id>` - Implement feature
-- `/nextai-review <id>` - Review implementation
-- `/nextai-complete <id>` - Complete feature
-```
-
-#### architecture.md
-```markdown
-# Architecture
-
-## System Overview
-[High-level description of the system]
-
-## Components
-[Key components and their responsibilities]
-
-## Data Flow
-[How data moves through the system]
-
-## Technology Stack
-[Languages, frameworks, libraries]
-```
-
-#### product-overview.md
-```markdown
-# Product Overview
-
-## What It Does
-[Description of the product's purpose]
-
-## Key Features
-[Main features and capabilities]
-
-## User Flows
-[How users interact with the product]
-```
-
-#### technical-guide.md
-```markdown
-# Technical Guide
-
-## Setup
-[How to set up the development environment]
-
-## Build
-[How to build the project]
-
-## Test
-[How to run tests]
-
-## Deploy
-[How to deploy]
-
-## Configuration
-[Key configuration options]
-```
-
-#### conventions.md
-```markdown
-# Coding Conventions
-
-## Code Style
-[Style guidelines for this project]
-
-## Naming Conventions
-[How to name things]
-
-## File Organization
-[How files should be organized]
-
-## Git Workflow
-[How to use git in this project]
-```
-
-#### history.md
-```markdown
-# Feature History
-
-Completed features are archived in `nextai/done/` with full artifacts.
-
-| Date | Feature ID | Summary | Archive |
-|------|------------|---------|---------|
-```
-
-### Step 3: Merge with Existing
-
-If documentation already exists:
-- Don't overwrite user content
-- Add new sections where appropriate
-- Update outdated information
-- Keep user customizations
+**Wait for the document-writer subagent to complete before proceeding to Completion.**
 
 ## Completion
 
-```
 ✓ Project documentation generated/updated.
 
 Location: nextai/docs/
 
-Files:
-- index.md
-- architecture.md
-- product-overview.md
-- technical-guide.md
-- conventions.md
-- history.md
-
 Review and customize the documentation as needed.
-```
-
-## Tips for Users
-
-Recommend:
-1. Review generated docs for accuracy
-2. Fill in placeholder sections
-3. Add project-specific details
-4. Re-run analyze periodically to update
