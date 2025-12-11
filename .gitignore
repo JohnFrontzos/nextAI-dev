@@ -30,7 +30,6 @@ npm-debug.log*
 *.tsbuildinfo
 
 # Package manager
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
