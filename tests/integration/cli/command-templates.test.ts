@@ -6,9 +6,9 @@ const RESOURCES_DIR = path.resolve(__dirname, '../../../resources/templates/comm
 
 describe('Command Templates Integration', () => {
   describe('Template Count', () => {
-    it('has exactly 12 command templates', () => {
+    it('has exactly 13 command templates', () => {
       const files = fs.readdirSync(RESOURCES_DIR).filter(f => f.endsWith('.md'));
-      expect(files).toHaveLength(12);
+      expect(files).toHaveLength(13);
     });
 
     it('includes all required command templates', () => {
@@ -19,6 +19,7 @@ describe('Command Templates Integration', () => {
         'implement.md',
         'list.md',
         'refine.md',
+        'remove.md',
         'repair.md',
         'resume.md',
         'review.md',
