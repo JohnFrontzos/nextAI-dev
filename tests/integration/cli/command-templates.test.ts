@@ -104,8 +104,8 @@ describe('Command Templates Integration', () => {
       for (const file of files) {
         const content = fs.readFileSync(path.join(RESOURCES_DIR, file), 'utf-8');
 
-        // Should start with frontmatter
-        expect(content).toMatch(/^---\n/);
+        // Should start with frontmatter (handle both Unix and Windows line endings)
+        expect(content).toMatch(/^---\r?\n/);
         expect(content).toMatch(/description:/);
       }
     });

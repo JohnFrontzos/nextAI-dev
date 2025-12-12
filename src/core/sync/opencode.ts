@@ -177,7 +177,8 @@ Instructions:
   private transformAgentManifest(content: string): string {
     // Add mode: subagent for OpenCode
     if (!content.includes('mode:')) {
-      return content.replace('---\n', '---\nmode: subagent\n');
+      // Handle both Unix (\n) and Windows (\r\n) line endings
+      return content.replace(/---\r?\n/, '---\nmode: subagent\n');
     }
     return content;
   }
@@ -191,7 +192,8 @@ Instructions:
         const frontmatter = skillContent.slice(0, frontmatterEnd);
         // Only check within frontmatter block, not entire document
         if (!frontmatter.includes('mode:')) {
-          return skillContent.replace('---\n', '---\nmode: subagent\n');
+          // Handle both Unix (\n) and Windows (\r\n) line endings
+          return skillContent.replace(/---\r?\n/, '---\nmode: subagent\n');
         }
       }
       return skillContent;

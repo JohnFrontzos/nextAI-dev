@@ -198,7 +198,7 @@ describe('Claude Code Sync', () => {
 
       // Verify: skill should have frontmatter
       const syncedSkill = fs.readFileSync(
-        path.join(testContext.projectRoot, '.claude', 'skills', 'nextai', 'test-skill', 'SKILL.md'),
+        path.join(testContext.projectRoot, '.claude', 'skills', 'test-skill', 'SKILL.md'),
         'utf-8'
       );
 
@@ -226,7 +226,7 @@ description: Use Codex CLI for code analysis
 
       // Verify: frontmatter preserved exactly
       const syncedContent = fs.readFileSync(
-        path.join(testContext.projectRoot, '.claude', 'skills', 'nextai', 'codex', 'SKILL.md'),
+        path.join(testContext.projectRoot, '.claude', 'skills', 'codex', 'SKILL.md'),
         'utf-8'
       );
 
