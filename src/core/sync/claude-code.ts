@@ -110,7 +110,7 @@ export class ClaudeCodeConfigurator extends ClientConfigurator {
     const { projectRoot, options, skipped } = ctx;
     const skillsSynced: string[] = [];
     const sourceDir = join(getNextAIDir(projectRoot), 'skills');
-    const targetDir = join(projectRoot, this.config.configDir, this.config.skillsDir!, 'nextai');
+    const targetDir = join(projectRoot, this.config.configDir, this.config.skillsDir!);
 
     if (!existsSync(sourceDir)) {
       return skillsSynced;

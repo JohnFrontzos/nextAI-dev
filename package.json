@@ -1,6 +1,6 @@
 {
   "name": "@frontztech/nextai-dev",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "NextAI Dev Framework - AI Development Workflow Orchestrator",
   "type": "module",
   "main": "dist/index.js",
@@ -50,6 +50,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.53.3",
     "@types/node": "^22.10.1",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.18.0",

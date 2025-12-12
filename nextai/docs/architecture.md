@@ -156,7 +156,9 @@ Zod schemas for runtime validation.
 | Schema Validation | Zod |
 | Build | tsup (esbuild-based) |
 | Testing | Vitest |
+| Linting | ESLint with TypeScript plugin |
 | Package Manager | npm |
+| CI/CD | GitHub Actions |
 
 ## Key Design Decisions
 
@@ -220,4 +222,44 @@ This ensures subagents have access to their specialized skill instructions, impr
 
 **Note:** Skills are stored at `.claude/skills/` (root level) not in subdirectories. Claude Code only discovers skills that are direct children of the skills directory.
 
-<!-- Updated: 2025-12-09 - Added /nextai-remove command, CLI table, and feature removal flow -->
+## Version Management and Publishing
+
+### Version-Aware Sync
+
+The sync system tracks template versions and auto-updates client directories when running `nextai init` or `nextai sync`:
+
+- **Version Tracking**: Each template (agents, skills, commands) is versioned in `package.json`
+- **Auto-Update**: During sync, outdated templates are automatically updated to latest versions
+- **Preservation**: User modifications are preserved where possible
+- **Audit Trail**: Version updates are logged to history
+
+This ensures that projects always have access to the latest improvements without manual intervention.
+
+### CI/CD Pipeline
+
+NextAI uses GitHub Actions for automated publishing:
+
+```yaml
+Trigger: Git tags matching v*.*.*
+Steps:
+  1. Checkout code
+  2. Setup Node.js 20
+  3. Install dependencies (npm ci)
+  4. Run tests
+  5. Build distribution
+  6. Publish to npm with provenance
+```
+
+**Publishing Requirements:**
+- Tests must pass
+- Build must succeed
+- npm token required (secrets.NPM_TOKEN)
+- Provenance attestation enabled for supply chain security
+
+**Package Details:**
+- Name: `@frontztech/nextai-dev`
+- Registry: npm public registry
+- Access: Public
+- Files: `dist/`, `bin/`, `resources/`
+
+<!-- Updated: 2025-12-12 - Added version management, CI/CD pipeline, and publishing details -->

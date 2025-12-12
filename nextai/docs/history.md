@@ -4,6 +4,7 @@ Completed features are archived in `nextai/done/` with full artifacts.
 
 | Date | Feature ID | Type | Summary | Archive |
 |------|------------|------|---------|---------|
+| 2025-12-12 | 20251212_add-readme-badges | task | Added professional shields.io badges, MIT LICENSE file, and updated README documentation sections | [summary](../done/20251212_add-readme-badges/summary.md) |
 | 2025-12-11 | 20251211_cleanup-agents-skills-commands | task | Refactored agents/skills/commands to eliminate duplication and establish skills as single source of truth | [summary](../done/20251211_cleanup-agents-skills-commands/summary.md) |
 | 2025-12-11 | 20251209_version-aware-auto-update-sync | feature | Version-aware auto-update sync for templates | [summary](../done/20251209_version-aware-auto-update-sync/summary.md) |
 | 2025-12-10 | 20251209_skills-not-found-despite-exist | bug | Fix skill discovery by flattening directory structure | [summary](../done/20251209_skills-not-found-despite-exist/summary.md) |

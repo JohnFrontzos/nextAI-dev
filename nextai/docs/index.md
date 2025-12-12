@@ -10,7 +10,7 @@ NextAI Dev Framework is a spec-driven workflow for planning and executing softwa
 
 ```bash
 # Install globally
-npm install -g nextai
+npm install -g @frontztech/nextai-dev
 
 # Initialize in your project
 cd my-project
@@ -99,4 +99,9 @@ my-project/
 - Run `/nextai-list` to see all features and their phases
 - Run `/nextai-repair` if something seems wrong
 
-<!-- Updated: 2025-12-10 - Updated skills directory from skills/nextai/ to flat skills/ structure -->
+## License
+
+NextAI Dev Framework is licensed under the MIT License. See the [LICENSE](../../LICENSE) file for details.
+
+<!-- Updated: 2025-12-12 - Updated package name to @frontztech/nextai-dev -->
+<!-- Updated: 2025-12-12 - Added license section -->

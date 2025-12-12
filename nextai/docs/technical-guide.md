@@ -10,14 +10,14 @@
 ### Global Install (Recommended)
 
 ```bash
-npm install -g nextai
+npm install -g @frontztech/nextai-dev
 ```
 
 ### Development Install
 
 ```bash
-git clone https://github.com/anthropics/nextai.git
-cd nextai
+git clone https://github.com/JohnFrontzos/nextAI-dev.git
+cd nextai-dev
 npm install
 npm link  # Makes 'nextai' available globally
 ```
@@ -66,8 +66,10 @@ Build output goes to `dist/` directory.
 
 The project uses `tsup` for building:
 - Entry: `src/index.ts`, `src/cli/index.ts`
-- Output: ESM format
-- Target: Node 18
+- Output: ESM format only
+- Target: ES2022, Node 18+
+- Features: Type declarations, source maps, shims enabled
+- Optimization: Code splitting disabled for simpler output
 
 ## Test
 
@@ -91,6 +93,30 @@ tests/
 ├── fixtures/       # Test data
 └── helpers/        # Test utilities
 ```
+
+**Note:** The `research/` directory is excluded from test runs to avoid interference with experimental code.
+
+### Coverage Thresholds
+
+- Lines: 70%
+- Branches: 60%
+
+Certain files are excluded from coverage:
+- CLI entry points (thin wrappers)
+- Logger and prompt utilities
+- Config and type definition files
+
+## Linting
+
+```bash
+npm run lint        # Run ESLint on source files
+```
+
+ESLint configuration:
+- TypeScript-aware linting
+- Recommended rules from ESLint and @typescript-eslint
+- Unused vars error (except args prefixed with `_`)
+- Console statements allowed (CLI tool)
 
 ## Type Checking
 
@@ -305,7 +331,7 @@ removeFeature(projectRoot, featureId);
 
 **Important:** This only updates the ledger - you must handle folder movement separately using utilities from `src/cli/utils/remove.ts`.
 
-<!-- Updated: 2025-12-09 - Added API reference for phase management and removal functions -->
+<!-- Updated: 2025-12-12 - Updated package name to @frontztech/nextai-dev, added linting section, coverage details -->
 
 ## Extending NextAI
 

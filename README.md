@@ -1,7 +1,11 @@
-<p align="center"><strong>NextAI Dev Framework</strong></p>
-<p align="center">Spec-driven development workflow for AI coding assistants.</p>
-
 # NextAI Dev Framework
+
+[![npm version](https://img.shields.io/npm/v/@frontztech/nextai-dev.svg?style=flat-square)](https://www.npmjs.com/package/@frontztech/nextai-dev)
+[![Node version](https://img.shields.io/node/v/@frontztech/nextai-dev?style=flat-square)](https://nodejs.org)
+[![License](https://img.shields.io/npm/l/@frontztech/nextai-dev.svg?style=flat-square)](https://github.com/JohnFrontzos/nextAI-dev/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/JohnFrontzos/nextAI-dev/pulls)
+[![GitHub stars](https://img.shields.io/github/stars/JohnFrontzos/nextAI-dev?style=flat-square&logo=github)](https://github.com/JohnFrontzos/nextAI-dev/stargazers)
 
 NextAI Dev Framework is a spec-driven workflow for planning and executing software development with AI coding assistants. Instead of a magic autonomous agent, you get **structured phases, human checkpoints, and artifacts at every step**. No API keys required.
 
@@ -33,13 +37,19 @@ Key outcomes:
 │ Implement          │◀─────────────────┐
 │ (AI writes code)   │                  │
 └────────┬───────────┘                  │
-         │ tasks complete               │ review/test failed
+         │ tasks complete               │
          ▼                              │
 ┌────────────────────┐                  │
-│ Review & Test      │──────────────────┘
-│ (AI + you)         │
+│ Review             │──────────────────┘
+│ (AI checks spec)   │   review failed
 └────────┬───────────┘
-         │ pass
+         │ review passed
+         ▼
+┌────────────────────┐
+│ Test               │◀─────────────────┐
+│ (you verify)       │                  │ test failed
+└────────┬───────────┘──────────────────┘
+         │ test passed
          ▼
 ┌────────────────────┐
 │ Complete & Archive │  /nextai-complete
@@ -47,9 +57,10 @@ Key outcomes:
 
 1. Create a feature with your idea or proposal.
 2. Refine the spec—AI asks questions, you answer until spec is approved.
-3. Implement—AI codes, you monitor. Loop back if review/test fails.
-4. Review & test—AI validates against spec, you verify manually.
-5. Archive the completed feature with a summary.
+3. Implement—AI codes, you monitor. Review happens automatically.
+4. Review—AI validates against spec.
+5. Test—You verify manually and log results.
+6. Archive the completed feature with a summary.
 ```
 
 ## The Problem
@@ -199,6 +210,8 @@ All commands run in your AI client (Claude Code or OpenCode). The only terminal 
 | `/nextai-list` | Check status | Shows all features with phases |
 | `/nextai-show <id>` | Deep dive | Displays feature details and artifacts |
 | `/nextai-resume [id]` | Continue work | Shows where you left off, suggests next step |
+| `/nextai-status <id>` | Check/update status | Shows or updates feature status (block status, retry count) |
+| `/nextai-remove <id>` | Remove unwanted feature | Moves feature to nextai/removed/ |
 | `/nextai-sync` | After config changes | Re-syncs commands to AI client |
 | `/nextai-repair [id]` | Something's wrong | Diagnoses and fixes state issues |
 
@@ -220,10 +233,7 @@ All commands below run in your AI client:
 # Implement
 /nextai-implement 20251206_add-password-reset-flow
 # AI works through tasks, you monitor
-
-# Review
-/nextai-review 20251206_add-password-reset-flow
-# AI checks against spec, outputs PASS or FAIL
+# → Review starts automatically after implementation
 
 # Test manually, then log results
 /nextai-testing 20251206_add-password-reset-flow
@@ -260,7 +270,7 @@ my-project/
 │
 ├── .opencode/                       # OpenCode integration (if selected)
 │   ├── command/nextai-*.md          # Slash commands
-│   └── agent/nextai-*.md            # Agents (includes skills)
+│   └── agent/nextai-*.md            # Agents (skills embedded in agent files)
 │
 ├── nextai/                          # NextAI content directory
 │   ├── todo/                        # Active features
@@ -367,7 +377,7 @@ NextAI uses a **"Generate + Delegate"** architecture:
 |--------|--------|-----------------|
 | **Claude Code** | Supported | `.claude/` |
 | **OpenCode** | Supported | `.opencode/` |
-| **Codex** | Phase 2 | — |
+| **Codex** | Planned | — |
 
 ## Development Flow
 
@@ -376,19 +386,18 @@ NextAI itself is developed using NextAI. Here's the typical development cycle:
 ```
 1. Create a feature      →  /nextai-create          (describe your idea)
 2. Refine with AI        →  /nextai-refine <id>     (answer questions, get spec)
-3. Implement with AI     →  /nextai-implement <id>  (AI codes, you monitor)
-4. Review with AI        →  /nextai-review <id>     (AI validates against spec)
-5. Test manually         →  /nextai-testing <id>    (you verify it works)
-6. Complete & archive    →  /nextai-complete <id>   (AI summarizes, archives)
+3. Implement with AI     →  /nextai-implement <id>  (AI codes, auto-reviews)
+4. Test manually         →  /nextai-testing <id>    (you verify it works)
+5. Complete & archive    →  /nextai-complete <id>   (AI summarizes, archives)
 ```
 
-**Key insight:** Each phase produces artifacts (requirements.md, spec.md, tasks.md, review.md, testing.md, summary.md) that create an audit trail and serve as context for the next phase.
+**Key insight:** Each phase produces artifacts (requirements.md, spec.md, tasks.md, review.md, testing.md, summary.md) that create an audit trail and serve as context for the next phase. Note that code review happens automatically after implementation completes - you don't need to manually trigger `/nextai-review`.
 
 ### Contributing
 
 ```bash
-git clone https://github.com/anthropics/nextai.git
-cd nextai
+git clone https://github.com/JohnFrontzos/nextAI-dev.git
+cd nextAI-dev
 
 npm install
 npm run dev       # Development mode with watch
@@ -409,7 +418,7 @@ npx tsc --noEmit  # Type check
 
 ## Acknowledgments
 
-NextAI Dev Framework builds on patterns from open-source projects including OpenSpec, Agent-OS, and OpenSkills.
+NextAI Dev Framework builds on patterns from open-source projects including [OpenSpec](https://github.com/Fission-AI/OpenSpec), [Agent-OS](https://github.com/buildermethods/agent-os), [OpenSkills](https://github.com/numman-ali/openskills), and [Superpowers](https://github.com/obra/superpowers).
 
 ## License
 
