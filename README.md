@@ -126,8 +126,10 @@ Autonomous agents fail in real-world codebases because:
 ### Step 1: Install
 
 ```bash
-npm install -g nextai
+npm install -g @frontztech/nextai-dev
 ```
+
+The CLI command is `nextai`.
 
 ### Step 2: Initialize Your Project
 
@@ -415,7 +417,7 @@ MIT
 
 <p align="center">
   <strong>Ready to become the operator?</strong><br>
-  <code>npm install -g nextai && nextai init</code><br>
+  <code>npm install -g @frontztech/nextai-dev && nextai init</code><br>
   <em>Then run <code>/nextai-analyze</code> in your AI client to generate project context.</em>
 </p>
 
