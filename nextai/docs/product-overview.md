@@ -33,6 +33,18 @@ Create → Refine → Spec → Implement → Review → Test → Complete
 ```
 
 Each phase has:
+
+### Intelligent Test Failure Analysis
+
+When tests fail, the Investigator agent analyzes whether the failure represents a bug or a specification change:
+
+- **Bug Detection**: Returns to implementation with detailed investigation report
+- **Spec Change Detection**: Prompts user for approval (Yes/No/Cancel)
+  - **Approve**: Appends change to initialization.md and restarts product refinement
+  - **Decline**: Treats as bug, returns to implementation
+  - **Cancel**: Stays in testing for manual decision
+
+70% confidence threshold prevents false positives. All decisions are tracked in spec-changes.jsonl for insights.
 - A trigger command
 - Required artifacts
 - Validation gates

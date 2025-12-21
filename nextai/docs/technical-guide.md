@@ -204,7 +204,7 @@ Feature lifecycle tracking:
 | `nextai remove <id>` | Remove unwanted feature (moves to `nextai/removed/`) |
 | `nextai sync` | Re-sync to AI clients |
 | `nextai repair [id]` | Repair state issues |
-| `nextai testing <id>` | Log test results (supports quick PASS mode or detailed FAIL mode with investigation) |
+| `nextai testing <id>` | Log test results with automatic spec change detection and investigation on FAIL |
 | `nextai complete <id>` | Archive completed feature (`--skip-summary`, `--force`) |
 | `nextai status <id>` | Update feature status |
 | `nextai advance <id> <phase>` | Advance to phase (internal) |
@@ -332,6 +332,23 @@ removeFeature(projectRoot, featureId);
 **Important:** This only updates the ledger - you must handle folder movement separately using utilities from `src/cli/utils/remove.ts`.
 
 ### Testing Command Options
+
+**Workflow with Spec Change Detection:**
+
+When a test FAIL is logged, NextAI automatically invokes the Investigator agent to classify the failure:
+
+1. **FAIL Status**: User submits failure with notes
+2. **Agent Analysis**: Investigator reads spec.md, code, and failure notes
+3. **Classification**:
+   - BUG (confidence ≤70%): Returns to implementation with investigation report
+   - SPEC_CHANGE (confidence >70%): Prompts user for approval
+4. **User Decision** (if spec change detected):
+   - **Yes**: Appends change description to initialization.md, resets to product_refinement
+   - **No**: Treats as bug, returns to implementation
+   - **Cancel**: Stays in testing, no automatic changes
+
+**Metrics Tracking:**
+All spec change decisions are logged to nextai/metrics/spec-changes.jsonl for analysis.
 
 The testing command supports multiple modes for logging test results:
 

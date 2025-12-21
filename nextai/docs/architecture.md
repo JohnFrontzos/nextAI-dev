@@ -223,6 +223,61 @@ This ensures subagents have access to their specialized skill instructions, impr
 
 **Note:** Skills are stored at `.claude/skills/` (root level) not in subdirectories. Claude Code only discovers skills that are direct children of the skills directory.
 
+## Spec Change Detection System
+
+When a test fails during the testing phase, the system automatically analyzes whether the failure represents a bug or a specification change.
+
+### Workflow
+
+```
+Test FAIL logged
+  |
+triggerInvestigator() invokes Investigator agent
+  |
+Agent analyzes: BUG or SPEC_CHANGE?
+  |
++- BUG (≤70% confidence)
+|  +- Return to implementation with investigation report
+|
++- SPEC_CHANGE (>70% confidence)
+   +- Prompt user (Yes/No/Cancel)
+      +- Approve: Append to initialization.md + Reset to product_refinement
+      +- Decline: Write investigation report + Return to implementation
+      +- Cancel: Stay in testing, no changes
+```
+
+### Classification Criteria
+
+**Spec Change Indicators:**
+- Changes agreed-upon behavior/features described in spec.md
+- Adds new functionality not in original spec.md
+- Requires significant code changes
+
+**Bug Indicators (Default):**
+- Simple fixes (sort order, formatting)
+- Restores original intended behavior from spec.md
+- Single-line code changes
+- Code doesn't match spec.md description
+
+### Components
+
+**Testing-Investigator Skill** (resources/skills/testing-investigator/SKILL.md)
+- Phase 0: Classification step that precedes investigation
+- Outputs: Classification, confidence, reasoning, spec change description
+
+**Enhanced Testing Command** (src/cli/commands/testing.ts)
+- triggerInvestigator() - Invokes agent with classification
+- handleSpecChangeApproval() - Interactive user approval
+- approveSpecChange() - Appends to initialization.md, resets phase
+- declineSpecChange() - Treats as bug
+- logSpecChangeMetrics() - Records decision
+
+**Metrics** (nextai/metrics/spec-changes.jsonl)
+- JSONL format tracking all spec change events
+- Fields: timestamp, feature_id, failure_description, user_decision, original_phase
+- Enables analysis of spec change frequency and patterns
+
+
 ## Version Management and Publishing
 
 ### Version-Aware Sync

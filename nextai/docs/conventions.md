@@ -367,3 +367,67 @@ When using the /testing command, test sessions are logged to testing.md with seq
 - Attachments folder (attachments/evidence/) is auto-checked
 
 <!-- Updated: 2025-12-21 - Added test session logging format, testing-investigator skill, tasks.md/testing.md separation -->
+
+## Metrics Logging Conventions
+
+### Metrics Files Location
+
+Metrics are stored in `nextai/metrics/` in JSONL (JSON Lines) format:
+- One JSON object per line
+- Each line is independent and parsable
+- Suitable for streaming analysis
+
+### Spec Change Metrics
+
+File: `nextai/metrics/spec-changes.jsonl`
+
+**Fields:**
+```typescript
+{
+  timestamp: string;        // ISO 8601 timestamp
+  feature_id: string;       // YYYYMMDD_slug format
+  failure_description: string; // From test notes
+  user_decision: 'approved' | 'declined' | 'cancelled';
+  original_phase: string;   // Phase when failure occurred
+}
+```
+
+**Example:**
+```json
+{"timestamp":"2025-12-21T10:30:00.000Z","feature_id":"20251221_handle-spec-changes-in-testing","failure_description":"Button doesn't work on mobile","user_decision":"approved","original_phase":"testing"}
+```
+
+**Usage:**
+Append entries as spec change events occur. Use for:
+- Tracking spec change frequency
+- Analyzing approval patterns
+- Understanding phase dynamics
+
+### Metrics Writing Pattern
+
+All metrics writers follow the same pattern:
+
+```typescript
+import { appendFileSync } from 'fs';
+import { join } from 'path';
+
+function logMetric(projectRoot: string, metric: object): void {
+  const metricsDir = join(projectRoot, 'nextai', 'metrics');
+  const metricsFile = join(metricsDir, 'metric-name.jsonl');
+  
+  try {
+    appendFileSync(metricsFile, JSON.stringify(metric) + '\n', 'utf-8');
+  } catch (error) {
+    // Log warning but don't block workflow
+    console.warn('Failed to write metrics:', error);
+  }
+}
+```
+
+**Key Principles:**
+- Non-blocking: Metrics failures don't stop the workflow
+- Append-only: New entries added without overwriting
+- JSONL format: One entry per line for easy parsing
+- Timestamp always included for chronological analysis
+
+<!-- Updated: 2025-12-21 - Added metrics logging conventions and spec change metrics documentation -->

@@ -3,10 +3,11 @@ import { writeFileSync, appendFileSync, existsSync, readFileSync, readdirSync, s
 import { join } from 'path';
 import chalk from 'chalk';
 import { logger } from '../utils/logger.js';
-import { findProjectRoot } from '../utils/config.js';
+import { findProjectRoot, ensureDir } from '../utils/config.js';
 import { findFeature, updateFeaturePhase } from '../../core/state/ledger.js';
 import { getFeaturePath } from '../../core/scaffolding/feature.js';
 import { printNextCommand } from '../utils/next-command.js';
+import { selectOption } from '../utils/prompts.js';
 
 /**
  * Check attachments folder for evidence files
@@ -59,7 +60,17 @@ export function getNextSessionNumber(testingPath: string): number {
 }
 
 /**
- * Trigger investigator agent on test failure (placeholder for now)
+ * Interface for Investigator classification result
+ */
+interface InvestigatorClassification {
+  classification: 'BUG' | 'SPEC_CHANGE';
+  confidence: number;
+  reasoning: string;
+  specChangeDescription?: string;
+}
+
+/**
+ * Trigger investigator agent on test failure
  */
 async function triggerInvestigator(
   projectRoot: string,
@@ -67,11 +78,190 @@ async function triggerInvestigator(
   failureNotes: string,
   attachments: string[]
 ): Promise<void> {
-  // Placeholder for future investigator integration
-  logger.dim('Investigation trigger: Future integration with testing-investigator skill');
+  // 1. Get feature paths
+  const featurePath = getFeaturePath(projectRoot, featureId);
+  const specPath = join(featurePath, 'spec.md');
+
+  // 2. Check if spec.md exists (edge case)
+  if (!existsSync(specPath)) {
+    logger.warn('Cannot analyze spec change - spec.md not found');
+    logger.dim('Defaulting to bug investigation. Run /nextai-refine first if needed.');
+    return;
+  }
+
+  // 3. Invoke Investigator agent with testing-investigator skill
+  // TODO: Agent SDK integration
+  // For now, log what would happen
+  logger.info('Invoking Investigator agent for failure analysis...');
   logger.dim(`Failure notes: ${failureNotes}`);
   if (attachments.length > 0) {
     logger.dim(`Attachments: ${attachments.join(', ')}`);
+  }
+
+  // 4. Parse agent response (mock for now)
+  // TODO: Replace with actual agent invocation that returns classification
+  const classification: InvestigatorClassification = {
+    classification: 'BUG', // Mock - will be replaced with agent output
+    confidence: 60,
+    reasoning: 'Placeholder reasoning from investigator',
+    specChangeDescription: undefined
+  };
+
+  // 5. Handle classification
+  if (classification.classification === 'BUG' || classification.confidence < 70) {
+    // Continue with existing bug investigation flow
+    logger.dim('Classified as bug - investigation report will be written to testing.md');
+    return;
+  }
+
+  // 6. Spec change detected - prompt user
+  await handleSpecChangeApproval(
+    projectRoot,
+    featureId,
+    failureNotes,
+    classification.reasoning,
+    classification.confidence,
+    classification.specChangeDescription || 'Spec change detected'
+  );
+}
+
+/**
+ * Handle user approval flow for spec changes
+ */
+async function handleSpecChangeApproval(
+  projectRoot: string,
+  featureId: string,
+  failureDescription: string,
+  reasoning: string,
+  confidence: number,
+  specChangeDescription: string
+): Promise<void> {
+  // Display spec change detection
+  logger.blank();
+  logger.warn(`Spec change detected in feature ${featureId}`);
+  logger.blank();
+  logger.keyValue('Failure Description', failureDescription.substring(0, 200) + (failureDescription.length > 200 ? '...' : ''));
+  logger.keyValue('Analysis', reasoning);
+  logger.keyValue('Confidence', `${confidence}%`);
+  logger.blank();
+  logger.dim('This will:');
+  logger.dim('1. Append the spec change to initialization.md');
+  logger.dim('2. Reset to product_refinement phase');
+  logger.dim('3. Re-run refinement (overwrites existing specs)');
+  logger.blank();
+
+  // Prompt user
+  const decision = await selectOption<'yes' | 'no' | 'cancel'>(
+    'How would you like to proceed?',
+    [
+      { value: 'yes', name: 'Yes - Approve spec change and restart refinement' },
+      { value: 'no', name: 'No - Treat as bug, return to implementation' },
+      { value: 'cancel', name: 'Cancel - Stop and wait for manual input' }
+    ]
+  );
+
+  // Handle decision
+  switch (decision) {
+    case 'yes':
+      await approveSpecChange(projectRoot, featureId, specChangeDescription);
+      break;
+    case 'no':
+      await declineSpecChange(projectRoot, featureId, failureDescription);
+      break;
+    case 'cancel':
+      logger.info('Cancelled. Feature remains in testing phase.');
+      logger.dim(`Run /nextai-testing ${featureId} when ready.`);
+      break;
+  }
+}
+
+/**
+ * Approve spec change and reset to product_refinement
+ */
+async function approveSpecChange(
+  projectRoot: string,
+  featureId: string,
+  specChangeDescription: string
+): Promise<void> {
+  // 1. Append to initialization.md
+  const featurePath = getFeaturePath(projectRoot, featureId);
+  const initPath = join(featurePath, 'planning', 'initialization.md');
+
+  const specChangeEntry = `\n## Spec Changes\n\n### ${new Date().toISOString()}\n${specChangeDescription}\n`;
+
+  if (existsSync(initPath)) {
+    appendFileSync(initPath, specChangeEntry);
+  } else {
+    logger.warn('initialization.md not found - spec change will not be recorded');
+  }
+
+  // 2. Log metrics
+  await logSpecChangeMetrics(projectRoot, featureId, 'approved', specChangeDescription);
+
+  // 3. Reset phase to product_refinement
+  const result = await updateFeaturePhase(projectRoot, featureId, 'product_refinement', { skipValidation: true });
+
+  if (result.success) {
+    logger.success('Spec change approved');
+    logger.info('Phase reset to product_refinement');
+    logger.blank();
+    logger.dim('Next step: Run /nextai-refine to restart refinement with updated requirements');
+    printNextCommand(featureId, 'product_refinement', featurePath);
+  } else {
+    logger.error('Failed to reset phase');
+    logger.dim(result.error || 'Unknown error');
+  }
+}
+
+/**
+ * Decline spec change and continue with bug investigation
+ */
+async function declineSpecChange(
+  projectRoot: string,
+  featureId: string,
+  failureDescription: string
+): Promise<void> {
+  // 1. Log metrics
+  await logSpecChangeMetrics(projectRoot, featureId, 'declined', failureDescription);
+
+  // 2. Let investigator write bug report (existing flow)
+  logger.info('Treating as bug - investigation report will be generated');
+  logger.dim('The Investigator will write findings to testing.md');
+
+  // Phase already transitioned to implementation in main testing command
+  logger.blank();
+  logger.dim('Fix the issues and run through review again before re-testing.');
+}
+
+/**
+ * Log spec change metrics to JSONL file
+ */
+async function logSpecChangeMetrics(
+  projectRoot: string,
+  featureId: string,
+  userDecision: 'approved' | 'declined' | 'cancelled',
+  description: string
+): Promise<void> {
+  try {
+    const metricsDir = join(projectRoot, 'nextai', 'metrics');
+    ensureDir(metricsDir);
+
+    const metricsPath = join(metricsDir, 'spec-changes.jsonl');
+
+    const entry = {
+      timestamp: new Date().toISOString(),
+      featureId,
+      failureDescription: description,
+      userDecision,
+      originalPhase: 'testing'
+    };
+
+    // Append as JSONL (one JSON object per line)
+    const line = JSON.stringify(entry) + '\n';
+    appendFileSync(metricsPath, line);
+  } catch (error) {
+    // Log error but don't crash - metrics are non-critical
+    logger.dim(`Failed to log spec change metrics: ${error}`);
   }
 }
 

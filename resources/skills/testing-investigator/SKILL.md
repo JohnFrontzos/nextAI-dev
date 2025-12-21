@@ -21,6 +21,39 @@ Investigate test failures systematically and produce actionable investigation re
 
 ## Process
 
+### Phase 0: Classification
+
+Before deep investigation, perform quick classification:
+1. Read spec.md to understand agreed-upon behavior
+2. Read failure notes to understand what went wrong
+3. Determine: Is this a BUG or SPEC_CHANGE?
+
+**Classification Criteria:**
+
+**SPEC_CHANGE (>70% confidence):**
+- Changes agreed-upon behavior/features described in spec.md
+- Adds NEW functionality not mentioned in spec.md
+- Requires significant code changes (not single-line fixes)
+
+**BUG (<70% confidence, default):**
+- Simple fixes like changing sort order or formatting
+- Restores original intended behavior from spec.md
+- Single-line code changes or minor adjustments
+- Code does not match what spec.md describes
+
+**Output Format:**
+```json
+{
+  "classification": "BUG" | "SPEC_CHANGE",
+  "confidence": 0-100,
+  "reasoning": "Explanation of why...",
+  "specChangeDescription": "What needs to change in spec (only if SPEC_CHANGE)"
+}
+```
+
+If classification is BUG, continue to Phase 1.
+If classification is SPEC_CHANGE with >70% confidence, return early for user approval.
+
 ### Phase 1: Context Gathering
 1. Read the current test session in testing.md
 2. Read failure notes from operator
