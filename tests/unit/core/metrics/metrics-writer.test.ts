@@ -63,7 +63,8 @@ describe('Metrics Writer', () => {
       const metrics = calculateFeatureMetrics(testContext.projectRoot, feature.id);
 
       expect(metrics?.phases.created?.duration_ms).toBeDefined();
-      expect(metrics?.phases.created?.duration_ms).toBeGreaterThan(0);
+      // Duration can be 0 on fast machines where transitions happen in same millisecond
+      expect(metrics?.phases.created?.duration_ms).toBeGreaterThanOrEqual(0);
       expect(metrics?.phases.created?.entered_at).toBeDefined();
       expect(metrics?.phases.created?.exited_at).toBeDefined();
     });
