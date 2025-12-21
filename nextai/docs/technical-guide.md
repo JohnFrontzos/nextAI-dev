@@ -204,7 +204,7 @@ Feature lifecycle tracking:
 | `nextai remove <id>` | Remove unwanted feature (moves to `nextai/removed/`) |
 | `nextai sync` | Re-sync to AI clients |
 | `nextai repair [id]` | Repair state issues |
-| `nextai testing <id>` | Log test results |
+| `nextai testing <id>` | Log test results (supports quick PASS mode or detailed FAIL mode with investigation) |
 | `nextai complete <id>` | Archive completed feature (`--skip-summary`, `--force`) |
 | `nextai status <id>` | Update feature status |
 | `nextai advance <id> <phase>` | Advance to phase (internal) |
@@ -331,7 +331,28 @@ removeFeature(projectRoot, featureId);
 
 **Important:** This only updates the ledger - you must handle folder movement separately using utilities from `src/cli/utils/remove.ts`.
 
-<!-- Updated: 2025-12-12 - Updated package name to @frontztech/nextai-dev, added linting section, coverage details -->
+### Testing Command Options
+
+The testing command supports multiple modes for logging test results:
+
+```bash
+# Quick PASS mode (minimal friction)
+nextai testing <id> --status pass
+
+# FAIL mode with notes (triggers investigation)
+nextai testing <id> --status fail --notes "Button doesn't work on Android 12"
+
+# Conversational mode (prompts for status and notes)
+nextai testing <id>
+```
+
+**Features:**
+- Session numbering - Test sessions are automatically numbered sequentially in testing.md
+- Attachment auto-detection - Checks attachments/evidence/ folder for screenshots and logs
+- Investigation on FAIL - Automatically triggers investigator agent to analyze test failures
+- Hybrid workflow - Supports both quick mode for power users and conversational mode for guided testing
+
+<!-- Updated: 2025-12-21 - Added testing command options, session numbering, and investigation workflow -->
 
 ## Extending NextAI
 

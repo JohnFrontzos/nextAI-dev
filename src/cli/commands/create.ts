@@ -58,6 +58,11 @@ export const createCommand = new Command('create')
         `1. Add context to nextai/todo/${feature.id}/planning/initialization.md`,
         `2. Run: /nextai-refine ${feature.id}`,
       ]);
+
+      logger.blank();
+      logger.dim(
+        `Tip: Add designs, evidence, or references to nextai/todo/${feature.id}/attachments/`
+      );
     } catch (error) {
       spinner.fail('Failed to create feature');
       if (error instanceof NextAIError) {

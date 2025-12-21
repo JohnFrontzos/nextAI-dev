@@ -10,6 +10,7 @@ import { loadLedger, saveLedger, appendHistory } from '../../cli/utils/config.js
 import { getValidatorForPhase } from '../validation/phase-validators.js';
 import { logValidation, logValidationBypass } from './history.js';
 import { getFeaturePath, getDonePath } from '../scaffolding/feature.js';
+import { onPhaseTransition, onFeatureComplete } from '../metrics/index.js';
 
 /**
  * Add a new feature to the ledger
@@ -222,6 +223,13 @@ export function updateLedgerPhase(
   // Log bypass if requested
   if (options.logBypass) {
     logValidationBypass(projectRoot, featureId, newPhase, [], []);
+  }
+
+  // Update metrics after phase transition
+  if (newPhase === 'complete') {
+    onFeatureComplete(projectRoot, featureId);
+  } else {
+    onPhaseTransition(projectRoot, featureId);
   }
 
   return { success: true, bypassed: options.logBypass };

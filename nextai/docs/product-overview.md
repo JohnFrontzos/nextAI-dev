@@ -50,15 +50,16 @@ Each phase has:
 | Investigator | Bug analysis, root cause | Bug workflows |
 | AI Team Lead | Orchestration | All phases |
 
-### 7 Built-in Skills
+### 8 Built-in Skills
 
 | Skill | Purpose |
 |-------|---------|
 | `refinement-questions` | Structured product Q&A loop |
-| `refinement-spec-writer` | Technical spec authoring |
+| `refinement-spec-writer` | Technical spec authoring (spec.md, tasks.md, testing.md) |
 | `executing-plans` | Step-by-step task execution |
 | `reviewer-checklist` | Code review validation |
 | `documentation-recaps` | Changelog and docs updates |
+| `testing-investigator` | Test failure investigation and reporting |
 | `root-cause-tracing` | Backward bug tracing |
 | `systematic-debugging` | 4-phase debugging framework |
 
@@ -99,7 +100,7 @@ NextAI never calls AI APIs directly:
 3. You answer, AI captures in requirements.md
    Phase: product_refinement
 
-4. Technical Architect writes spec.md and tasks.md
+4. Technical Architect writes spec.md, tasks.md, and testing.md
    Phase: tech_spec
 ```
 
@@ -127,8 +128,10 @@ NextAI never calls AI APIs directly:
    - FAIL → Returns to implementation
 
 2. /nextai-testing 20251208_add-password-reset
-   - You run manual tests
-   - Log results (pass/fail with notes)
+   - Quick PASS mode or detailed FAIL mode
+   - Session logging with auto-numbered test sessions
+   - Auto-checks attachments/evidence/ folder
+   - FAIL triggers investigation report
    - PASS → Phase: testing
 ```
 
@@ -187,4 +190,4 @@ NextAI never calls AI APIs directly:
 | OpenCode | Supported | `.opencode/` |
 | Codex | Planned | - |
 
-<!-- Updated: 2025-12-09 - Added "Removing Unwanted Features" user flow -->
+<!-- Updated: 2025-12-21 - Added testing.md to refinement outputs, updated /testing workflow with investigation, added testing-investigator skill -->

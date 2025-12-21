@@ -234,6 +234,27 @@ export function updateSession(projectRoot: string, version: string): Session {
   return session;
 }
 
+// Metrics operations
+export function getMetricsDir(projectRoot: string): string {
+  return join(getNextAIDir(projectRoot), 'metrics');
+}
+
+export function getMetricsFeaturesDir(projectRoot: string): string {
+  return join(getMetricsDir(projectRoot), 'features');
+}
+
+export function getFeatureMetricsPath(projectRoot: string, featureId: string): string {
+  return join(getMetricsFeaturesDir(projectRoot), `${featureId}.json`);
+}
+
+export function getAggregatedMetricsPath(projectRoot: string): string {
+  return join(getMetricsDir(projectRoot), 'aggregated.json');
+}
+
+export function getMetricsIndexPath(projectRoot: string): string {
+  return join(getMetricsDir(projectRoot), 'index.json');
+}
+
 // Package version helper (injected at build time via tsup define)
 export function getPackageVersion(): string {
   return process.env.PACKAGE_VERSION || '0.0.0';

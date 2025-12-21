@@ -110,7 +110,7 @@ Zod schemas for runtime validation.
 2. User: /nextai-refine <id>
    └─► Product Owner agent asks questions
        └─► Phase: product_refinement
-   └─► Technical Architect writes spec.md, tasks.md
+   └─► Technical Architect writes spec.md, tasks.md, testing.md
        └─► Phase: tech_spec
 
 3. User: /nextai-implement <id>
@@ -122,7 +122,8 @@ Zod schemas for runtime validation.
        └─► Phase: review (PASS → testing, FAIL → implementation)
 
 5. User: /nextai-testing <id>
-   └─► User logs manual test results
+   └─► User logs manual test results to testing.md
+       └─► Quick PASS mode or detailed FAIL mode with investigation
        └─► Phase: testing (PASS → complete, FAIL → implementation)
 
 6. User: /nextai-complete <id>
@@ -183,9 +184,9 @@ Every phase produces reviewable outputs:
 - `initialization.md` - Original request
 - `requirements.md` - Product Q&A results
 - `spec.md` - Technical specification
-- `tasks.md` - Implementation checklist
+- `tasks.md` - Implementation checklist (code tasks only, no manual verification)
+- `testing.md` - Manual test checklist and test sessions log (generated during refinement)
 - `review.md` - Code review results
-- `testing.md` - Test log
 - `summary.md` - Completion summary
 
 ### Client-Agnostic
@@ -216,7 +217,7 @@ Before starting work, you MUST load your assigned skill:
 - technical-architect → refinement-spec-writer
 - reviewer → reviewer-checklist
 - document-writer → documentation-recaps
-- investigator → root-cause-tracing, systematic-debugging
+- investigator → root-cause-tracing, systematic-debugging, testing-investigator
 
 This ensures subagents have access to their specialized skill instructions, improving output quality and consistency.
 
@@ -262,4 +263,4 @@ Steps:
 - Access: Public
 - Files: `dist/`, `bin/`, `resources/`
 
-<!-- Updated: 2025-12-12 - Added version management, CI/CD pipeline, and publishing details -->
+<!-- Updated: 2025-12-21 - Added testing.md to refinement outputs, updated /testing workflow, added testing-investigator skill -->

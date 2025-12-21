@@ -264,9 +264,9 @@ Follow the artifact templates:
 | `initialization.md` | Original request | Idea, context |
 | `requirements.md` | Q&A results | Questions, answers |
 | `spec.md` | Technical spec | Overview, implementation, testing |
-| `tasks.md` | Checklist | Ordered task list |
+| `tasks.md` | Implementation checklist | Implementation tasks only (no manual verification) |
+| `testing.md` | Manual test checklist and session log | Manual Test Checklist, Test Sessions |
 | `review.md` | Review results | Verdict, findings |
-| `testing.md` | Test log | Results, notes |
 | `summary.md` | Completion summary | Changes, highlights |
 
 ## Command Template Conventions
@@ -299,10 +299,10 @@ Then proceed with your workflow:
 |-------|--------|-------|
 | developer | executing-plans | Implementation task execution |
 | product-owner | refinement-questions | Requirements gathering Q&A |
-| technical-architect | refinement-spec-writer | Spec and task authoring |
+| technical-architect | refinement-spec-writer | Spec and task authoring (spec.md, tasks.md, testing.md) |
 | reviewer | reviewer-checklist | Code review validation |
 | document-writer | documentation-recaps | Summary and docs updates |
-| investigator | root-cause-tracing, systematic-debugging | Bug investigation |
+| investigator | root-cause-tracing, systematic-debugging, testing-investigator | Bug and test failure investigation |
 
 **Note:** Skills must be direct children of `.claude/skills/` (no subdirectories). Use bare skill names without namespace prefixes when invoking skills.
 
@@ -332,4 +332,38 @@ npm run typecheck && npm run lint && npm test && npm run build
 4. Push tag: `git push origin v0.1.0`
 5. GitHub Actions automatically publishes to npm
 
-<!-- Updated: 2025-12-12 - Added version number conventions and development workflow -->
+### Test Session Logging Format
+
+When using the /testing command, test sessions are logged to testing.md with sequential numbering:
+
+```markdown
+## Test Sessions
+
+### Session 1 - 2025-12-21 10:30
+**Status:** PASS
+**Notes:** All features working as expected
+
+**Attachments:**
+- attachments/evidence/screenshot-1.png
+
+### Session 2 - 2025-12-21 14:15
+**Status:** FAIL
+**Notes:** Button doesn't work on Android 12
+
+**Attachments:**
+- attachments/evidence/android-screenshot.png
+
+#### Investigation Report
+**Root Cause:** Missing null check in handleClick()
+**Affected Files:** src/components/Button.tsx:45
+**Suggested Fix:** Add null check before accessing property
+```
+
+**Conventions:**
+- Session numbers increment sequentially (1, 2, 3...)
+- Timestamps use ISO format with local time
+- Status is either PASS or FAIL
+- Investigation reports are automatically added for FAIL sessions
+- Attachments folder (attachments/evidence/) is auto-checked
+
+<!-- Updated: 2025-12-21 - Added test session logging format, testing-investigator skill, tasks.md/testing.md separation -->

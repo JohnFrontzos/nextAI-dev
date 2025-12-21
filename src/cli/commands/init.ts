@@ -7,6 +7,7 @@ import { confirmAction, selectClient } from '../utils/prompts.js';
 import { scaffoldProject, scaffoldGlobalDirs, isProjectInitialized } from '../../core/scaffolding/project.js';
 import { SUPPORTED_CLIENTS, type SupportedClient } from '../../types/index.js';
 import { syncToClient } from '../../core/sync/index.js';
+import { initMetrics } from '../../core/metrics/index.js';
 
 export const initCommand = new Command('init')
   .description('Initialize NextAI in the current project')
@@ -45,6 +46,10 @@ export const initCommand = new Command('init')
       // Create global directories
       spinner.text = 'Creating global directories...';
       scaffoldGlobalDirs(projectRoot);
+
+      // Initialize metrics
+      spinner.text = 'Initializing metrics...';
+      initMetrics(projectRoot);
 
       spinner.succeed('Project structure created');
 
