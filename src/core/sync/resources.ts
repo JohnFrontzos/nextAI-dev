@@ -23,11 +23,12 @@ export interface CopyResult {
  * Get the resources directory from the package
  */
 export function getResourcesDir(): string {
-  // When bundled with tsup, __dirname points to dist/core/sync/
+  // When bundled with tsup, __dirname points to dist/
   // We need to find the resources folder relative to the package root
   const candidates = [
-    join(__dirname, '..', '..', 'resources'),        // dist/core/sync -> dist/resources
-    join(__dirname, '..', '..', '..', 'resources'),  // dist/core/sync -> resources (package root)
+    join(__dirname, '..', 'resources'),              // dist -> resources (package root)
+    join(__dirname, '..', '..', 'resources'),        // dist/cli -> resources (package root)
+    join(__dirname, '..', '..', '..', 'resources'),  // fallback for nested structure
   ];
 
   for (const candidate of candidates) {
@@ -70,6 +71,7 @@ export function getResourceManifest(): ResourceManifest {
       'documentation-recaps',
       'root-cause-tracing',
       'systematic-debugging',
+      'testing-investigator',
     ],
     commands: [
       'create.md',

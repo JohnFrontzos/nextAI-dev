@@ -79,9 +79,12 @@ Check `nextai/docs/technical-guide.md` to see if this project has unit tests con
 ```
 
 **IMPORTANT:** Do NOT include these sections - they are handled by other phases:
-- Manual testing → `/nextai-testing` phase (human task)
+- Manual testing → testing.md (Phase 4)
+- Manual verification → testing.md (Phase 4)
 - Documentation → document-writer agent during `/nextai-complete`
 - Review/feedback → reviewer agent during `/nextai-review`
+
+**CRITICAL:** Do NOT create "Manual Verification", "Manual Testing", or similar sections in tasks.md. All manual testing tasks belong in testing.md (Phase 4).
 
 ### Guidelines
 - Tasks should be specific and actionable
@@ -89,13 +92,37 @@ Check `nextai/docs/technical-guide.md` to see if this project has unit tests con
 - Group related tasks together
 - Include time-critical dependencies
 
+### Phase 4: Write testing.md
+Create a testing document with manual test checklist:
+
+```markdown
+# Testing
+
+## Manual Test Checklist
+<!-- Generated during refinement based on spec.md Testing Strategy -->
+- [ ] Test case 1 description
+- [ ] Test case 2 description
+
+---
+
+## Test Sessions
+<!-- Populated during /testing phase -->
+```
+
+**IMPORTANT:**
+- Extract test cases from the Testing Strategy section of spec.md
+- Make test items specific and actionable
+- This is where manual verification belongs, NOT in tasks.md
+
 ## Confidence-Based Validation
 Before completing:
 1. Review spec against requirements
 2. Ensure all requirements are addressed
 3. Verify tasks cover the full spec
-4. If gaps found, note them and ask for clarification
+4. Verify testing.md has relevant test cases
+5. If gaps found, note them and ask for clarification
 
 ## Output
 - `spec.md` in feature folder
 - `tasks.md` in feature folder
+- `testing.md` in feature folder

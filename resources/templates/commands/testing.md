@@ -73,79 +73,151 @@ This updates the ledger to reflect that testing is now in progress.
 
 ## Step 4: Gather Test Results
 
-Ask the operator:
-1. "Did the feature work as expected? (pass/fail)"
-2. "What did you test? Any notes?"
+Check if the operator provided `--status` in the command arguments:
+
+**If --status was provided:**
+- Use the provided status value (pass/fail)
+- Use the provided --notes if available
+- Skip conversational questions
+- Proceed directly to Step 5
+
+**If --status was NOT provided (conversational mode):**
+- Ask: "Did the feature work as expected? (pass/fail)"
+- If fail: Ask "What issues did you find? Please describe the failure."
+- If pass: Ask "Any notes about what you tested?" (optional)
 
 ## Step 5: Log Results
 
-Run the CLI command with their input:
+### Quick Mode (status provided via CLI)
 
+If the operator already provided --status:
+
+**For PASS:**
 ```bash
-nextai testing $ARGUMENTS --status <pass|fail> --notes "<their notes>"
+nextai testing $ARGUMENTS --status pass --notes "<notes if provided>"
 ```
 
-**Arguments:**
-- `id` (required) - Feature ID
+The CLI will:
+- Auto-check attachments/evidence/ folder for files
+- Create test session in testing.md
+- Log session with PASS status
+- Prepare for completion phase
 
-**Options:**
-- `-s, --status <status>` (required) - Test status: pass or fail
-- `-n, --notes <text>` - Test notes (optional, defaults to "Logged via CLI")
-- `-a, --attachments <paths>` - Comma-separated paths to attachments
+**For FAIL:**
+```bash
+nextai testing $ARGUMENTS --status fail --notes "<failure description>"
+```
 
 The CLI will:
-- Create/update `nextai/todo/<id>/testing.md`
-- Log the event to history
+- Auto-check attachments/evidence/ folder for files
+- Create test session in testing.md
+- Log session with FAIL status
+- Add investigation report placeholder
+- Trigger investigator agent (placeholder for now)
+- Return to implementation phase
 
-**Note:** The ledger was already advanced to `testing` in Step 3. The CLI command logs the test results without changing the phase.
+### Conversational Mode (no status provided)
+
+If you gathered test results in Step 4, run the appropriate command:
+
+**For PASS:**
+```bash
+nextai testing $ARGUMENTS --status pass --notes "<what they tested>"
+```
+
+**For FAIL:**
+```bash
+nextai testing $ARGUMENTS --status fail --notes "<failure description from operator>"
+```
+
+### Attachments Auto-Check
+
+The CLI automatically checks `attachments/evidence/` for files and includes them in the test session.
+
+If the operator wants to manually specify attachments, use:
+```bash
+nextai testing $ARGUMENTS --status fail --notes "<notes>" --attachments "path1,path2"
+```
+
+### CLI Behavior Summary
+
+The CLI will:
+- Create/update `nextai/todo/<id>/testing.md` with session format
+- Auto-increment session number (Session 1, Session 2, etc.)
+- Include auto-detected or manually specified attachments
+- For FAIL: Add investigation report placeholder
+- Update phase (PASS → stays in testing, FAIL → returns to implementation)
 
 ## Step 6: Show Next Steps
 
 **If PASS:**
 ```
-✓ Testing logged: PASS
+✓ Testing logged: PASS (Session N)
 
+Test session recorded in testing.md.
 The feature is ready for completion.
+
 Next: Run /nextai-complete $ARGUMENTS to archive this feature
 ```
 
 **If FAIL:**
 ```
-✓ Testing logged: FAIL
+✓ Testing logged: FAIL (Session N)
 
-The feature needs more work.
-Next: Run /nextai-implement $ARGUMENTS to address the issues
-      Then: /nextai-review $ARGUMENTS
-      Then: /nextai-testing $ARGUMENTS
+Test session recorded in testing.md.
+Investigation report placeholder added.
+
+The feature has been returned to implementation phase.
+
+Next steps:
+1. Review the test failure notes in testing.md
+2. (Future) Investigator will analyze failure and update investigation report
+3. Fix the issues identified
+4. Run /nextai-implement $ARGUMENTS to address the issues
+5. Then: /nextai-review $ARGUMENTS
+6. Then: /nextai-testing $ARGUMENTS
 ```
+
+**Investigation Report Note:**
+- For FAIL sessions, an investigation report section is added to testing.md
+- Currently a placeholder - full investigator integration coming soon
+- Operator can manually add investigation findings to this section
 
 ## Attachments
 
-If the operator has logs, screenshots, or other files to attach:
+The CLI automatically checks `attachments/evidence/` and includes any files found in the test session.
 
-1. **Place files in the appropriate subfolder:**
-   - Test failure logs → `attachments/evidence/`
-   - Screenshots of failures → `attachments/evidence/`
-   - Any reference docs → `attachments/reference/`
+**Automatic Detection:**
+- CLI scans `attachments/evidence/` before creating test session
+- All files in this folder are automatically attached
+- No need to manually specify with --attachments flag
 
-2. **Reference in command:** Use `--attachments` flag with relative paths
+**Manual Override:**
+- Use `--attachments` flag to specify custom paths
+- Useful for files outside evidence folder
 
-Example:
+Example (manual):
 ```bash
-nextai testing $ARGUMENTS --status fail --notes "Build failed, see log" --attachments "attachments/evidence/build-error.log,attachments/evidence/failure-screenshot.png"
+nextai testing $ARGUMENTS --status fail --notes "Build failed, see log" --attachments "attachments/evidence/build-error.log,attachments/reference/config.json"
 ```
 
-The attachments folder structure is created automatically when the feature is scaffolded:
+**Attachments Folder Structure:**
 ```
 attachments/
 ├── design/      ← UI mockups, visual designs
-├── evidence/    ← Test failures, bug reproduction, logs
+├── evidence/    ← Test failures, bug reproduction, logs (auto-checked)
 └── reference/   ← Docs, examples, external files
 ```
+
+**Best Practice:**
+- Place test failure evidence in `attachments/evidence/` before running the testing command
+- CLI will automatically detect and include them
+- Files are referenced in testing.md for future reference
 
 ## Notes
 
 - Testing is the human checkpoint — only the operator can mark this
-- Keep notes concise but meaningful for future reference
-- The testing.md file preserves the test history
+- The testing.md file preserves full test session history
+- Session numbers increment automatically (Session 1, Session 2, etc.)
 - No retry limit for operator testing — test as many times as needed
+- Investigation reports (for FAIL) will be enhanced in future updates

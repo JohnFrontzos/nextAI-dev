@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { writeFileSync, appendFileSync, existsSync } from 'fs';
+import { writeFileSync, appendFileSync, existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import chalk from 'chalk';
 import { logger } from '../utils/logger.js';
@@ -8,10 +8,77 @@ import { findFeature, updateFeaturePhase } from '../../core/state/ledger.js';
 import { getFeaturePath } from '../../core/scaffolding/feature.js';
 import { printNextCommand } from '../utils/next-command.js';
 
+/**
+ * Check attachments folder for evidence files
+ */
+export function checkAttachmentsFolder(projectRoot: string, featureId: string): string[] {
+  const attachmentsPath = join(projectRoot, 'nextai', 'todo', featureId, 'attachments', 'evidence');
+
+  if (!existsSync(attachmentsPath)) {
+    return [];
+  }
+
+  try {
+    const files = readdirSync(attachmentsPath);
+    return files
+      .filter(file => {
+        const filePath = join(attachmentsPath, file);
+        return statSync(filePath).isFile();
+      })
+      .map(file => `attachments/evidence/${file}`);
+  } catch (error) {
+    return [];
+  }
+}
+
+/**
+ * Get next session number by parsing existing testing.md
+ */
+export function getNextSessionNumber(testingPath: string): number {
+  if (!existsSync(testingPath)) {
+    return 1;
+  }
+
+  try {
+    const content = readFileSync(testingPath, 'utf-8');
+    const sessionMatches = content.match(/### Session (\d+)/g);
+
+    if (!sessionMatches || sessionMatches.length === 0) {
+      return 1;
+    }
+
+    const sessionNumbers = sessionMatches.map(match => {
+      const num = match.match(/### Session (\d+)/);
+      return num ? parseInt(num[1], 10) : 0;
+    });
+
+    return Math.max(...sessionNumbers) + 1;
+  } catch (error) {
+    return 1;
+  }
+}
+
+/**
+ * Trigger investigator agent on test failure (placeholder for now)
+ */
+async function triggerInvestigator(
+  projectRoot: string,
+  featureId: string,
+  failureNotes: string,
+  attachments: string[]
+): Promise<void> {
+  // Placeholder for future investigator integration
+  logger.dim('Investigation trigger: Future integration with testing-investigator skill');
+  logger.dim(`Failure notes: ${failureNotes}`);
+  if (attachments.length > 0) {
+    logger.dim(`Attachments: ${attachments.join(', ')}`);
+  }
+}
+
 export const testingCommand = new Command('testing')
   .description('Log manual test results')
   .argument('<id>', 'Feature ID')
-  .requiredOption('-s, --status <status>', 'Test status: pass or fail (required)')
+  .option('-s, --status <status>', 'Test status: pass or fail')
   .option('-n, --notes <text>', 'Test notes')
   .option('-a, --attachments <paths>', 'Comma-separated paths to attachments')
   .action(async (idArg, options) => {
@@ -38,7 +105,13 @@ export const testingCommand = new Command('testing')
         process.exit(1);
       }
 
-      // Validate status (--status is required via requiredOption)
+      // Validate status (now optional, handled by template in conversational mode)
+      if (!options.status) {
+        logger.error('Status is required. Use --status pass or --status fail');
+        logger.dim('Conversational mode is handled by the command template in Claude Code');
+        process.exit(1);
+      }
+
       const status = options.status;
       if (!['pass', 'fail'].includes(status.toLowerCase())) {
         logger.error('Invalid status. Use "pass" or "fail"');
@@ -50,17 +123,28 @@ export const testingCommand = new Command('testing')
       // Notes are optional, default to CLI-generated message
       const notes = options.notes || 'Logged via CLI';
 
-      // Get attachments
+      // Auto-check attachments folder
+      const autoAttachments = checkAttachmentsFolder(projectRoot, feature.id);
+
+      // Get attachments from options or use auto-detected
       const attachments = options.attachments
         ? options.attachments.split(',').map((p: string) => p.trim())
-        : [];
+        : autoAttachments;
+
+      // Get session number
+      const testingPath = join(getFeaturePath(projectRoot, feature.id), 'testing.md');
+      const sessionNumber = getNextSessionNumber(testingPath);
 
       // Create test entry
-      const testEntry = generateTestEntry(normalizedStatus, notes, attachments);
+      const testEntry = generateTestSessionEntry(sessionNumber, normalizedStatus, notes, attachments);
 
       // Append to testing.md
-      const testingPath = join(getFeaturePath(projectRoot, feature.id), 'testing.md');
       appendTestEntry(testingPath, testEntry);
+
+      // Trigger investigator on FAIL
+      if (normalizedStatus === 'fail') {
+        await triggerInvestigator(projectRoot, feature.id, notes, attachments);
+      }
 
       logger.success(`Logged test run for ${feature.id}`);
       logger.keyValue('Status', normalizedStatus === 'pass' ? chalk.green('PASS') : chalk.red('FAIL'));
@@ -94,12 +178,12 @@ export const testingCommand = new Command('testing')
     }
   });
 
-function generateTestEntry(
+export function generateTestSessionEntry(
+  sessionNumber: number,
   status: 'pass' | 'fail',
   notes: string,
   attachments: string[]
 ): string {
-  const timestamp = new Date().toISOString();
   const dateStr = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: '2-digit',
@@ -108,29 +192,44 @@ function generateTestEntry(
     minute: '2-digit',
   });
 
-  let entry = `\n## Test Run - ${dateStr}\n\n`;
-  entry += `**Status:** ${status}\n`;
-  entry += `**Timestamp:** ${timestamp}\n`;
+  let entry = `\n### Session ${sessionNumber} - ${dateStr}\n`;
+  entry += `**Status:** ${status.toUpperCase()}\n`;
   entry += `**Notes:** ${notes || 'No notes provided'}\n`;
 
   if (attachments.length > 0) {
-    entry += `**Attachments:**\n`;
+    entry += `\n**Attachments:**\n`;
     for (const attachment of attachments) {
       entry += `- ${attachment}\n`;
     }
   }
 
-  entry += '\n---\n';
+  // Add investigation report placeholder for FAIL
+  if (status === 'fail') {
+    entry += `\n#### Investigation Report\n`;
+    entry += `<!-- Investigation findings will be added here -->\n`;
+  }
+
+  entry += '\n';
 
   return entry;
 }
 
 function appendTestEntry(testingPath: string, entry: string): void {
   if (!existsSync(testingPath)) {
-    // Create new testing.md with header
-    const header = `# Testing Log\n\nManual test results for this feature.\n\n---\n`;
+    // Create new testing.md with header (matching Phase 4 template)
+    const header = `# Testing\n\n## Manual Test Checklist\n\n<!-- Add test cases here -->\n\n---\n\n## Test Sessions\n`;
     writeFileSync(testingPath, header + entry);
   } else {
-    appendFileSync(testingPath, entry);
+    // Check if file has the new structure with Test Sessions header
+    const content = readFileSync(testingPath, 'utf-8');
+
+    if (!content.includes('## Test Sessions')) {
+      // Old format - add Test Sessions header before appending
+      const updatedContent = content + '\n---\n\n## Test Sessions\n';
+      writeFileSync(testingPath, updatedContent + entry);
+    } else {
+      // New format - just append
+      appendFileSync(testingPath, entry);
+    }
   }
 }

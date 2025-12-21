@@ -105,7 +105,7 @@ Invoke the Task tool with:
 **Context to provide the technical-architect subagent:**
 - Feature ID: $ARGUMENTS
 - Input: `nextai/todo/$ARGUMENTS/planning/requirements.md`
-- Output: `nextai/todo/$ARGUMENTS/spec.md` and `nextai/todo/$ARGUMENTS/tasks.md`
+- Output: `nextai/todo/$ARGUMENTS/spec.md`, `nextai/todo/$ARGUMENTS/tasks.md`, and `nextai/todo/$ARGUMENTS/testing.md`
 - Project docs: `nextai/docs/` (if available)
 
 **Instructions for the technical-architect subagent:**
@@ -117,7 +117,7 @@ Before creating the specification, you MUST load your assigned skill:
 3. Follow the skill's guidance for writing spec.md and tasks.md
 
 Then proceed with your workflow:
-1. Follow the refinement-spec-writer skill for writing spec.md and tasks.md
+1. Follow the refinement-spec-writer skill for writing spec.md, tasks.md, and testing.md
 
 **Wait for the technical-architect subagent to complete Phase 2 before proceeding to Completion.**
 
@@ -135,11 +135,20 @@ Then proceed with your workflow:
 - Alternatives Considered
 
 ### tasks.md structure:
+Tasks must contain ONLY implementation-phase work:
 - Pre-implementation tasks
 - Core implementation tasks (checkbox format)
 - Unit tests (only if project has test framework - check nextai/docs/technical-guide.md)
 
-> Do NOT include documentation or review tasks - these are handled by their respective phases.
+**CRITICAL - DO NOT include these sections:**
+- Manual Verification/Testing - Use testing.md instead
+- Documentation tasks - Handled by /nextai-complete phase
+- Review tasks - Handled by /nextai-review phase
+
+**Where testing belongs:**
+- Testing Strategy (approach) in spec.md
+- Manual Test Checklist in testing.md
+- Test Sessions in testing.md (logged during /nextai-testing)
 
 ## Completion
 
@@ -149,6 +158,7 @@ When both phases complete successfully:
    - `nextai/todo/$ARGUMENTS/planning/requirements.md` - Product research results
    - `nextai/todo/$ARGUMENTS/spec.md` - Technical specification
    - `nextai/todo/$ARGUMENTS/tasks.md` - Implementation task list
+   - `nextai/todo/$ARGUMENTS/testing.md` - Manual test checklist
 
 2. **Advance to tech_spec phase:**
    Run: `nextai advance $ARGUMENTS --to tech_spec --quiet`
@@ -161,6 +171,7 @@ When both phases complete successfully:
    - planning/requirements.md
    - spec.md
    - tasks.md
+   - testing.md
 
    Next: Run /nextai-implement $ARGUMENTS
    ```
@@ -216,7 +227,7 @@ Invoke the Task tool with:
 - Feature ID: $ARGUMENTS
 - Input: `nextai/todo/$ARGUMENTS/planning/investigation.md` (investigator findings)
 - Input: `nextai/todo/$ARGUMENTS/planning/initialization.md` (original bug report)
-- Output: `nextai/todo/$ARGUMENTS/spec.md` and `nextai/todo/$ARGUMENTS/tasks.md`
+- Output: `nextai/todo/$ARGUMENTS/spec.md`, `nextai/todo/$ARGUMENTS/tasks.md`, and `nextai/todo/$ARGUMENTS/testing.md`
 - Project docs: `nextai/docs/` (if available)
 
 **Instructions for the technical-architect subagent:**
@@ -236,6 +247,7 @@ Then proceed with your workflow:
 5. If uncertain, ask technical clarifying questions (max 3 rounds)
 6. Write `spec.md` with full fix specification
 7. Write `tasks.md` with implementation checklist (ONLY implementation tasks)
+8. Write `testing.md` with manual test checklist
 
 **Wait for the technical-architect subagent to complete before proceeding to Completion.**
 
