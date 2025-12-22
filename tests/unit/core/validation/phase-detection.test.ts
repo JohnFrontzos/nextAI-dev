@@ -32,6 +32,7 @@ import {
   reviewNoVerdictMd,
   reviewVerdictBeforeHeaderMd,
   passingTestingMd,
+  failingTestingMd,
   validSummaryMd,
   createdPhaseArtifacts,
   productRefinementArtifacts,
@@ -250,12 +251,20 @@ describe('Phase Detection', () => {
       expect(isPhaseComplete(featureDir, 'review')).toBe(true);
     });
 
-    it('review: true even on FAIL', () => {
+    it('review: false when verdict is FAIL', () => {
       createFeatureFixture(testContext.projectRoot, 'test-feature', {
         ...implementationCompleteArtifacts,
         'review.md': failingReviewMd,
       });
-      expect(isPhaseComplete(featureDir, 'review')).toBe(true);
+      expect(isPhaseComplete(featureDir, 'review')).toBe(false);
+    });
+
+    it('review: false when no verdict exists', () => {
+      createFeatureFixture(testContext.projectRoot, 'test-feature', {
+        ...implementationCompleteArtifacts,
+        'review.md': reviewNoVerdictMd,
+      });
+      expect(isPhaseComplete(featureDir, 'review')).toBe(false);
     });
 
     it('testing: true when testing.md exists', () => {
@@ -487,6 +496,28 @@ describe('Phase Detection', () => {
 
     it("returns 'created' for empty feature folder", () => {
       expect(detectPhaseFromArtifacts(featureDir)).toBe('created');
+    });
+
+    it("returns 'testing' when testing.md has 'status: fail'", () => {
+      createFeatureFixture(testContext.projectRoot, 'test-feature', {
+        ...reviewPassArtifacts,
+        'testing.md': failingTestingMd,
+      });
+      expect(detectPhaseFromArtifacts(featureDir)).toBe('testing');
+    });
+
+    it("returns 'testing' when testing.md has '**status:** fail' (bold format)", () => {
+      const boldFailTestingMd = `# Testing Log
+
+## Test Run 1
+**Date:** 2025-12-06
+**Status:** fail
+**Notes:** Some tests failed.`;
+      createFeatureFixture(testContext.projectRoot, 'test-feature', {
+        ...reviewPassArtifacts,
+        'testing.md': boldFailTestingMd,
+      });
+      expect(detectPhaseFromArtifacts(featureDir)).toBe('testing');
     });
   });
 

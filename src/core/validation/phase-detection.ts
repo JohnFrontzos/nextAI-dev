@@ -113,7 +113,8 @@ export function isPhaseComplete(featureDir: string, phase: Phase): boolean {
       return getTaskProgress(join(featureDir, 'tasks.md')).isComplete;
 
     case 'review':
-      return getReviewOutcome(join(featureDir, 'review.md')).isComplete;
+      const outcome = getReviewOutcome(join(featureDir, 'review.md'));
+      return outcome.isComplete && outcome.verdict === 'pass';
 
     case 'testing':
       return existsWithContent(join(featureDir, 'testing.md'));
@@ -183,6 +184,17 @@ export function canTransitionTo(
   targetPhase: Phase
 ): { canTransition: boolean; reason?: string } {
 
+  // Special case: review must PASS to go to testing (check before prerequisites)
+  if (targetPhase === 'testing') {
+    const reviewOutcome = getReviewOutcome(join(featureDir, 'review.md'));
+    if (reviewOutcome.verdict === 'fail') {
+      return {
+        canTransition: false,
+        reason: `Review failed. Fix issues and re-run /nextai-review before testing.`,
+      };
+    }
+  }
+
   const prerequisites: Record<Phase, Phase[]> = {
     created: [],
     product_refinement: ['created'],
@@ -200,17 +212,6 @@ export function canTransitionTo(
       return {
         canTransition: false,
         reason: `Phase '${prereq}' is not complete. Cannot start '${targetPhase}'.`,
-      };
-    }
-  }
-
-  // Special case: review must PASS to go to testing
-  if (targetPhase === 'testing') {
-    const reviewOutcome = getReviewOutcome(join(featureDir, 'review.md'));
-    if (reviewOutcome.verdict === 'fail') {
-      return {
-        canTransition: false,
-        reason: `Review failed. Fix issues and re-run /nextai-review before testing.`,
       };
     }
   }
@@ -347,12 +348,13 @@ export function detectPhaseFromArtifacts(featurePath: string): Phase {
     return 'complete'; // Feature is archived and complete
   }
 
-  // Check for testing.md with PASS status (testing phase complete)
+  // Check for testing.md with PASS or FAIL status (testing phase)
   const testingPath = join(featurePath, 'testing.md');
   if (existsWithContent(testingPath)) {
     const content = readFileSync(testingPath, 'utf-8').toLowerCase();
-    if (content.includes('status: pass') || content.includes('**status:** pass')) {
-      return 'testing'; // Testing complete, ready for complete phase
+    if (content.includes('status: pass') || content.includes('**status:** pass') ||
+        content.includes('status: fail') || content.includes('**status:** fail')) {
+      return 'testing'; // Testing phase (pass or fail), ready for complete or retry
     }
   }
 
