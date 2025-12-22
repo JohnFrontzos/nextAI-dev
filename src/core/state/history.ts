@@ -1,7 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 import { getHistoryPath, appendHistory } from '../../cli/utils/config.js';
 import type { HistoryEvent } from '../../schemas/history.js';
-import type { FeatureType } from '../../schemas/ledger.js';
 
 /**
  * Read all history events
@@ -37,32 +36,11 @@ export function getValidationBypasses(projectRoot: string): HistoryEvent[] {
 }
 
 /**
- * Get validation bypass counts by feature type
- */
-export function getBypassCountsByType(projectRoot: string): Record<FeatureType, number> {
-  const bypasses = getValidationBypasses(projectRoot);
-  const counts: Record<FeatureType, number> = {
-    feature: 0,
-    bug: 0,
-    task: 0,
-  };
-
-  for (const event of bypasses) {
-    if (event.event === 'validation_bypass' && 'feature_type' in event) {
-      counts[event.feature_type]++;
-    }
-  }
-
-  return counts;
-}
-
-/**
- * Log a validation bypass (with feature type for metrics tracking)
+ * Log a validation bypass
  */
 export function logValidationBypass(
   projectRoot: string,
   featureId: string,
-  featureType: FeatureType,
   targetPhase: string,
   errorsIgnored: string[],
   warningsIgnored?: string[]
@@ -70,7 +48,6 @@ export function logValidationBypass(
   appendHistory(projectRoot, {
     event: 'validation_bypass',
     feature_id: featureId,
-    feature_type: featureType,
     target_phase: targetPhase,
     errors_ignored: errorsIgnored,
     warnings_ignored: warningsIgnored,

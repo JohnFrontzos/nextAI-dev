@@ -2,9 +2,8 @@
 
 ## What It Does
 
-NextAI Dev Framework adds specialized workflows for different types of work (features, bugs, tasks) to AI coding assistants. It transforms AI from a reactive tool into a predictable development partner by providing:
+NextAI Dev Framework adds a structured 7-phase workflow to AI coding assistants. It transforms AI from a reactive tool into a predictable development partner by providing:
 
-- **Type-appropriate workflows** - Features get full refinement, bugs start with investigation, tasks skip to specs
 - **Specs before code** - Requirements are gathered and approved before implementation begins
 - **Human checkpoints** - You approve phase transitions and verify results
 - **Artifact trail** - Every phase produces reviewable documents
@@ -19,34 +18,21 @@ AI coding assistants are powerful but chaotic without structure:
 | Ideas stay vague, specs incomplete | Product Owner agent asks clarifying questions |
 | AI generates wrong code without context | Technical specifications provide implementation guidance |
 | Developers waste time rewriting prompts | Reusable agents and skills encode best practices |
-| No lifecycle management | Type-specific workflows with validation gates |
+| No lifecycle management | 7-phase workflow with validation gates |
 | Jira/Linear disconnected from execution | State lives alongside code in `nextai/` |
 | Autonomous agents fail in messy repos | Human-in-the-loop by design |
-| Wrong workflows force wrong artifacts | Type-specific validation and phases |
 
 ## Key Features
 
-### Type-Specific Workflows
+### 7-Phase Workflow
 
-Different work types follow optimized workflows, reducing friction while maintaining quality:
+Structured progression from idea to shipped feature:
 
-**Features (7 phases)** - Full development workflow
 ```
-created → product_refinement → tech_spec → implementation → review → testing → complete
+Create → Refine → Spec → Implement → Review → Test → Complete
 ```
-Product Owner gathers requirements, Technical Architect writes specs, comprehensive testing.
 
-**Bugs (8 phases)** - Investigation-first workflow
-```
-created → bug_investigation → product_refinement → tech_spec → implementation → review → testing → complete
-```
-Investigator analyzes root cause, focuses on regression testing, skips lengthy requirements.
-
-**Tasks (6 phases)** - Implementation-only workflow
-```
-created → tech_spec → implementation → review → testing → complete
-```
-Skip product refinement, go straight to specs for already-scoped work, lighter testing validation.
+Each phase has:
 
 ### Intelligent Test Failure Analysis
 
@@ -59,12 +45,16 @@ When tests fail, the Investigator agent analyzes whether the failure represents 
   - **Cancel**: Stays in testing for manual decision
 
 70% confidence threshold prevents false positives. All decisions are tracked in spec-changes.jsonl for insights.
+- A trigger command
+- Required artifacts
+- Validation gates
+- Clear next steps
 
 ### 7 Built-in Agents
 
 | Agent | Role | Active During |
 |-------|------|---------------|
-| Product Owner | Requirements gathering via Q&A | Feature refinement |
+| Product Owner | Requirements gathering via Q&A | Refinement |
 | Technical Architect | Spec and task list writing | Refinement |
 | Developer | Code implementation | Implementation |
 | Reviewer | Code review against spec | Review |
@@ -199,7 +189,7 @@ NextAI never calls AI APIs directly:
 
 | NextAI Is | NextAI Is NOT |
 |-----------|---------------|
-| Type-specific workflows | A magic autonomous agent |
+| A structured 7-phase workflow | A magic autonomous agent |
 | A state manager for features | A replacement for your AI client |
 | A framework YOU operate | A "set it and forget it" tool |
 | Human-in-the-loop by design | Fully automated end-to-end |
@@ -212,32 +202,4 @@ NextAI never calls AI APIs directly:
 | OpenCode | Supported | `.opencode/` |
 | Codex | Planned | - |
 
-## Developer Experience
-
-### Automatic Resource Management
-
-NextAI eliminates manual resource tracking with auto-discovery:
-- Add agents, skills, or commands to `resources/` - they're automatically discovered
-- No manifest files to maintain
-- Detailed sync output shows exactly what changed (new/updated/unchanged/removed)
-- Clear distinction between framework-controlled (`.nextai/`) and user-space (`.claude/`) directories
-
-### Improved Sync UX
-
-The sync command provides clear, actionable feedback:
-```
-Syncing resources to .nextai/...
-Commands: 13 (1 new, 2 updated)
-Agents: 7 (no changes)
-Skills: 8 (3 removed)
-```
-
-Users always know:
-- What resources are being synced
-- Which files are new vs updated
-- Whether deprecated resources were removed
-- Where files are being synced to
-
 <!-- Updated: 2025-12-21 - Added testing.md to refinement outputs, updated /testing workflow with investigation, added testing-investigator skill -->
-<!-- Updated: 2025-12-22 by NextAI - Added type-specific workflow descriptions to features section -->
-<!-- Updated: 2025-12-22 by NextAI - Added developer experience section documenting auto-discovery and improved sync UX -->

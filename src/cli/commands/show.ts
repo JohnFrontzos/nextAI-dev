@@ -6,7 +6,6 @@ import { findFeature, listFeatures } from '../../core/state/ledger.js';
 import { getFeaturePath } from '../../core/scaffolding/feature.js';
 import { getAllPhaseStatuses, getTaskProgress, getReviewOutcome, suggestNextAction } from '../../core/validation/phase-detection.js';
 import type { Phase } from '../../schemas/ledger.js';
-import { getPhaseFlow } from '../../schemas/ledger.js';
 
 export const showCommand = new Command('show')
   .description('Show details of a specific feature')
@@ -63,15 +62,6 @@ export const showCommand = new Command('show')
         logger.keyValue('External ID', feature.external_id);
       }
 
-      // Show workflow visualization
-      logger.blank();
-      console.log(chalk.bold('Workflow:'));
-      const phaseFlow = getPhaseFlow(feature.type);
-      const flowStr = phaseFlow
-        .map(p => p === feature.phase ? chalk.yellow(`[${p}]`) : chalk.dim(p))
-        .join(' → ');
-      console.log(`  ${flowStr}`);
-
       // Show phase status
       logger.blank();
       console.log(chalk.bold('Phase Status:'));
@@ -126,7 +116,6 @@ export const showCommand = new Command('show')
 function formatPhase(phase: Phase): string {
   const colors: Record<Phase, (text: string) => string> = {
     created: chalk.gray,
-    bug_investigation: chalk.blue,
     product_refinement: chalk.blue,
     tech_spec: chalk.blue,
     implementation: chalk.yellow,

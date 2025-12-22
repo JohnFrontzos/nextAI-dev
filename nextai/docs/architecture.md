@@ -76,9 +76,6 @@ Business logic for state management, scaffolding, sync, and validation.
 | `base.ts` | Abstract base class for client configurators |
 | `claude-code.ts` | Claude Code integration (`.claude/`) |
 | `opencode.ts` | OpenCode integration (`.opencode/`) |
-| `resources.ts` | Auto-discovery of package resources with change tracking |
-| `version.ts` | Version comparison and tracking |
-| `client-selection.ts` | Interactive client selection |
 
 #### Validation (`src/core/validation/`)
 
@@ -143,38 +140,12 @@ Zod schemas for runtime validation.
 
 ### Sync Flow
 
-The sync system operates with automatic resource management:
-
-**Stage 1: Resource Update (.nextai/ is always synced from package)**
-```
-package resources/               .nextai/
-├── agents/*.md          ──►     ├── agents/*.md
-├── skills/*/SKILL.md    ──►     ├── skills/*/SKILL.md
-└── templates/commands/  ──►     └── templates/commands/*.md
-```
-
-Resources are auto-discovered by scanning the package directory:
-- Agents: All `.md` files in `resources/agents/`
-- Skills: All directories containing `SKILL.md` in `resources/skills/`
-- Commands: All `.md` files in `resources/templates/commands/`
-
-Change tracking distinguishes:
-- New resources (added to package)
-- Updated resources (content changed)
-- Unchanged resources (identical)
-- Removed resources (no longer in package)
-
-**Stage 2: Client Sync (user-space directories)**
 ```
 .nextai/                          .claude/ (or .opencode/)
 ├── agents/*.md          ──►      ├── agents/*.md
 ├── skills/*/SKILL.md    ──►      ├── skills/*/SKILL.md
 └── templates/commands/  ──►      └── commands/nextai-*.md
 ```
-
-**Directory Ownership:**
-- `.nextai/` - Framework-controlled (always updated from package)
-- `.claude/`, `.opencode/` - User-space (respects force flag for overwrites)
 
 ## Technology Stack
 
@@ -191,20 +162,6 @@ Change tracking distinguishes:
 | CI/CD | GitHub Actions |
 
 ## Key Design Decisions
-
-### Auto-Discovery Pattern
-
-Resources (agents, skills, commands) are automatically discovered by scanning the package directory rather than using hardcoded manifests. This design choice:
-- Eliminates maintenance burden (no manifest to update when adding files)
-- Prevents missing files (all `.md` files are automatically included)
-- Enables change tracking (new/updated/unchanged/removed detection)
-- Separates concerns (framework-controlled `.nextai/` vs user-space `.claude/`)
-
-The `scanResourcesFromPackage()` function in `src/core/sync/resources.ts` implements this pattern:
-- Scans `resources/agents/` for all `.md` files
-- Scans `resources/skills/` for directories containing `SKILL.md`
-- Scans `resources/templates/commands/` for all `.md` files
-- Returns a complete manifest without requiring manual updates
 
 ### Generate + Delegate
 
@@ -265,65 +222,6 @@ Before starting work, you MUST load your assigned skill:
 This ensures subagents have access to their specialized skill instructions, improving output quality and consistency.
 
 **Note:** Skills are stored at `.claude/skills/` (root level) not in subdirectories. Claude Code only discovers skills that are direct children of the skills directory.
-
-## Type-Specific Workflows
-
-NextAI supports three feature types, each with a specialized workflow optimized for its needs.
-
-### Feature Workflow (7 phases)
-
-Full-featured development workflow for new functionality:
-```
-created → product_refinement → tech_spec → implementation → review → testing → complete
-```
-
-- **Product Refinement**: Product Owner gathers requirements via Q&A
-- **Tech Spec**: Technical Architect documents specification and tasks
-- **Testing**: Comprehensive validation of feature behavior
-
-### Bug Workflow (8 phases)
-
-Streamlined workflow for bug fixes, starting with root cause investigation:
-```
-created → bug_investigation → product_refinement → tech_spec → implementation → review → testing → complete
-```
-
-- **Bug Investigation**: Investigator analyzes root cause (no product requirements needed)
-- **Testing**: Regression testing to ensure bug doesn't recur
-- **Skips redundant steps**: No lengthy product refinement, focuses on fixing the issue
-
-### Task Workflow (6 phases)
-
-Minimal workflow for implementation-only work (no new features or requirements gathering):
-```
-created → tech_spec → implementation → review → testing → complete
-```
-
-- **Direct to Spec**: No product refinement phase (tasks are already defined)
-- **Lighter Validation**: Appropriate for smaller, scoped work
-- **Same Task Completion**: 100% completion required like all types
-
-### Type-Specific Validation
-
-**BugInvestigationValidator** (Bug only)
-- Requires `planning/investigation.md` with root cause analysis
-- Ensures bugs are properly understood before fixing
-
-**BugTestingValidator** (Bug only)
-- Focuses regression testing documentation
-- Ensures fixed bugs don't recur
-
-**TaskTestingValidator** (Task only)
-- Lighter testing requirements appropriate for task scope
-- Still requires passing test session
-
-**Standard Validators (All Types)**
-- **TechSpecValidator**: ALL types require spec.md + tasks.md (no special cases)
-- **ImplementationValidator**: 100% task completion required for ALL types
-
-This type-aware validation eliminates unnecessary friction while maintaining quality standards.
-
-<!-- Updated: 2025-12-22 by NextAI - Added type-specific workflows section documenting feature, bug, and task workflows -->
 
 ## Spec Change Detection System
 
@@ -422,6 +320,3 @@ Steps:
 
 <!-- Updated: 2025-12-21 - Added testing.md to refinement outputs, updated /testing workflow, added testing-investigator skill -->
 <!-- Updated: 2025-12-22 - Fixed agents directory path from agents/nextai/ to agents/ in sync flow and client-agnostic sections -->
-<!-- Updated: 2025-12-22 - Added sync module files and documented two-stage sync flow with resource update behavior -->
-<!-- Updated: 2025-12-22 by NextAI - Added type-specific workflows section documenting feature, bug, and task workflows -->
-<!-- Updated: 2025-12-22 by NextAI - Added auto-discovery pattern section, updated sync flow with change tracking and directory ownership model -->

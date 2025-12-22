@@ -9,11 +9,7 @@ import {
   createFeature,
   emptyLedger,
   generateFeatureId,
-  getValidTransitionsForFeature,
-  getPhaseFlow,
-  getNextPhaseForFeature,
   type Phase,
-  type Feature,
 } from '../../../src/schemas/ledger';
 
 describe('Ledger Schema', () => {
@@ -21,7 +17,6 @@ describe('Ledger Schema', () => {
     it('accepts valid phases', () => {
       const validPhases = [
         'created',
-        'bug_investigation',
         'product_refinement',
         'tech_spec',
         'implementation',
@@ -207,8 +202,8 @@ describe('Ledger Schema', () => {
   });
 
   describe('Constants Validation', () => {
-    it('PHASE_ORDER has 8 phases (includes bug_investigation)', () => {
-      expect(PHASE_ORDER.length).toBe(8);
+    it('PHASE_ORDER has 7 phases', () => {
+      expect(PHASE_ORDER.length).toBe(7);
     });
 
     it("PHASE_ORDER starts with 'created'", () => {
@@ -219,158 +214,23 @@ describe('Ledger Schema', () => {
       expect(PHASE_ORDER[PHASE_ORDER.length - 1]).toBe('complete');
     });
 
-    it('PHASE_ORDER includes bug_investigation', () => {
-      expect(PHASE_ORDER).toContain('bug_investigation');
+    it("VALID_TRANSITIONS['created'] allows only 'product_refinement'", () => {
+      expect(VALID_TRANSITIONS['created']).toEqual(['product_refinement']);
     });
 
-    it('VALID_TRANSITIONS is type-specific (Record<FeatureType, Record<Phase, Phase[]>>)', () => {
-      expect(VALID_TRANSITIONS.feature).toBeDefined();
-      expect(VALID_TRANSITIONS.bug).toBeDefined();
-      expect(VALID_TRANSITIONS.task).toBeDefined();
+    it("VALID_TRANSITIONS['review'] allows 'testing' and 'implementation'", () => {
+      expect(VALID_TRANSITIONS['review']).toContain('testing');
+      expect(VALID_TRANSITIONS['review']).toContain('implementation');
     });
 
-    it('VALID_TRANSITIONS.feature has correct transitions for created', () => {
-      expect(VALID_TRANSITIONS.feature.created).toEqual(['product_refinement']);
+    it("VALID_TRANSITIONS['complete'] is empty", () => {
+      expect(VALID_TRANSITIONS['complete']).toEqual([]);
     });
 
-    it('VALID_TRANSITIONS.bug has correct transitions for created', () => {
-      expect(VALID_TRANSITIONS.bug.created).toEqual(['bug_investigation']);
-    });
-
-    it('VALID_TRANSITIONS.task has correct transitions for created', () => {
-      expect(VALID_TRANSITIONS.task.created).toEqual(['tech_spec']);
-    });
-
-    it('VALID_TRANSITIONS for all types allow review -> testing or implementation', () => {
-      expect(VALID_TRANSITIONS.feature.review).toContain('testing');
-      expect(VALID_TRANSITIONS.feature.review).toContain('implementation');
-      expect(VALID_TRANSITIONS.bug.review).toContain('testing');
-      expect(VALID_TRANSITIONS.bug.review).toContain('implementation');
-      expect(VALID_TRANSITIONS.task.review).toContain('testing');
-      expect(VALID_TRANSITIONS.task.review).toContain('implementation');
-    });
-
-    it('VALID_TRANSITIONS complete is empty for all types', () => {
-      expect(VALID_TRANSITIONS.feature.complete).toEqual([]);
-      expect(VALID_TRANSITIONS.bug.complete).toEqual([]);
-      expect(VALID_TRANSITIONS.task.complete).toEqual([]);
-    });
-  });
-
-  describe('Type-Specific Workflow Helpers', () => {
-    describe('getValidTransitionsForFeature', () => {
-      it('returns type-specific transitions for feature type', () => {
-        const feature: Feature = createFeature('feature-id', 'Feature', 'feature');
-        feature.phase = 'created';
-
-        const transitions = getValidTransitionsForFeature(feature);
-        expect(transitions).toEqual(['product_refinement']);
-      });
-
-      it('returns type-specific transitions for bug type', () => {
-        const bug: Feature = createFeature('bug-id', 'Bug', 'bug');
-        bug.phase = 'created';
-
-        const transitions = getValidTransitionsForFeature(bug);
-        expect(transitions).toEqual(['bug_investigation']);
-      });
-
-      it('returns correct transitions for bug type at bug_investigation phase', () => {
-        const bug: Feature = createFeature('bug-id', 'Bug', 'bug');
-        bug.phase = 'bug_investigation';
-
-        const transitions = getValidTransitionsForFeature(bug);
-        expect(transitions).toEqual(['product_refinement']);
-      });
-
-      it('returns correct transitions for task type (skips product_refinement)', () => {
-        const task: Feature = createFeature('task-id', 'Task', 'task');
-        task.phase = 'created';
-
-        const transitions = getValidTransitionsForFeature(task);
-        expect(transitions).toEqual(['tech_spec']);
-      });
-    });
-
-    describe('getPhaseFlow', () => {
-      it('returns correct 7-phase sequence for feature type', () => {
-        const flow = getPhaseFlow('feature');
-        expect(flow).toEqual([
-          'created',
-          'product_refinement',
-          'tech_spec',
-          'implementation',
-          'review',
-          'testing',
-          'complete',
-        ]);
-        expect(flow.length).toBe(7);
-      });
-
-      it('returns correct 8-phase sequence for bug type (includes bug_investigation)', () => {
-        const flow = getPhaseFlow('bug');
-        expect(flow).toEqual([
-          'created',
-          'bug_investigation',
-          'product_refinement',
-          'tech_spec',
-          'implementation',
-          'review',
-          'testing',
-          'complete',
-        ]);
-        expect(flow.length).toBe(8);
-      });
-
-      it('returns correct 6-phase sequence for task type (skips product_refinement)', () => {
-        const flow = getPhaseFlow('task');
-        expect(flow).toEqual([
-          'created',
-          'tech_spec',
-          'implementation',
-          'review',
-          'testing',
-          'complete',
-        ]);
-        expect(flow.length).toBe(6);
-      });
-    });
-
-    describe('getNextPhaseForFeature', () => {
-      it('returns correct next phase for feature types', () => {
-        const feature: Feature = createFeature('feature-id', 'Feature', 'feature');
-        feature.phase = 'created';
-
-        expect(getNextPhaseForFeature(feature)).toBe('product_refinement');
-      });
-
-      it('returns correct next phase for bug types', () => {
-        const bug: Feature = createFeature('bug-id', 'Bug', 'bug');
-        bug.phase = 'created';
-
-        expect(getNextPhaseForFeature(bug)).toBe('bug_investigation');
-      });
-
-      it('returns correct next phase for task types', () => {
-        const task: Feature = createFeature('task-id', 'Task', 'task');
-        task.phase = 'created';
-
-        expect(getNextPhaseForFeature(task)).toBe('tech_spec');
-      });
-
-      it('returns null for phases with multiple transitions', () => {
-        const feature: Feature = createFeature('feature-id', 'Feature', 'feature');
-        feature.phase = 'review'; // review has two options: testing or implementation
-
-        expect(getNextPhaseForFeature(feature)).toBeNull();
-      });
-
-      it('returns null for complete phase', () => {
-        const feature: Feature = createFeature('feature-id', 'Feature', 'feature');
-        feature.phase = 'complete';
-
-        expect(getNextPhaseForFeature(feature)).toBeNull();
-      });
+    it('all phases have transition entries', () => {
+      for (const phase of PHASE_ORDER) {
+        expect(VALID_TRANSITIONS[phase as Phase]).toBeDefined();
+      }
     });
   });
 });

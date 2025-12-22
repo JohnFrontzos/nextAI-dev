@@ -493,20 +493,18 @@ describe('Phase Detection', () => {
   describe('phaseIndex()', () => {
     it('returns correct index for each phase', () => {
       expect(phaseIndex('created')).toBe(0);
-      expect(phaseIndex('bug_investigation')).toBe(1);
-      expect(phaseIndex('product_refinement')).toBe(2);
-      expect(phaseIndex('tech_spec')).toBe(3);
-      expect(phaseIndex('implementation')).toBe(4);
-      expect(phaseIndex('review')).toBe(5);
-      expect(phaseIndex('testing')).toBe(6);
-      expect(phaseIndex('complete')).toBe(7);
+      expect(phaseIndex('product_refinement')).toBe(1);
+      expect(phaseIndex('tech_spec')).toBe(2);
+      expect(phaseIndex('implementation')).toBe(3);
+      expect(phaseIndex('review')).toBe(4);
+      expect(phaseIndex('testing')).toBe(5);
+      expect(phaseIndex('complete')).toBe(6);
     });
   });
 
   describe('getNextPhase()', () => {
-    it('returns next phase in sequence (deprecated - use getNextPhaseForFeature for type-aware routing)', () => {
-      expect(getNextPhase('created')).toBe('bug_investigation');
-      expect(getNextPhase('bug_investigation')).toBe('product_refinement');
+    it('returns next phase in sequence', () => {
+      expect(getNextPhase('created')).toBe('product_refinement');
       expect(getNextPhase('product_refinement')).toBe('tech_spec');
       expect(getNextPhase('tech_spec')).toBe('implementation');
       expect(getNextPhase('implementation')).toBe('review');

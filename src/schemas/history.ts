@@ -25,7 +25,6 @@ export const ValidationEventSchema = BaseEventSchema.extend({
 export const ValidationBypassEventSchema = BaseEventSchema.extend({
   event: z.literal('validation_bypass'),
   feature_id: z.string(),
-  feature_type: z.enum(['feature', 'bug', 'task']),
   target_phase: z.string(),
   errors_ignored: z.array(z.string()),
   warnings_ignored: z.array(z.string()).optional(),

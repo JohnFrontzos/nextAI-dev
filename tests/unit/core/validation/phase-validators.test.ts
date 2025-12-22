@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {
   CreatedValidator,
-  BugInvestigationValidator,
   ProductRefinementValidator,
   TechSpecValidator,
   ImplementationValidator,
@@ -11,10 +10,6 @@ import {
   TestingValidator,
   getValidatorForPhase,
 } from '../../../../src/core/validation/phase-validators';
-import {
-  BugTestingValidator,
-  TaskTestingValidator,
-} from '../../../../src/core/validation/type-specific-validators';
 import {
   createTestProject,
   createFeatureFixture,
@@ -84,39 +79,6 @@ describe('Phase Validators', () => {
       const result = await validator.validate(featureDir);
       expect(result.valid).toBe(true);
       expect(result.warnings.some(w => w.includes('title heading'))).toBe(true);
-    });
-
-    it('has correct targetPhase', () => {
-      expect(validator.targetPhase).toBe('product_refinement');
-    });
-  });
-
-  describe('BugInvestigationValidator', () => {
-    const validator = new BugInvestigationValidator();
-
-    it('returns valid when investigation.md exists with root cause', async () => {
-      createFeatureFixture(testContext.projectRoot, 'test-feature', {
-        'planning/investigation.md': '# Investigation\n\n## Root Cause\n\nThe bug was caused by...',
-      });
-      const result = await validator.validate(featureDir);
-      expect(result.valid).toBe(true);
-      expect(result.errors).toEqual([]);
-    });
-
-    it('returns error when investigation.md missing', async () => {
-      const result = await validator.validate(featureDir);
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('investigation.md is missing or empty');
-    });
-
-    it('returns warning when no root cause section found', async () => {
-      createFeatureFixture(testContext.projectRoot, 'test-feature', {
-        'planning/investigation.md': '# Investigation\n\nSome analysis here but missing required keyword.',
-      });
-      const result = await validator.validate(featureDir);
-      expect(result.valid).toBe(true);
-      expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings[0]).toContain('root cause analysis');
     });
 
     it('has correct targetPhase', () => {
@@ -317,138 +279,40 @@ describe('Phase Validators', () => {
     });
   });
 
-  describe('Type-Specific Validator Tests', () => {
-    describe('BugTestingValidator', () => {
-      const validator = new BugTestingValidator();
-
-      it('returns valid when testing.md has pass status and regression', async () => {
-        createFeatureFixture(testContext.projectRoot, 'test-feature', {
-          'testing.md': '# Testing\n\nRegression test passed.\n\nStatus: pass',
-        });
-        const result = await validator.validate(featureDir);
-        expect(result.valid).toBe(true);
-        expect(result.errors).toEqual([]);
-      });
-
-      it('returns error when no pass status', async () => {
-        createFeatureFixture(testContext.projectRoot, 'test-feature', {
-          'testing.md': '# Testing\n\nRegression test info.\n',
-        });
-        const result = await validator.validate(featureDir);
-        expect(result.valid).toBe(false);
-        expect(result.errors.some(e => e.includes('No passing test found'))).toBe(true);
-      });
-
-      it('returns warning when no regression mention', async () => {
-        createFeatureFixture(testContext.projectRoot, 'test-feature', {
-          'testing.md': '# Testing\n\nStatus: pass',
-        });
-        const result = await validator.validate(featureDir);
-        expect(result.valid).toBe(true);
-        expect(result.warnings.some(w => w.includes('regression test'))).toBe(true);
-      });
+  describe('getValidatorForPhase()', () => {
+    it("returns CreatedValidator for 'created'", () => {
+      const validator = getValidatorForPhase('created');
+      expect(validator).toBeInstanceOf(CreatedValidator);
     });
 
-    describe('TaskTestingValidator', () => {
-      const validator = new TaskTestingValidator();
-
-      it('returns valid when testing.md has pass status', async () => {
-        createFeatureFixture(testContext.projectRoot, 'test-feature', {
-          'testing.md': '# Testing\n\nStatus: pass',
-        });
-        const result = await validator.validate(featureDir);
-        expect(result.valid).toBe(true);
-        expect(result.errors).toEqual([]);
-      });
-
-      it('does not require regression mention', async () => {
-        createFeatureFixture(testContext.projectRoot, 'test-feature', {
-          'testing.md': '# Testing\n\nStatus: pass',
-        });
-        const result = await validator.validate(featureDir);
-        expect(result.valid).toBe(true);
-        expect(result.warnings).toEqual([]);
-      });
-
-      it('returns error when no pass status', async () => {
-        createFeatureFixture(testContext.projectRoot, 'test-feature', {
-          'testing.md': '# Testing\n\nTest info.',
-        });
-        const result = await validator.validate(featureDir);
-        expect(result.valid).toBe(false);
-        expect(result.errors.some(e => e.includes('No passing test found'))).toBe(true);
-      });
-    });
-  });
-
-  describe('getValidatorForPhase() - Type-Aware Routing', () => {
-    describe('Bug type', () => {
-      it('returns BugInvestigationValidator for bug_investigation phase', () => {
-        const validator = getValidatorForPhase('bug_investigation', 'bug');
-        expect(validator).toBeInstanceOf(BugInvestigationValidator);
-      });
-
-      it('returns null for bug_investigation phase on non-bug types', () => {
-        expect(getValidatorForPhase('bug_investigation', 'feature')).toBeNull();
-        expect(getValidatorForPhase('bug_investigation', 'task')).toBeNull();
-      });
-
-      it('returns BugTestingValidator for testing phase', () => {
-        const validator = getValidatorForPhase('testing', 'bug');
-        expect(validator).toBeInstanceOf(BugTestingValidator);
-      });
+    it("returns ProductRefinementValidator for 'product_refinement'", () => {
+      const validator = getValidatorForPhase('product_refinement');
+      expect(validator).toBeInstanceOf(ProductRefinementValidator);
     });
 
-    describe('Task type', () => {
-      it('returns null for product_refinement phase (tasks skip it)', () => {
-        const validator = getValidatorForPhase('product_refinement', 'task');
-        expect(validator).toBeNull();
-      });
-
-      it('returns standard TechSpecValidator for tech_spec phase', () => {
-        const validator = getValidatorForPhase('tech_spec', 'task');
-        expect(validator).toBeInstanceOf(TechSpecValidator);
-      });
-
-      it('returns standard ImplementationValidator for implementation phase', () => {
-        const validator = getValidatorForPhase('implementation', 'task');
-        expect(validator).toBeInstanceOf(ImplementationValidator);
-      });
-
-      it('returns TaskTestingValidator for testing phase', () => {
-        const validator = getValidatorForPhase('testing', 'task');
-        expect(validator).toBeInstanceOf(TaskTestingValidator);
-      });
+    it("returns TechSpecValidator for 'tech_spec'", () => {
+      const validator = getValidatorForPhase('tech_spec');
+      expect(validator).toBeInstanceOf(TechSpecValidator);
     });
 
-    describe('Feature type', () => {
-      it('returns ProductRefinementValidator for product_refinement phase', () => {
-        const validator = getValidatorForPhase('product_refinement', 'feature');
-        expect(validator).toBeInstanceOf(ProductRefinementValidator);
-      });
-
-      it('returns standard TechSpecValidator for tech_spec phase', () => {
-        const validator = getValidatorForPhase('tech_spec', 'feature');
-        expect(validator).toBeInstanceOf(TechSpecValidator);
-      });
-
-      it('returns standard ImplementationValidator for implementation phase', () => {
-        const validator = getValidatorForPhase('implementation', 'feature');
-        expect(validator).toBeInstanceOf(ImplementationValidator);
-      });
-
-      it('returns standard TestingValidator for testing phase', () => {
-        const validator = getValidatorForPhase('testing', 'feature');
-        expect(validator).toBeInstanceOf(TestingValidator);
-      });
+    it("returns ImplementationValidator for 'implementation'", () => {
+      const validator = getValidatorForPhase('implementation');
+      expect(validator).toBeInstanceOf(ImplementationValidator);
     });
 
-    describe('All types', () => {
-      it('returns null for complete phase', () => {
-        expect(getValidatorForPhase('complete', 'feature')).toBeNull();
-        expect(getValidatorForPhase('complete', 'bug')).toBeNull();
-        expect(getValidatorForPhase('complete', 'task')).toBeNull();
-      });
+    it("returns ReviewValidator for 'review'", () => {
+      const validator = getValidatorForPhase('review');
+      expect(validator).toBeInstanceOf(ReviewValidator);
+    });
+
+    it("returns TestingValidator for 'testing'", () => {
+      const validator = getValidatorForPhase('testing');
+      expect(validator).toBeInstanceOf(TestingValidator);
+    });
+
+    it("returns null for 'complete'", () => {
+      const validator = getValidatorForPhase('complete');
+      expect(validator).toBeNull();
     });
   });
 });
