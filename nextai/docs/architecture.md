@@ -242,6 +242,65 @@ This ensures subagents have access to their specialized skill instructions, impr
 
 **Note:** Skills are stored at `.claude/skills/` (root level) not in subdirectories. Claude Code only discovers skills that are direct children of the skills directory.
 
+## Type-Specific Workflows
+
+NextAI supports three feature types, each with a specialized workflow optimized for its needs.
+
+### Feature Workflow (7 phases)
+
+Full-featured development workflow for new functionality:
+```
+created → product_refinement → tech_spec → implementation → review → testing → complete
+```
+
+- **Product Refinement**: Product Owner gathers requirements via Q&A
+- **Tech Spec**: Technical Architect documents specification and tasks
+- **Testing**: Comprehensive validation of feature behavior
+
+### Bug Workflow (8 phases)
+
+Streamlined workflow for bug fixes, starting with root cause investigation:
+```
+created → bug_investigation → product_refinement → tech_spec → implementation → review → testing → complete
+```
+
+- **Bug Investigation**: Investigator analyzes root cause (no product requirements needed)
+- **Testing**: Regression testing to ensure bug doesn't recur
+- **Skips redundant steps**: No lengthy product refinement, focuses on fixing the issue
+
+### Task Workflow (6 phases)
+
+Minimal workflow for implementation-only work (no new features or requirements gathering):
+```
+created → tech_spec → implementation → review → testing → complete
+```
+
+- **Direct to Spec**: No product refinement phase (tasks are already defined)
+- **Lighter Validation**: Appropriate for smaller, scoped work
+- **Same Task Completion**: 100% completion required like all types
+
+### Type-Specific Validation
+
+**BugInvestigationValidator** (Bug only)
+- Requires `planning/investigation.md` with root cause analysis
+- Ensures bugs are properly understood before fixing
+
+**BugTestingValidator** (Bug only)
+- Focuses regression testing documentation
+- Ensures fixed bugs don't recur
+
+**TaskTestingValidator** (Task only)
+- Lighter testing requirements appropriate for task scope
+- Still requires passing test session
+
+**Standard Validators (All Types)**
+- **TechSpecValidator**: ALL types require spec.md + tasks.md (no special cases)
+- **ImplementationValidator**: 100% task completion required for ALL types
+
+This type-aware validation eliminates unnecessary friction while maintaining quality standards.
+
+<!-- Updated: 2025-12-22 by NextAI - Added type-specific workflows section documenting feature, bug, and task workflows -->
+
 ## Spec Change Detection System
 
 When a test fails during the testing phase, the system automatically analyzes whether the failure represents a bug or a specification change.
@@ -340,3 +399,4 @@ Steps:
 <!-- Updated: 2025-12-21 - Added testing.md to refinement outputs, updated /testing workflow, added testing-investigator skill -->
 <!-- Updated: 2025-12-22 - Fixed agents directory path from agents/nextai/ to agents/ in sync flow and client-agnostic sections -->
 <!-- Updated: 2025-12-22 - Added sync module files and documented two-stage sync flow with resource update behavior -->
+<!-- Updated: 2025-12-22 by NextAI - Added type-specific workflows section documenting feature, bug, and task workflows -->
