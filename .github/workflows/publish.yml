@@ -18,10 +18,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: '22'
 
-      - name: Install dependencies (cross-platform)
+      - name: Upgrade npm for OIDC support
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
         run: |
           rm -f package-lock.json
           npm install --ignore-scripts
