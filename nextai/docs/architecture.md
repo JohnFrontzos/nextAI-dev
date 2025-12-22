@@ -142,7 +142,7 @@ Zod schemas for runtime validation.
 
 ```
 .nextai/                          .claude/ (or .opencode/)
-├── agents/*.md          ──►      ├── agents/nextai/*.md
+├── agents/*.md          ──►      ├── agents/*.md
 ├── skills/*/SKILL.md    ──►      ├── skills/*/SKILL.md
 └── templates/commands/  ──►      └── commands/nextai-*.md
 ```
@@ -192,7 +192,7 @@ Every phase produces reviewable outputs:
 ### Client-Agnostic
 
 Sync adapters transform NextAI resources for each supported AI client:
-- Claude Code: `.claude/commands/`, `.claude/agents/nextai/`, `.claude/skills/`
+- Claude Code: `.claude/commands/`, `.claude/agents/`, `.claude/skills/`
 - OpenCode: `.opencode/command/`, `.opencode/agent/`
 
 ### Explicit Skill Loading
@@ -319,3 +319,4 @@ Steps:
 - Files: `dist/`, `bin/`, `resources/`
 
 <!-- Updated: 2025-12-21 - Added testing.md to refinement outputs, updated /testing workflow, added testing-investigator skill -->
+<!-- Updated: 2025-12-22 - Fixed agents directory path from agents/nextai/ to agents/ in sync flow and client-agnostic sections -->

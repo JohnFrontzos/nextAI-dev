@@ -1,6 +1,6 @@
 {
   "name": "@frontztech/nextai-dev",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "NextAI Dev Framework - AI Development Workflow Orchestrator",
   "type": "module",
   "main": "dist/index.js",

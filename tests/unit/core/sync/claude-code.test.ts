@@ -38,10 +38,10 @@ describe('Claude Code Sync', () => {
       expect(fs.existsSync(commandsDir)).toBe(true);
     });
 
-    it('creates .claude/agents/nextai/ directory', async () => {
+    it('creates .claude/agents/ directory', async () => {
       await configurator.sync(testContext.projectRoot, {});
 
-      const agentsDir = path.join(testContext.projectRoot, '.claude', 'agents', 'nextai');
+      const agentsDir = path.join(testContext.projectRoot, '.claude', 'agents');
       expect(fs.existsSync(agentsDir)).toBe(true);
     });
 
@@ -60,7 +60,7 @@ describe('Claude Code Sync', () => {
     it('generates agent files', async () => {
       await configurator.sync(testContext.projectRoot, {});
 
-      const agentsDir = path.join(testContext.projectRoot, '.claude', 'agents', 'nextai');
+      const agentsDir = path.join(testContext.projectRoot, '.claude', 'agents');
       const files = fs.readdirSync(agentsDir);
 
       // Should have agent files

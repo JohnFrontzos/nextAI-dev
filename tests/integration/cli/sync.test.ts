@@ -71,7 +71,7 @@ describe('Sync Command Integration', () => {
       await syncToClient(testContext.projectRoot, 'claude');
 
       expect(
-        fs.existsSync(path.join(testContext.projectRoot, '.claude', 'agents', 'nextai'))
+        fs.existsSync(path.join(testContext.projectRoot, '.claude', 'agents'))
       ).toBe(true);
     });
 
@@ -87,7 +87,7 @@ describe('Sync Command Integration', () => {
     it('generates agent files', async () => {
       await syncToClient(testContext.projectRoot, 'claude');
 
-      const agentsDir = path.join(testContext.projectRoot, '.claude', 'agents', 'nextai');
+      const agentsDir = path.join(testContext.projectRoot, '.claude', 'agents');
       const files = fs.readdirSync(agentsDir);
 
       expect(files.length).toBeGreaterThan(0);

@@ -82,7 +82,7 @@ my-project/
 │
 ├── .claude/                    # Claude Code integration
 │   ├── commands/nextai-*.md    # Synced slash commands
-│   ├── agents/nextai/          # Synced agents
+│   ├── agents/                 # Synced agents
 │   └── skills/                 # Synced skills (flat structure)
 │
 └── nextai/                     # Content directory
@@ -105,3 +105,4 @@ NextAI Dev Framework is licensed under the MIT License. See the [LICENSE](../../
 
 <!-- Updated: 2025-12-12 - Updated package name to @frontztech/nextai-dev -->
 <!-- Updated: 2025-12-12 - Added license section -->
+<!-- Updated: 2025-12-22 - Fixed agents directory path from agents/nextai/ to agents/ -->
