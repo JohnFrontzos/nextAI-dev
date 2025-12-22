@@ -212,5 +212,32 @@ NextAI never calls AI APIs directly:
 | OpenCode | Supported | `.opencode/` |
 | Codex | Planned | - |
 
+## Developer Experience
+
+### Automatic Resource Management
+
+NextAI eliminates manual resource tracking with auto-discovery:
+- Add agents, skills, or commands to `resources/` - they're automatically discovered
+- No manifest files to maintain
+- Detailed sync output shows exactly what changed (new/updated/unchanged/removed)
+- Clear distinction between framework-controlled (`.nextai/`) and user-space (`.claude/`) directories
+
+### Improved Sync UX
+
+The sync command provides clear, actionable feedback:
+```
+Syncing resources to .nextai/...
+Commands: 13 (1 new, 2 updated)
+Agents: 7 (no changes)
+Skills: 8 (3 removed)
+```
+
+Users always know:
+- What resources are being synced
+- Which files are new vs updated
+- Whether deprecated resources were removed
+- Where files are being synced to
+
 <!-- Updated: 2025-12-21 - Added testing.md to refinement outputs, updated /testing workflow with investigation, added testing-investigator skill -->
 <!-- Updated: 2025-12-22 by NextAI - Added type-specific workflow descriptions to features section -->
+<!-- Updated: 2025-12-22 by NextAI - Added developer experience section documenting auto-discovery and improved sync UX -->

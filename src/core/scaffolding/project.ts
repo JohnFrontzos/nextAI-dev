@@ -26,10 +26,11 @@ export function scaffoldProject(
   projectRoot: string,
   projectName: string,
   client?: SupportedClient,
-  options: ScaffoldOptions = {}
+  _options: ScaffoldOptions = {}
 ): { projectId: string } {
   const nextaiDir = getNextAIDir(projectRoot);
-  const { force = false } = options;
+  // Note: options parameter kept for backward compatibility but .nextai/ is always updated
+  // as it is framework-controlled space
 
   // Create directory structure
   const dirs = [
@@ -49,14 +50,14 @@ export function scaffoldProject(
   initLedger(projectRoot);
   updateSession(projectRoot, getPackageVersion());
 
-  // Copy agent templates
-  copyAgentTemplates(projectRoot, force);
+  // Copy agent templates (always updated - .nextai/ is framework-controlled)
+  copyAgentTemplates(projectRoot);
 
-  // Copy skill templates
-  copySkillTemplates(projectRoot, force);
+  // Copy skill templates (always updated - .nextai/ is framework-controlled)
+  copySkillTemplates(projectRoot);
 
-  // Copy command templates
-  copyCommandTemplates(projectRoot, force);
+  // Copy command templates (always updated - .nextai/ is framework-controlled)
+  copyCommandTemplates(projectRoot);
 
   // Log init event
   logInit(projectRoot, config.project.id, projectName, client);
@@ -66,8 +67,9 @@ export function scaffoldProject(
 
 /**
  * Copy agent template files from resources
+ * Note: .nextai/ is framework-controlled space - always updated
  */
-function copyAgentTemplates(projectRoot: string, force: boolean = false): void {
+function copyAgentTemplates(projectRoot: string): void {
   const resourcesDir = getResourcesDir();
   const agentsSourceDir = join(resourcesDir, 'agents');
   const agentsTargetDir = join(getNextAIDir(projectRoot), 'agents');
@@ -82,16 +84,16 @@ function copyAgentTemplates(projectRoot: string, force: boolean = false): void {
   for (const agent of agents) {
     const source = join(agentsSourceDir, agent);
     const target = join(agentsTargetDir, agent);
-    if (force || !existsSync(target)) {
-      copyFileSync(source, target);
-    }
+    // Always copy - .nextai/ is framework-controlled
+    copyFileSync(source, target);
   }
 }
 
 /**
  * Copy skill template files from resources
+ * Note: .nextai/ is framework-controlled space - always updated
  */
-function copySkillTemplates(projectRoot: string, force: boolean = false): void {
+function copySkillTemplates(projectRoot: string): void {
   const resourcesDir = getResourcesDir();
   const skillsSourceDir = join(resourcesDir, 'skills');
   const skillsTargetDir = join(getNextAIDir(projectRoot), 'skills');
@@ -110,18 +112,18 @@ function copySkillTemplates(projectRoot: string, force: boolean = false): void {
     const targetSkillFile = join(target, 'SKILL.md');
 
     if (existsSync(skillFile)) {
-      if (force || !existsSync(targetSkillFile)) {
-        ensureDir(target);
-        copyFileSync(skillFile, targetSkillFile);
-      }
+      // Always copy - .nextai/ is framework-controlled
+      ensureDir(target);
+      copyFileSync(skillFile, targetSkillFile);
     }
   }
 }
 
 /**
  * Copy command template files from resources
+ * Note: .nextai/ is framework-controlled space - always updated
  */
-function copyCommandTemplates(projectRoot: string, force: boolean = false): void {
+function copyCommandTemplates(projectRoot: string): void {
   const resourcesDir = getResourcesDir();
   const commandsSourceDir = join(resourcesDir, 'templates', 'commands');
   const commandsTargetDir = join(getNextAIDir(projectRoot), 'templates', 'commands');
@@ -136,9 +138,8 @@ function copyCommandTemplates(projectRoot: string, force: boolean = false): void
   for (const command of commands) {
     const source = join(commandsSourceDir, command);
     const target = join(commandsTargetDir, command);
-    if (force || !existsSync(target)) {
-      copyFileSync(source, target);
-    }
+    // Always copy - .nextai/ is framework-controlled
+    copyFileSync(source, target);
   }
 }
 

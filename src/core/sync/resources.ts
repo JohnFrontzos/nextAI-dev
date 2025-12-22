@@ -1,4 +1,4 @@
-import { existsSync, copyFileSync } from 'fs';
+import { existsSync, copyFileSync, readdirSync, readFileSync, unlinkSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getNextAIDir, ensureDir } from '../../cli/utils/config.js';
@@ -12,10 +12,18 @@ export interface ResourceManifest {
   commands: string[];
 }
 
+export interface ResourceStats {
+  total: number;
+  new: number;
+  updated: number;
+  unchanged: number;
+  removed: number;
+}
+
 export interface CopyResult {
-  agents: number;
-  skills: number;
-  commands: number;
+  agents: ResourceStats;
+  skills: ResourceStats;
+  commands: ResourceStats;
   errors: string[];
 }
 
@@ -50,72 +58,207 @@ export function getResourcesDir(): string {
 }
 
 /**
+ * Scan and auto-discover resources from the package directory
+ * Replaces hardcoded manifest to eliminate maintenance burden and prevent missing files
+ */
+export function scanResourcesFromPackage(): ResourceManifest {
+  try {
+    const resourcesDir = getResourcesDir();
+
+    // Scan agents: all .md files in resources/agents/
+    const agentsDir = join(resourcesDir, 'agents');
+    const agents = existsSync(agentsDir)
+      ? readdirSync(agentsDir)
+          .filter(f => f.endsWith('.md'))
+          .sort()
+      : [];
+
+    // Scan skills: all directories containing SKILL.md
+    const skillsDir = join(resourcesDir, 'skills');
+    const skills = existsSync(skillsDir)
+      ? readdirSync(skillsDir)
+          .filter(skill => {
+            try {
+              const skillFile = join(skillsDir, skill, 'SKILL.md');
+              const stats = statSync(join(skillsDir, skill));
+              return stats.isDirectory() && existsSync(skillFile);
+            } catch {
+              return false;
+            }
+          })
+          .sort()
+      : [];
+
+    // Scan commands: all .md files in resources/templates/commands/
+    const commandsDir = join(resourcesDir, 'templates', 'commands');
+    const commands = existsSync(commandsDir)
+      ? readdirSync(commandsDir)
+          .filter(f => f.endsWith('.md'))
+          .sort()
+      : [];
+
+    return { agents, skills, commands };
+  } catch (error) {
+    // Fallback to empty manifest if scanning fails
+    return { agents: [], skills: [], commands: [] };
+  }
+}
+
+/**
  * Get manifest of NextAI-provided files
+ * @deprecated Use scanResourcesFromPackage() instead for auto-discovery
  */
 export function getResourceManifest(): ResourceManifest {
-  return {
-    agents: [
-      'ai-team-lead.md',
-      'product-owner.md',
-      'technical-architect.md',
-      'developer.md',
-      'reviewer.md',
-      'document-writer.md',
-      'investigator.md',
-    ],
-    skills: [
-      'refinement-questions',
-      'refinement-spec-writer',
-      'executing-plans',
-      'reviewer-checklist',
-      'documentation-recaps',
-      'root-cause-tracing',
-      'systematic-debugging',
-      'testing-investigator',
-    ],
-    commands: [
-      'create.md',
-      'resume.md',
-      'refine.md',
-      'implement.md',
-      'review.md',
-      'testing.md',
-      'complete.md',
-      'analyze.md',
-      'show.md',
-      'list.md',
-      'sync.md',
-      'repair.md',
-      'remove.md',
-    ],
-  };
+  return scanResourcesFromPackage();
+}
+
+/**
+ * Compare file contents to detect if file has changed
+ */
+function filesAreIdentical(src: string, dst: string): boolean {
+  try {
+    if (!existsSync(dst)) {
+      return false;
+    }
+    const srcContent = readFileSync(src, 'utf8');
+    const dstContent = readFileSync(dst, 'utf8');
+    return srcContent === dstContent;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Copy file with change detection
+ * Returns true if file was new, false if it was updated or unchanged
+ */
+function copyWithChangeDetection(src: string, dst: string): { isNew: boolean; wasUpdated: boolean } {
+  const isNew = !existsSync(dst);
+  const wasUpdated = !isNew && !filesAreIdentical(src, dst);
+
+  if (isNew || wasUpdated) {
+    ensureDir(dirname(dst));
+    copyFileSync(src, dst);
+  }
+
+  return { isNew, wasUpdated };
+}
+
+/**
+ * Remove deprecated resources from .nextai/ that no longer exist in package
+ * Only operates on .nextai/ directory (framework-controlled space)
+ */
+function removeDeprecatedResources(projectRoot: string, manifest: ResourceManifest): { agents: number; skills: number; commands: number } {
+  const nextaiDir = getNextAIDir(projectRoot);
+  const removed = { agents: 0, skills: 0, commands: 0 };
+
+  // Remove deprecated agents
+  try {
+    const agentsDir = join(nextaiDir, 'agents');
+    if (existsSync(agentsDir)) {
+      const existingAgents = readdirSync(agentsDir).filter(f => f.endsWith('.md'));
+      for (const agent of existingAgents) {
+        if (!manifest.agents.includes(agent)) {
+          try {
+            unlinkSync(join(agentsDir, agent));
+            removed.agents++;
+          } catch (error) {
+            // Ignore errors on individual file removal
+          }
+        }
+      }
+    }
+  } catch {
+    // Ignore errors reading directory
+  }
+
+  // Remove deprecated skills
+  try {
+    const skillsDir = join(nextaiDir, 'skills');
+    if (existsSync(skillsDir)) {
+      const existingSkills = readdirSync(skillsDir);
+      for (const skill of existingSkills) {
+        const skillPath = join(skillsDir, skill);
+        try {
+          const stats = statSync(skillPath);
+          if (stats.isDirectory() && !manifest.skills.includes(skill)) {
+            // Remove the SKILL.md file (keep directory structure simple)
+            const skillFile = join(skillPath, 'SKILL.md');
+            if (existsSync(skillFile)) {
+              unlinkSync(skillFile);
+              removed.skills++;
+            }
+          }
+        } catch {
+          // Ignore errors on individual skill
+        }
+      }
+    }
+  } catch {
+    // Ignore errors reading directory
+  }
+
+  // Remove deprecated commands
+  try {
+    const commandsDir = join(nextaiDir, 'templates', 'commands');
+    if (existsSync(commandsDir)) {
+      const existingCommands = readdirSync(commandsDir).filter(f => f.endsWith('.md'));
+      for (const command of existingCommands) {
+        if (!manifest.commands.includes(command)) {
+          try {
+            unlinkSync(join(commandsDir, command));
+            removed.commands++;
+          } catch (error) {
+            // Ignore errors on individual file removal
+          }
+        }
+      }
+    }
+  } catch {
+    // Ignore errors reading directory
+  }
+
+  return removed;
 }
 
 /**
  * Copy resources from package to .nextai/ directory
- * Only copies files in the manifest (NextAI-provided files)
+ * Implements change tracking (new/updated/unchanged) and removes deprecated files
+ * .nextai/ is framework-controlled space - always updated without force checks
  */
 export function copyResourcesToNextAI(projectRoot: string): CopyResult {
   const result: CopyResult = {
-    agents: 0,
-    skills: 0,
-    commands: 0,
+    agents: { total: 0, new: 0, updated: 0, unchanged: 0, removed: 0 },
+    skills: { total: 0, new: 0, updated: 0, unchanged: 0, removed: 0 },
+    commands: { total: 0, new: 0, updated: 0, unchanged: 0, removed: 0 },
     errors: [],
   };
 
-  const manifest = getResourceManifest();
+  const manifest = scanResourcesFromPackage();
   const resourcesDir = getResourcesDir();
   const nextaiDir = getNextAIDir(projectRoot);
 
+  // Remove deprecated resources first
+  const removed = removeDeprecatedResources(projectRoot, manifest);
+  result.agents.removed = removed.agents;
+  result.skills.removed = removed.skills;
+  result.commands.removed = removed.commands;
+
   // Copy agents
+  result.agents.total = manifest.agents.length;
   for (const agent of manifest.agents) {
     try {
       const src = join(resourcesDir, 'agents', agent);
       const dst = join(nextaiDir, 'agents', agent);
       if (existsSync(src)) {
-        ensureDir(dirname(dst));
-        copyFileSync(src, dst);
-        result.agents++;
+        const { isNew, wasUpdated } = copyWithChangeDetection(src, dst);
+        if (isNew) {
+          result.agents.new++;
+        } else if (wasUpdated) {
+          result.agents.updated++;
+        } else {
+          result.agents.unchanged++;
+        }
       }
     } catch (error) {
       result.errors.push(`Failed to copy agent ${agent}: ${error}`);
@@ -123,14 +266,20 @@ export function copyResourcesToNextAI(projectRoot: string): CopyResult {
   }
 
   // Copy skills
+  result.skills.total = manifest.skills.length;
   for (const skill of manifest.skills) {
     try {
       const src = join(resourcesDir, 'skills', skill, 'SKILL.md');
       const dst = join(nextaiDir, 'skills', skill, 'SKILL.md');
       if (existsSync(src)) {
-        ensureDir(dirname(dst));
-        copyFileSync(src, dst);
-        result.skills++;
+        const { isNew, wasUpdated } = copyWithChangeDetection(src, dst);
+        if (isNew) {
+          result.skills.new++;
+        } else if (wasUpdated) {
+          result.skills.updated++;
+        } else {
+          result.skills.unchanged++;
+        }
       }
     } catch (error) {
       result.errors.push(`Failed to copy skill ${skill}: ${error}`);
@@ -138,14 +287,20 @@ export function copyResourcesToNextAI(projectRoot: string): CopyResult {
   }
 
   // Copy commands
+  result.commands.total = manifest.commands.length;
   for (const command of manifest.commands) {
     try {
       const src = join(resourcesDir, 'templates', 'commands', command);
       const dst = join(nextaiDir, 'templates', 'commands', command);
       if (existsSync(src)) {
-        ensureDir(dirname(dst));
-        copyFileSync(src, dst);
-        result.commands++;
+        const { isNew, wasUpdated } = copyWithChangeDetection(src, dst);
+        if (isNew) {
+          result.commands.new++;
+        } else if (wasUpdated) {
+          result.commands.updated++;
+        } else {
+          result.commands.unchanged++;
+        }
       }
     } catch (error) {
       result.errors.push(`Failed to copy command ${command}: ${error}`);

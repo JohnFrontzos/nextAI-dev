@@ -126,14 +126,20 @@ Bundled templates (copied during init):
 
 ```
 resources/
-├── agents/                 # Agent markdown files
-├── skills/                 # Skill directories (flat, no subdirectories)
+├── agents/                 # Agent markdown files (auto-discovered)
+├── skills/                 # Skill directories (auto-discovered, flat structure)
 │   ├── documentation-recaps/
 │   ├── executing-plans/
 │   └── ...
 └── templates/
-    └── commands/           # Command templates
+    └── commands/           # Command templates (auto-discovered)
 ```
+
+**Auto-Discovery Rules:**
+- All `.md` files in `resources/agents/` are automatically synced
+- All directories in `resources/skills/` containing `SKILL.md` are automatically synced
+- All `.md` files in `resources/templates/commands/` are automatically synced
+- No manifest files to update - just add files and they're discovered
 
 **Important:** Skills must be direct children of `resources/skills/`. Claude Code only discovers skills at the root level, not in subdirectories.
 

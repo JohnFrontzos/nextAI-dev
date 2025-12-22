@@ -51,9 +51,9 @@ describe('Resources Sync Unit Tests', () => {
     it('should copy all resources successfully', () => {
       const result = copyResourcesToNextAI(testContext.projectRoot);
 
-      expect(result.agents).toBeGreaterThan(0);
-      expect(result.skills).toBeGreaterThan(0);
-      expect(result.commands).toBeGreaterThan(0);
+      expect(result.agents.total).toBeGreaterThan(0);
+      expect(result.skills.total).toBeGreaterThan(0);
+      expect(result.commands.total).toBeGreaterThan(0);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -78,7 +78,7 @@ describe('Resources Sync Unit Tests', () => {
       const result = copyResourcesToNextAI(testContext.projectRoot);
 
       expect(fs.existsSync(skillPath)).toBe(true);
-      expect(result.skills).toBeGreaterThan(0);
+      expect(result.skills.new).toBeGreaterThan(0);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -102,7 +102,7 @@ describe('Resources Sync Unit Tests', () => {
       const result = copyResourcesToNextAI(testContext.projectRoot);
 
       expect(fs.existsSync(agentPath)).toBe(true);
-      expect(result.agents).toBeGreaterThan(0);
+      expect(result.agents.new).toBeGreaterThan(0);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -127,7 +127,7 @@ describe('Resources Sync Unit Tests', () => {
       const result = copyResourcesToNextAI(testContext.projectRoot);
 
       expect(fs.existsSync(commandPath)).toBe(true);
-      expect(result.commands).toBeGreaterThan(0);
+      expect(result.commands.new).toBeGreaterThan(0);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -167,9 +167,14 @@ describe('Resources Sync Unit Tests', () => {
       const result2 = copyResourcesToNextAI(testContext.projectRoot);
 
       // Both should succeed with same counts
-      expect(result1.agents).toBe(result2.agents);
-      expect(result1.skills).toBe(result2.skills);
-      expect(result1.commands).toBe(result2.commands);
+      expect(result1.agents.total).toBe(result2.agents.total);
+      expect(result1.skills.total).toBe(result2.skills.total);
+      expect(result1.commands.total).toBe(result2.commands.total);
+
+      // Second run should show all as unchanged
+      expect(result2.agents.unchanged).toBe(result2.agents.total);
+      expect(result2.skills.unchanged).toBe(result2.skills.total);
+      expect(result2.commands.unchanged).toBe(result2.commands.total);
       expect(result2.errors).toHaveLength(0);
     });
   });

@@ -4,6 +4,7 @@ Completed features are archived in `nextai/done/` with full artifacts.
 
 | Date | Feature ID | Type | Summary | Archive |
 |------|------------|------|---------|---------|
+| 2025-12-22 | 20251222_improve-sync-and-init-ux | feature | Implemented auto-discovery of framework resources, enhanced change tracking with detailed output, and streamlined framework file updates to eliminate upgrade friction | [summary](../done/20251222_improve-sync-and-init-ux/summary.md) |
 | 2025-12-22 | 20251222_missing-testing-investigator-s | bug | Fixed sync --force to update resources in .nextai/ from package, allowing users to receive new skills after npm updates | [summary](../done/20251222_missing-testing-investigator-s/summary.md) |
 | 2025-12-22 | 20251221_type-specific-workflows | feature | Implemented type-specific workflows for features (7 phases), bugs (8 phases with investigation), and tasks (6 phases), reducing validation friction while maintaining quality standards | [summary](../done/20251221_type-specific-workflows/summary.md) |
 | 2025-12-21 | 20251221_handle-spec-changes-in-testing | feature | Extended testing-investigator skill to detect specification changes during test failures, added user approval flow with Yes/No/Cancel options, and implemented metrics tracking for spec change events | [summary](../done/20251221_handle-spec-changes-in-testing/summary.md) |

@@ -187,6 +187,41 @@ Describe your idea when prompted—whether it's a complex feature, a bug to fix,
 
 Follow the suggested commands. Each phase produces artifacts and suggests the next step.
 
+## Upgrading NextAI
+
+When a new version of NextAI is released, follow these steps to upgrade:
+
+### Step 1: Update the Package
+
+```bash
+npm install -g @frontztech/nextai-dev@latest
+```
+
+### Step 2: Reinitialize Your Project
+
+```bash
+cd my-project
+nextai init
+```
+
+This updates framework files in `.nextai/` to the latest version. Your customizations in your AI client's config directory (e.g., `.claude/`) are preserved.
+
+### Step 3: Sync to Your AI Client
+
+```bash
+nextai sync
+```
+
+This syncs the updated commands, agents, and skills to your AI client. The output shows what changed:
+
+```
+Commands: 13 (1 new, 2 updated)
+Agents: 7 (no changes)
+Skills: 8 (1 updated)
+```
+
+**That's it!** Framework files auto-update, and your customizations are protected.
+
 ## Command Reference
 
 All commands run in your AI client (Claude Code or OpenCode). The only terminal command you need is `nextai init`.

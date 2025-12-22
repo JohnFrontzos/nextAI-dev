@@ -76,7 +76,7 @@ Business logic for state management, scaffolding, sync, and validation.
 | `base.ts` | Abstract base class for client configurators |
 | `claude-code.ts` | Claude Code integration (`.claude/`) |
 | `opencode.ts` | OpenCode integration (`.opencode/`) |
-| `resources.ts` | Resource manifest and copying utilities |
+| `resources.ts` | Auto-discovery of package resources with change tracking |
 | `version.ts` | Version comparison and tracking |
 | `client-selection.ts` | Interactive client selection |
 
@@ -143,9 +143,9 @@ Zod schemas for runtime validation.
 
 ### Sync Flow
 
-The sync system operates in two stages:
+The sync system operates with automatic resource management:
 
-**Stage 1: Resource Update (when using `--force` or version change detected)**
+**Stage 1: Resource Update (.nextai/ is always synced from package)**
 ```
 package resources/               .nextai/
 ├── agents/*.md          ──►     ├── agents/*.md
@@ -153,7 +153,18 @@ package resources/               .nextai/
 └── templates/commands/  ──►     └── templates/commands/*.md
 ```
 
-**Stage 2: Client Sync**
+Resources are auto-discovered by scanning the package directory:
+- Agents: All `.md` files in `resources/agents/`
+- Skills: All directories containing `SKILL.md` in `resources/skills/`
+- Commands: All `.md` files in `resources/templates/commands/`
+
+Change tracking distinguishes:
+- New resources (added to package)
+- Updated resources (content changed)
+- Unchanged resources (identical)
+- Removed resources (no longer in package)
+
+**Stage 2: Client Sync (user-space directories)**
 ```
 .nextai/                          .claude/ (or .opencode/)
 ├── agents/*.md          ──►      ├── agents/*.md
@@ -161,10 +172,9 @@ package resources/               .nextai/
 └── templates/commands/  ──►      └── commands/nextai-*.md
 ```
 
-**Sync Modes:**
-- **Normal sync**: Only syncs `.nextai/` to client directories
-- **Force sync** (`--force`): Updates `.nextai/` from package, then syncs to client
-- **Auto-update**: Automatically updates resources when version change detected
+**Directory Ownership:**
+- `.nextai/` - Framework-controlled (always updated from package)
+- `.claude/`, `.opencode/` - User-space (respects force flag for overwrites)
 
 ## Technology Stack
 
@@ -181,6 +191,20 @@ package resources/               .nextai/
 | CI/CD | GitHub Actions |
 
 ## Key Design Decisions
+
+### Auto-Discovery Pattern
+
+Resources (agents, skills, commands) are automatically discovered by scanning the package directory rather than using hardcoded manifests. This design choice:
+- Eliminates maintenance burden (no manifest to update when adding files)
+- Prevents missing files (all `.md` files are automatically included)
+- Enables change tracking (new/updated/unchanged/removed detection)
+- Separates concerns (framework-controlled `.nextai/` vs user-space `.claude/`)
+
+The `scanResourcesFromPackage()` function in `src/core/sync/resources.ts` implements this pattern:
+- Scans `resources/agents/` for all `.md` files
+- Scans `resources/skills/` for directories containing `SKILL.md`
+- Scans `resources/templates/commands/` for all `.md` files
+- Returns a complete manifest without requiring manual updates
 
 ### Generate + Delegate
 
@@ -400,3 +424,4 @@ Steps:
 <!-- Updated: 2025-12-22 - Fixed agents directory path from agents/nextai/ to agents/ in sync flow and client-agnostic sections -->
 <!-- Updated: 2025-12-22 - Added sync module files and documented two-stage sync flow with resource update behavior -->
 <!-- Updated: 2025-12-22 by NextAI - Added type-specific workflows section documenting feature, bug, and task workflows -->
+<!-- Updated: 2025-12-22 by NextAI - Added auto-discovery pattern section, updated sync flow with change tracking and directory ownership model -->

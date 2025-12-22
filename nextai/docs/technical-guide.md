@@ -217,30 +217,43 @@ The `nextai sync` command syncs NextAI configuration and resources to your AI cl
 ```bash
 nextai sync                    # Sync to default client
 nextai sync --client claude    # Sync to specific client
-nextai sync --force            # Force overwrite AND update resources
+nextai sync --force            # Force overwrite client files
 nextai sync --dry-run          # Preview what would be synced
 ```
 
-**Resource Updates:**
+**Automatic Resource Management:**
 
-When you update the NextAI package, new agents, skills, and commands are available in the package's `resources/` directory. To receive these updates in your project's `.nextai/` directory, use the `--force` flag:
+Resources in `.nextai/` are always kept in sync with the package automatically:
+- `.nextai/` is framework-controlled space (always updated)
+- Resources are auto-discovered from the package (no manual manifest)
+- Change tracking reports new, updated, unchanged, and removed files
 
-```bash
-nextai sync --force
+**Sync Output:**
+
+The sync command provides detailed feedback on what changed:
+```
+Syncing resources to .nextai/...
+Commands: 13 (1 new, 2 updated)
+Agents: 7 (no changes)
+Skills: 8 (3 removed)
 ```
 
-This will:
-1. Copy updated resources from the package to `.nextai/` (agents, skills, commands)
-2. Sync those resources to your AI client directory (`.claude/` or `.opencode/`)
+**Force Flag Usage:**
+
+The `--force` flag only affects user-space directories (`.claude/`, `.opencode/`):
+```bash
+nextai sync --force    # Overwrites files in .claude/ or .opencode/
+```
+
+`.nextai/` is always updated from the package regardless of the force flag.
 
 **Auto-Update Behavior:**
 
-NextAI automatically detects version changes and prompts for updates:
-- On first sync after package upgrade, resources are auto-updated
+NextAI automatically detects version changes and updates resources:
 - Template version is tracked in `.nextai/state/session.json`
 - Use `--no-auto-update` to skip automatic updates
 
-<!-- Updated: 2025-12-22 - Added sync command details and resource update behavior -->
+<!-- Updated: 2025-12-22 - Revised sync documentation to reflect auto-discovery and directory ownership model -->
 
 ## Environment Variables
 

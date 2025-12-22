@@ -4,9 +4,30 @@ import { logger } from '../utils/logger.js';
 import { findProjectRoot, loadConfig, updateSession } from '../utils/config.js';
 import { syncToClient, getConfigurator } from '../../core/sync/index.js';
 import { getVersionComparison } from '../../core/sync/version.js';
-import { copyResourcesToNextAI, getResourceManifest } from '../../core/sync/resources.js';
+import { copyResourcesToNextAI, getResourceManifest, type ResourceStats } from '../../core/sync/resources.js';
 import { selectClient } from '../../core/sync/client-selection.js';
 import { SUPPORTED_CLIENTS, type SupportedClient } from '../../types/index.js';
+
+/**
+ * Format resource statistics for output
+ * Examples:
+ *  - "Commands: 13 (1 new, 2 updated)"
+ *  - "Agents: 7 (no changes)"
+ *  - "Skills: 8 (3 removed)"
+ */
+function formatResourceStats(name: string, stats: ResourceStats): string {
+  const changes: string[] = [];
+
+  if (stats.new > 0) changes.push(`${stats.new} new`);
+  if (stats.updated > 0) changes.push(`${stats.updated} updated`);
+  if (stats.removed > 0) changes.push(`${stats.removed} removed`);
+
+  const changeText = changes.length > 0
+    ? changes.join(', ')
+    : 'no changes';
+
+  return `${name}: ${stats.total} (${changeText})`;
+}
 
 export const syncCommand = new Command('sync')
   .description('Sync NextAI configuration to AI client')
@@ -43,7 +64,7 @@ export const syncCommand = new Command('sync')
           );
           logger.blank();
           const manifest = getResourceManifest();
-          logger.info('Files to update:');
+          logger.info('Resources to sync:');
           logger.subItem(`Commands: ${manifest.commands.length} files`);
           logger.subItem(`Agents: ${manifest.agents.length} files`);
           logger.subItem(`Skills: ${manifest.skills.length} files`);
@@ -125,10 +146,9 @@ export const syncCommand = new Command('sync')
 
           syncSpinner.succeed(`Synced to ${clientInfo?.name}`);
 
-          const label = versionComparison.isUpgrade ? 'updated' : 'rolled back';
-          logger.subItem(`Commands: ${copyResult.commands} (${label})`);
-          logger.subItem(`Agents: ${copyResult.agents} (${label})`);
-          logger.subItem(`Skills: ${copyResult.skills} (${label})`);
+          logger.subItem(formatResourceStats('Commands', copyResult.commands));
+          logger.subItem(formatResourceStats('Agents', copyResult.agents));
+          logger.subItem(formatResourceStats('Skills', copyResult.skills));
 
           if (result.warnings.length > 0) {
             logger.blank();
@@ -159,9 +179,9 @@ export const syncCommand = new Command('sync')
               }
             } else {
               spinner.succeed('Resources updated');
-              logger.subItem(`Agents: ${copyResult.agents}`);
-              logger.subItem(`Skills: ${copyResult.skills}`);
-              logger.subItem(`Commands: ${copyResult.commands}`);
+              logger.subItem(formatResourceStats('Commands', copyResult.commands));
+              logger.subItem(formatResourceStats('Agents', copyResult.agents));
+              logger.subItem(formatResourceStats('Skills', copyResult.skills));
             }
           } catch (error) {
             spinner.fail('Resource update failed');
