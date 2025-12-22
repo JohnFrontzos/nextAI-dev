@@ -253,4 +253,90 @@ describe('Advance Command Integration', () => {
       expect(result.success).toBe(false);
     });
   });
+
+  describe('Type-Specific Transitions', () => {
+    it('bug cannot transition from created to product_refinement', async () => {
+      const bug = addFeature(testContext.projectRoot, 'Test Bug', 'bug');
+      createFeatureFixture(testContext.projectRoot, bug.id, createdPhaseArtifacts);
+
+      const result = await updateFeaturePhase(
+        testContext.projectRoot,
+        bug.id,
+        'product_refinement'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Cannot transition bug');
+      expect(result.error).toContain('bug_investigation');
+    });
+
+    it('bug can transition from created to bug_investigation', async () => {
+      const bug = addFeature(testContext.projectRoot, 'Test Bug', 'bug');
+      createFeatureFixture(testContext.projectRoot, bug.id, createdPhaseArtifacts);
+
+      const result = await updateFeaturePhase(
+        testContext.projectRoot,
+        bug.id,
+        'bug_investigation'
+      );
+
+      expect(result.success).toBe(true);
+      const updated = getFeature(testContext.projectRoot, bug.id);
+      expect(updated?.phase).toBe('bug_investigation');
+    });
+
+    it('task can transition from created to tech_spec', async () => {
+      const task = addFeature(testContext.projectRoot, 'Test Task', 'task');
+      createFeatureFixture(testContext.projectRoot, task.id, createdPhaseArtifacts);
+
+      const result = await updateFeaturePhase(
+        testContext.projectRoot,
+        task.id,
+        'tech_spec'
+      );
+
+      expect(result.success).toBe(true);
+      const updated = getFeature(testContext.projectRoot, task.id);
+      expect(updated?.phase).toBe('tech_spec');
+    });
+
+    it('task cannot transition from created to product_refinement', async () => {
+      const task = addFeature(testContext.projectRoot, 'Test Task', 'task');
+      createFeatureFixture(testContext.projectRoot, task.id, createdPhaseArtifacts);
+
+      const result = await updateFeaturePhase(
+        testContext.projectRoot,
+        task.id,
+        'product_refinement'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Cannot transition task');
+      expect(result.error).toContain('tech_spec');
+    });
+
+    it('feature must go through product_refinement', async () => {
+      const feature = addFeature(testContext.projectRoot, 'Test Feature', 'feature');
+      createFeatureFixture(testContext.projectRoot, feature.id, createdPhaseArtifacts);
+
+      // Try to skip product_refinement
+      const result = await updateFeaturePhase(
+        testContext.projectRoot,
+        feature.id,
+        'tech_spec'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Cannot transition feature');
+
+      // Verify correct path works
+      const correctResult = await updateFeaturePhase(
+        testContext.projectRoot,
+        feature.id,
+        'product_refinement'
+      );
+
+      expect(correctResult.success).toBe(true);
+    });
+  });
 });

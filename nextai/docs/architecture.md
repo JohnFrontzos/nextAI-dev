@@ -76,6 +76,9 @@ Business logic for state management, scaffolding, sync, and validation.
 | `base.ts` | Abstract base class for client configurators |
 | `claude-code.ts` | Claude Code integration (`.claude/`) |
 | `opencode.ts` | OpenCode integration (`.opencode/`) |
+| `resources.ts` | Resource manifest and copying utilities |
+| `version.ts` | Version comparison and tracking |
+| `client-selection.ts` | Interactive client selection |
 
 #### Validation (`src/core/validation/`)
 
@@ -140,12 +143,28 @@ Zod schemas for runtime validation.
 
 ### Sync Flow
 
+The sync system operates in two stages:
+
+**Stage 1: Resource Update (when using `--force` or version change detected)**
+```
+package resources/               .nextai/
+├── agents/*.md          ──►     ├── agents/*.md
+├── skills/*/SKILL.md    ──►     ├── skills/*/SKILL.md
+└── templates/commands/  ──►     └── templates/commands/*.md
+```
+
+**Stage 2: Client Sync**
 ```
 .nextai/                          .claude/ (or .opencode/)
 ├── agents/*.md          ──►      ├── agents/*.md
 ├── skills/*/SKILL.md    ──►      ├── skills/*/SKILL.md
 └── templates/commands/  ──►      └── commands/nextai-*.md
 ```
+
+**Sync Modes:**
+- **Normal sync**: Only syncs `.nextai/` to client directories
+- **Force sync** (`--force`): Updates `.nextai/` from package, then syncs to client
+- **Auto-update**: Automatically updates resources when version change detected
 
 ## Technology Stack
 
@@ -320,3 +339,4 @@ Steps:
 
 <!-- Updated: 2025-12-21 - Added testing.md to refinement outputs, updated /testing workflow, added testing-investigator skill -->
 <!-- Updated: 2025-12-22 - Fixed agents directory path from agents/nextai/ to agents/ in sync flow and client-agnostic sections -->
+<!-- Updated: 2025-12-22 - Added sync module files and documented two-stage sync flow with resource update behavior -->

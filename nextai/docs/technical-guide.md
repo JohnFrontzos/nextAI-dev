@@ -202,12 +202,45 @@ Feature lifecycle tracking:
 | `nextai show <id>` | Show feature details |
 | `nextai resume [id]` | Resume work on feature |
 | `nextai remove <id>` | Remove unwanted feature (moves to `nextai/removed/`) |
-| `nextai sync` | Re-sync to AI clients |
+| `nextai sync` | Re-sync to AI clients (use `--force` to update resources from package) |
 | `nextai repair [id]` | Repair state issues |
 | `nextai testing <id>` | Log test results with automatic spec change detection and investigation on FAIL |
 | `nextai complete <id>` | Archive completed feature (`--skip-summary`, `--force`) |
 | `nextai status <id>` | Update feature status |
 | `nextai advance <id> <phase>` | Advance to phase (internal) |
+
+### Sync Command Details
+
+The `nextai sync` command syncs NextAI configuration and resources to your AI client directories.
+
+**Basic Usage:**
+```bash
+nextai sync                    # Sync to default client
+nextai sync --client claude    # Sync to specific client
+nextai sync --force            # Force overwrite AND update resources
+nextai sync --dry-run          # Preview what would be synced
+```
+
+**Resource Updates:**
+
+When you update the NextAI package, new agents, skills, and commands are available in the package's `resources/` directory. To receive these updates in your project's `.nextai/` directory, use the `--force` flag:
+
+```bash
+nextai sync --force
+```
+
+This will:
+1. Copy updated resources from the package to `.nextai/` (agents, skills, commands)
+2. Sync those resources to your AI client directory (`.claude/` or `.opencode/`)
+
+**Auto-Update Behavior:**
+
+NextAI automatically detects version changes and prompts for updates:
+- On first sync after package upgrade, resources are auto-updated
+- Template version is tracked in `.nextai/state/session.json`
+- Use `--no-auto-update` to skip automatic updates
+
+<!-- Updated: 2025-12-22 - Added sync command details and resource update behavior -->
 
 ## Environment Variables
 

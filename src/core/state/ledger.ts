@@ -3,8 +3,8 @@ import {
   type Phase,
   createFeature,
   generateFeatureId,
-  VALID_TRANSITIONS,
   type FeatureType,
+  getValidTransitionsForFeature,
 } from '../../schemas/ledger.js';
 import { loadLedger, saveLedger, appendHistory } from '../../cli/utils/config.js';
 import { getValidatorForPhase } from '../validation/phase-validators.js';
@@ -142,16 +142,16 @@ export async function validateFeatureForPhase(
 
   const fromPhase = feature.phase;
 
-  // Check if transition is valid (phase order)
-  if (!VALID_TRANSITIONS[fromPhase].includes(newPhase)) {
-    return {
-      success: false,
-      error: `Cannot transition from '${fromPhase}' to '${newPhase}'`,
-    };
+  // Check if transition is valid (type-specific)
+  const validTransitions = getValidTransitionsForFeature(feature);
+
+  if (!validTransitions.includes(newPhase)) {
+    const errorMsg = `Cannot transition ${feature.type} from '${fromPhase}' to '${newPhase}'. Valid transitions: ${validTransitions.join(', ')}`;
+    return { success: false, error: errorMsg };
   }
 
-  // Run validation for current phase
-  const validator = getValidatorForPhase(fromPhase);
+  // Run validation for current phase (type-aware)
+  const validator = getValidatorForPhase(fromPhase, feature.type);
   if (validator) {
     const basePath = options.basePath || 'todo';
     const featurePath = basePath === 'done'
@@ -163,7 +163,7 @@ export async function validateFeatureForPhase(
     if (!result.valid) {
       return {
         success: false,
-        error: 'Validation failed',
+        error: `Validation failed for ${feature.type} in ${fromPhase} phase`,
         errors: result.errors,
         warnings: result.warnings,
       };

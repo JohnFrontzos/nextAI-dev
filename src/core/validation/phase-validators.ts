@@ -1,8 +1,9 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import type { Phase } from '../../schemas/ledger.js';
+import type { Phase, FeatureType } from '../../schemas/ledger.js';
 import type { PhaseValidator, ValidationResult, ValidationIssue } from '../../schemas/validation.js';
 import { existsWithContent, getTaskProgress, getReviewOutcome } from './phase-detection.js';
+import { BugTestingValidator, TaskTestingValidator } from './type-specific-validators.js';
 
 /**
  * Helper to create ValidationResult from issues array
@@ -35,6 +36,38 @@ export class CreatedValidator implements PhaseValidator {
       const content = readFileSync(initPath, 'utf-8');
       if (!content.includes('# ')) {
         issues.push({ level: 'warning', message: 'initialization.md should have a title heading' });
+      }
+    }
+
+    return createResult(issues);
+  }
+}
+
+/**
+ * Validates the 'bug_investigation' phase before transitioning to 'product_refinement'
+ * Checks: investigation.md exists and has root cause analysis
+ */
+export class BugInvestigationValidator implements PhaseValidator {
+  targetPhase: Phase = 'product_refinement';
+
+  async validate(featureDir: string): Promise<ValidationResult> {
+    const issues: ValidationIssue[] = [];
+    const investigationPath = join(featureDir, 'planning', 'investigation.md');
+
+    if (!existsWithContent(investigationPath)) {
+      issues.push({
+        level: 'error',
+        message: 'investigation.md is missing or empty',
+      });
+    } else {
+      const content = readFileSync(investigationPath, 'utf-8');
+
+      // Check for root cause section
+      if (!content.toLowerCase().includes('root cause')) {
+        issues.push({
+          level: 'warning',
+          message: 'investigation.md should contain root cause analysis',
+        });
       }
     }
 
@@ -183,24 +216,57 @@ export class TestingValidator implements PhaseValidator {
 }
 
 /**
- * Registry of validators by current phase
- * The validator for a phase validates that phase's work is complete
- * before allowing transition to the next phase
+ * Get the appropriate validator for a phase (type-aware)
+ * Returns null for 'complete' phase or invalid phase/type combinations
+ *
+ * @param phase - Current phase to validate
+ * @param type - Feature type (feature, bug, task)
  */
-const validators: Record<Phase, PhaseValidator | null> = {
-  created: new CreatedValidator(),
-  product_refinement: new ProductRefinementValidator(),
-  tech_spec: new TechSpecValidator(),
-  implementation: new ImplementationValidator(),
-  review: new ReviewValidator(),
-  testing: new TestingValidator(),
-  complete: null, // No validation needed when already complete
-};
+export function getValidatorForPhase(
+  phase: Phase,
+  type: FeatureType
+): PhaseValidator | null {
+  // Type-specific validators
+  switch (phase) {
+    case 'created':
+      return new CreatedValidator();
 
-/**
- * Get the appropriate validator for a phase
- * Returns null for 'complete' phase (nothing to validate)
- */
-export function getValidatorForPhase(phase: Phase): PhaseValidator | null {
-  return validators[phase];
+    case 'bug_investigation':
+      if (type === 'bug') {
+        return new BugInvestigationValidator();
+      }
+      return null; // Invalid phase for this type
+
+    case 'product_refinement':
+      if (type === 'task') {
+        return null; // Tasks skip this phase
+      }
+      return new ProductRefinementValidator();
+
+    case 'tech_spec':
+      // ALL types use standard TechSpecValidator
+      return new TechSpecValidator();
+
+    case 'implementation':
+      // ALL types use standard ImplementationValidator (100% completion)
+      return new ImplementationValidator();
+
+    case 'review':
+      return new ReviewValidator();
+
+    case 'testing':
+      if (type === 'bug') {
+        return new BugTestingValidator();
+      }
+      if (type === 'task') {
+        return new TaskTestingValidator();
+      }
+      return new TestingValidator();
+
+    case 'complete':
+      return null;
+
+    default:
+      return null;
+  }
 }

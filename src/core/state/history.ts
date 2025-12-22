@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { getHistoryPath, appendHistory } from '../../cli/utils/config.js';
 import type { HistoryEvent } from '../../schemas/history.js';
+import type { FeatureType } from '../../schemas/ledger.js';
 
 /**
  * Read all history events
@@ -36,11 +37,12 @@ export function getValidationBypasses(projectRoot: string): HistoryEvent[] {
 }
 
 /**
- * Log a validation bypass
+ * Log a validation bypass (with feature type for metrics tracking)
  */
 export function logValidationBypass(
   projectRoot: string,
   featureId: string,
+  featureType: FeatureType,
   targetPhase: string,
   errorsIgnored: string[],
   warningsIgnored?: string[]
@@ -48,6 +50,7 @@ export function logValidationBypass(
   appendHistory(projectRoot, {
     event: 'validation_bypass',
     feature_id: featureId,
+    feature_type: featureType,
     target_phase: targetPhase,
     errors_ignored: errorsIgnored,
     warnings_ignored: warningsIgnored,

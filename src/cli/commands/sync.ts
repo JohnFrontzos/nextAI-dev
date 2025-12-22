@@ -146,6 +146,31 @@ export const syncCommand = new Command('sync')
         }
       } else {
         // Normal sync (existing code path)
+
+        // If force flag is set, update resources first
+        if (options.force) {
+          const spinner = ora('Updating NextAI resources...').start();
+          try {
+            const copyResult = copyResourcesToNextAI(projectRoot);
+            if (copyResult.errors.length > 0) {
+              spinner.warn('Some resources failed to copy');
+              for (const error of copyResult.errors) {
+                logger.dim(`  ${error}`);
+              }
+            } else {
+              spinner.succeed('Resources updated');
+              logger.subItem(`Agents: ${copyResult.agents}`);
+              logger.subItem(`Skills: ${copyResult.skills}`);
+              logger.subItem(`Commands: ${copyResult.commands}`);
+            }
+          } catch (error) {
+            spinner.fail('Resource update failed');
+            logger.dim(String(error));
+            logger.dim('Continuing with client sync...');
+          }
+          logger.blank();
+        }
+
         let client: SupportedClient = options.client;
 
         if (!client) {
