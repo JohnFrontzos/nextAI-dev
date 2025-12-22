@@ -222,7 +222,7 @@ export function updateLedgerPhase(
 
   // Log bypass if requested
   if (options.logBypass) {
-    logValidationBypass(projectRoot, featureId, newPhase, [], []);
+    logValidationBypass(projectRoot, featureId, feature.type, newPhase, [], []);
   }
 
   // Update metrics after phase transition
@@ -278,6 +278,7 @@ export async function updateFeaturePhase(
         logValidationBypass(
           projectRoot,
           featureId,
+          feature.type,
           newPhase,
           validationResult.errors || [],
           validationResult.warnings || []

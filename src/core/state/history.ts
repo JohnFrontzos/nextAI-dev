@@ -37,6 +37,26 @@ export function getValidationBypasses(projectRoot: string): HistoryEvent[] {
 }
 
 /**
+ * Get validation bypass counts by feature type
+ */
+export function getBypassCountsByType(projectRoot: string): Record<FeatureType, number> {
+  const bypasses = getValidationBypasses(projectRoot);
+  const counts: Record<FeatureType, number> = {
+    feature: 0,
+    bug: 0,
+    task: 0,
+  };
+
+  for (const event of bypasses) {
+    if (event.event === 'validation_bypass' && 'feature_type' in event) {
+      counts[event.feature_type]++;
+    }
+  }
+
+  return counts;
+}
+
+/**
  * Log a validation bypass (with feature type for metrics tracking)
  */
 export function logValidationBypass(

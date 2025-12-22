@@ -77,6 +77,7 @@ describe('History Operations', () => {
       logValidationBypass(
         testContext.projectRoot,
         'test-feature',
+        'feature',
         'product_refinement',
         ['Error 1', 'Error 2']
       );
@@ -89,7 +90,7 @@ describe('History Operations', () => {
     });
 
     it('includes bypass_method', () => {
-      logValidationBypass(testContext.projectRoot, 'test-feature', 'product_refinement', []);
+      logValidationBypass(testContext.projectRoot, 'test-feature', 'feature', 'product_refinement', []);
 
       const events = readHistory(testContext.projectRoot);
       const bypassEvent = events.find((e) => e.event === 'validation_bypass');
@@ -103,6 +104,7 @@ describe('History Operations', () => {
       logValidationBypass(
         testContext.projectRoot,
         'test-feature',
+        'feature',
         'product_refinement',
         ['Error 1', 'Error 2'],
         ['Warning 1']
@@ -114,6 +116,7 @@ describe('History Operations', () => {
       if (bypassEvent?.event === 'validation_bypass') {
         expect(bypassEvent.errors_ignored).toEqual(['Error 1', 'Error 2']);
         expect(bypassEvent.warnings_ignored).toEqual(['Warning 1']);
+        expect(bypassEvent.feature_type).toEqual('feature');
       }
     });
   });
@@ -244,8 +247,8 @@ describe('History Operations', () => {
   describe('getValidationBypasses()', () => {
     it('returns all validation bypass events', () => {
       logValidation(testContext.projectRoot, 'f1', 'created', 'passed');
-      logValidationBypass(testContext.projectRoot, 'f1', 'product_refinement', ['Error']);
-      logValidationBypass(testContext.projectRoot, 'f2', 'tech_spec', ['Another error']);
+      logValidationBypass(testContext.projectRoot, 'f1', 'feature', 'product_refinement', ['Error']);
+      logValidationBypass(testContext.projectRoot, 'f2', 'bug', 'tech_spec', ['Another error']);
 
       const bypasses = getValidationBypasses(testContext.projectRoot);
 
