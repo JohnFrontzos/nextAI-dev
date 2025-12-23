@@ -82,12 +82,12 @@ Invoke the Task tool with:
 
 FIRST ACTION - Load Your Skill:
 Before starting refinement, you MUST load your assigned skill:
-1. Use the Skill tool: Skill("refinement-product")
+1. Use the Skill tool: Skill("refinement-product-requirements")
 2. This skill provides question generation patterns and refinement best practices
 3. Follow the skill's guidance for generating clarifying questions
 
 Then proceed with your workflow:
-1. Follow the refinement-product skill for Q&A-based requirements gathering
+1. Follow the refinement-product-requirements skill for Q&A-based requirements gathering
 
 **Wait for the product-owner subagent to complete Phase 1 before proceeding to Phase 2.**
 
@@ -112,12 +112,12 @@ Invoke the Task tool with:
 
 FIRST ACTION - Load Your Skill:
 Before creating the specification, you MUST load your assigned skill:
-1. Use the Skill tool: Skill("refinement-technical")
+1. Use the Skill tool: Skill("refinement-technical-specs")
 2. This skill provides codebase analysis patterns, technical Q&A, and spec writing templates
 3. Follow the skill's guidance for technical analysis, writing spec.md, tasks.md, and testing.md
 
 Then proceed with your workflow:
-1. Follow the refinement-technical skill for codebase exploration, technical Q&A, and writing spec.md, tasks.md, and testing.md
+1. Follow the refinement-technical-specs skill for codebase exploration, technical Q&A, and writing spec.md, tasks.md, and testing.md
 
 **Wait for the technical-architect subagent to complete Phase 2 before proceeding to Completion.**
 
@@ -234,7 +234,7 @@ Invoke the Task tool with:
 
 FIRST ACTION - Load Your Skill:
 Before creating the specification, you MUST load your assigned skill:
-1. Use the Skill tool: Skill("refinement-technical")
+1. Use the Skill tool: Skill("refinement-technical-specs")
 2. This skill provides codebase analysis patterns, technical Q&A, and spec writing templates
 3. Follow the skill's guidance for technical analysis, writing spec.md, tasks.md, and testing.md
 

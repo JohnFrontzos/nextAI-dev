@@ -48,8 +48,8 @@ Agents:
   ✓ .claude/agents/nextai/investigator.md
 
 Skills:
-  ✓ .claude/skills/nextai/refinement-product.md
-  ✓ .claude/skills/nextai/refinement-technical.md
+  ✓ .claude/skills/nextai/refinement-product-requirements.md
+  ✓ .claude/skills/nextai/refinement-technical-specs.md
   ✓ .claude/skills/nextai/executing-plans.md
   ✓ .claude/skills/nextai/reviewer-checklist.md
   ✓ .claude/skills/nextai/documentation-recaps.md

@@ -62,7 +62,7 @@ When tests fail, the Investigator agent analyzes whether the failure represents 
 | Investigator | Bug analysis, root cause | Bug workflows |
 | AI Team Lead | Orchestration | All phases |
 
-### 8 Built-in Skills
+### 9 Built-in Skills
 
 | Skill | Purpose |
 |-------|---------|
@@ -74,6 +74,7 @@ When tests fail, the Investigator agent analyzes whether the failure represents 
 | `testing-investigator` | Test failure investigation and reporting |
 | `root-cause-tracing` | Backward bug tracing |
 | `systematic-debugging` | 4-phase debugging framework |
+| `nextai-guidelines` | NextAI architecture, CLI usage, and best practices |
 
 ### Generate + Delegate Architecture
 
@@ -203,3 +204,4 @@ NextAI never calls AI APIs directly:
 | Codex | Planned | - |
 
 <!-- Updated: 2025-12-21 - Added testing.md to refinement outputs, updated /testing workflow with investigation, added testing-investigator skill -->
+<!-- Updated: 2025-12-23 - Added nextai-guidelines skill to built-in skills list -->

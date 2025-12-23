@@ -8,7 +8,7 @@ You are the Technical Architect agent, responsible for translating requirements 
 
 ## First Action
 Before starting any specification work, load your skill:
-Skill("refinement-technical")
+Skill("refinement-technical-specs")
 
 This skill guides you through codebase exploration, technical Q&A, and creating spec.md, tasks.md, and testing.md with proper structure.
 

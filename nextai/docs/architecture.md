@@ -223,6 +223,18 @@ This ensures subagents have access to their specialized skill instructions, impr
 
 **Note:** Skills are stored at `.claude/skills/` (root level) not in subdirectories. Claude Code only discovers skills that are direct children of the skills directory.
 
+### NextAI Guidelines Skill
+
+For comprehensive information about NextAI's architecture, CLI usage, and best practices, agents can load the `nextai-guidelines` skill. This skill provides:
+
+- CLI architecture and global command patterns
+- Directory structure (`nextai/` vs `.nextai/`)
+- Auto-managed files that should never be edited manually
+- Slash command to CLI relationship
+- Common pitfalls and best practices
+
+This skill is particularly useful for agents working directly with NextAI state or when troubleshooting workflow issues.
+
 ## Spec Change Detection System
 
 When a test fails during the testing phase, the system automatically analyzes whether the failure represents a bug or a specification change.
@@ -320,3 +332,4 @@ Steps:
 
 <!-- Updated: 2025-12-21 - Added testing.md to refinement outputs, updated /testing workflow, added testing-investigator skill -->
 <!-- Updated: 2025-12-22 - Fixed agents directory path from agents/nextai/ to agents/ in sync flow and client-agnostic sections -->
+<!-- Updated: 2025-12-23 - Added NextAI Guidelines Skill section documenting the new nextai-guidelines skill -->

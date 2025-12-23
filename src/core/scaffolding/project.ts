@@ -213,8 +213,8 @@ function createDefaultSkills(skillsDir: string): void {
   ensureDir(skillsDir);
 
   const skills = [
-    { name: 'refinement-product', description: 'Product requirements Q&A loop' },
-    { name: 'refinement-technical', description: 'Codebase analysis, technical Q&A, spec authoring' },
+    { name: 'refinement-product-requirements', description: 'Product requirements Q&A loop' },
+    { name: 'refinement-technical-specs', description: 'Codebase analysis, technical Q&A, spec authoring' },
     { name: 'executing-plans', description: 'Step-by-step task execution' },
     { name: 'reviewer-checklist', description: 'AI review validation checklist' },
     { name: 'documentation-recaps', description: 'Docs & changelog updates' },

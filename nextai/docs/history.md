@@ -4,6 +4,7 @@ Completed features are archived in `nextai/done/` with full artifacts.
 
 | Date | Feature ID | Type | Summary | Archive |
 |------|------------|------|---------|---------|
+| 2025-12-23 | 20251223_nextai-usage-guidelines-skill | feature | Created comprehensive usage guidelines skill to educate AI agents about NextAI architecture, CLI usage, directory structure, auto-managed files, and common pitfalls. Integrated with ai-team-lead agent for consistent workflow understanding. | [summary](../done/20251223_nextai-usage-guidelines-skill/summary.md) |
 | 2025-12-22 | 20251222_fix-phase-transition-edge-case | bug | Fixed two edge cases in phase detection: review phase now correctly shows as incomplete when verdict is FAIL, and testing phase is properly detected when testing.md contains status: fail | [summary](../done/20251222_fix-phase-transition-edge-case/summary.md) |
 | 2025-12-21 | 20251221_handle-spec-changes-in-testing | feature | Extended testing-investigator skill to detect specification changes during test failures, added user approval flow with Yes/No/Cancel options, and implemented metrics tracking for spec change events | [summary](../done/20251221_handle-spec-changes-in-testing/summary.md) |
 | 2025-12-21 | 20251212_remove-manual-verification-fro | feature | Redesigned testing workflow with dedicated testing.md file, eliminated manual verification from tasks.md, added hybrid testing command modes, and integrated test failure investigation | [summary](../done/20251212_remove-manual-verification-fro/summary.md) |

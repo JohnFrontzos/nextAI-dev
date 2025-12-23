@@ -45,18 +45,22 @@ Generate 3-8 numbered technical questions covering:
 - **API Changes**: New or modified endpoints/interfaces?
 
 ### Question Format
-Each question should:
+
+Each question MUST:
 1. Be numbered for easy reference
 2. Include a proposed answer based on your codebase analysis
-3. Ask for confirmation or correction
+3. Offer an alternative option
+4. Use the format: "I found X / I recommend Y. Is that correct, or should we Z?"
 
 Example:
 ```
-1. **Service Architecture**: I found an existing `AuthService` at `src/services/auth.ts`. Should we extend this service with the new functionality, or create a separate `SessionService`? I recommend extending AuthService since it already handles token management.
+Based on my codebase analysis, I have some technical questions:
 
-2. **Database Impact**: This feature requires storing user preferences. I see we have a `users` table. Should we add columns to this table, or create a new `user_preferences` table? I recommend a new table for better separation of concerns.
+1. **Service Architecture**: I found an existing `AuthService` at `src/services/auth.ts`. I recommend extending this service with the new functionality since it already handles token management. Is that correct, or should we create a separate `SessionService` instead?
 
-3. **Reusable Components**: I found a `FormValidator` component at `src/utils/validation.ts`. Should we reuse this for the new form, or does this feature need custom validation logic?
+2. **Database Impact**: This feature requires storing user preferences. I see we have a `users` table. I recommend creating a new `user_preferences` table for better separation of concerns. Is that correct, or should we add columns to the existing `users` table instead?
+
+3. **Reusable Components**: I found a `FormValidator` component at `src/utils/validation.ts`. I assume we should reuse this for the new form. Is that correct, or does this feature need custom validation logic?
 ```
 
 ### Phase 4: Confidence-Based Loop
