@@ -193,6 +193,7 @@ Invoke the Task tool with:
 
 **Context to provide the investigator subagent:**
 - Feature ID: $ARGUMENTS
+- Output: `nextai/todo/$ARGUMENTS/planning/requirements.md` (investigation findings)
 - Evidence files in `attachments/evidence/`
 - User-provided reproduction steps
 - Error details and logs
@@ -225,7 +226,7 @@ Invoke the Task tool with:
 
 **Context to provide the technical-architect subagent:**
 - Feature ID: $ARGUMENTS
-- Input: `nextai/todo/$ARGUMENTS/planning/investigation.md` (investigator findings)
+- Input: `nextai/todo/$ARGUMENTS/planning/requirements.md` (investigator findings)
 - Input: `nextai/todo/$ARGUMENTS/planning/initialization.md` (original bug report)
 - Output: `nextai/todo/$ARGUMENTS/spec.md`, `nextai/todo/$ARGUMENTS/tasks.md`, and `nextai/todo/$ARGUMENTS/testing.md`
 - Project docs: `nextai/docs/` (if available)

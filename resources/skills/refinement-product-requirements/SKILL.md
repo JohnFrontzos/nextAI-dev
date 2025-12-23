@@ -103,7 +103,7 @@ Please provide file/folder paths or names if they exist.
 
 ## Output
 
-Write all Q&A results to `planning/requirements.md` with:
+Write all Q&A results to the requirements document:
 
 ```markdown
 # Requirements: [Feature Name]
@@ -156,3 +156,12 @@ Write all Q&A results to `planning/requirements.md` with:
 - If <95% confident, ask 1-3 follow-up questions
 - Maximum 3 rounds of questions
 - If still <95% after 3 rounds, warn and proceed with noted gaps
+
+## Next Steps
+
+After completing product requirements, run:
+```
+/nextai-refine <id>
+```
+
+This continues to the technical specification phase.

@@ -64,7 +64,7 @@ Review implemented code against the specification and identify issues before tes
 3. Check for issues in each category
 
 ### Phase 3: Generate Report
-Write results to `review.md`:
+Write results to the review document:
 
 ```markdown
 # Code Review
@@ -93,6 +93,19 @@ If FAIL:
 Maximum 5 automatic retry cycles before escalating to user.
 
 ## Output
-- `review.md` with PASS or FAIL result
+- Review document with PASS or FAIL result (location specified in delegation context)
 - Specific issues if FAIL
 - Phase transition trigger
+
+## Next Steps
+
+After completing code review:
+
+**If PASS:**
+```
+/nextai-testing <id>
+```
+This moves to manual testing phase.
+
+**If FAIL:**
+Return to `/nextai-implement <id>` to address review issues.

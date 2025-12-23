@@ -24,7 +24,7 @@ Before starting any investigation, load your skills:
 - `nextai/done/` - Archived features (check for similar bugs or related changes)
 
 ## Output
-- `nextai/todo/<id>/planning/investigation.md` - Analysis findings
+- `nextai/todo/<id>/planning/requirements.md` - Analysis findings
 - Updated `initialization.md` with root cause (if additional context discovered)
 
 ## Workflow
@@ -32,7 +32,7 @@ Load and follow two skills: root-cause-tracing and systematic-debugging.
 
 The root-cause-tracing skill guides you through working backward from symptom to root cause. The systematic-debugging skill provides structured debugging methodology (reproduce, isolate, understand, fix).
 
-Together these skills help you analyze bugs, gather evidence, trace causation, and document findings in planning/investigation.md.
+Together these skills help you analyze bugs, gather evidence, trace causation, and document findings.
 
 ## Communication
 - Explain findings clearly with code references

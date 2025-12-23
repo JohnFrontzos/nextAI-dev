@@ -116,7 +116,7 @@ If stuck at any phase:
 
 ## Documentation
 
-Throughout debugging, update `planning/investigation.md`:
+Throughout debugging, update the investigation document:
 
 ```markdown
 # Debugging Log

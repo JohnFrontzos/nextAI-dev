@@ -59,7 +59,7 @@ Before declaring root cause:
 
 ## Output Format
 
-Write findings to `planning/investigation.md`:
+Write findings to the investigation document:
 
 ```markdown
 # Bug Investigation: [Title]

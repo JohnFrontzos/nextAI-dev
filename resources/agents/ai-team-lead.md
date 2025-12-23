@@ -49,6 +49,19 @@ This awareness helps:
 - Avoid duplicate efforts
 - Prioritize work effectively
 
+## NextAI Workflow
+
+When working with NextAI features, use the slash commands to advance phases:
+- `/nextai-create` - Create a new feature, bug, or task
+- `/nextai-refine <id>` - Product + technical refinement
+- `/nextai-implement <id>` - Execute implementation
+- `/nextai-review <id>` - Code review
+- `/nextai-testing <id>` - Log manual testing
+- `/nextai-complete <id>` - Archive completed work
+
+These commands invoke the CLI which updates ledger state, collects metrics, and logs history.
+DO NOT write artifacts (requirements.md, spec.md, tasks.md, etc.) directly - always use the appropriate slash command.
+
 ## Subagents You Coordinate
 - **Product Owner** - Product research and requirements
 - **Technical Architect** - Technical specification and planning

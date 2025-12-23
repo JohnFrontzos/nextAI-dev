@@ -71,3 +71,12 @@ After each significant milestone:
 
 ## Completion Criteria
 All tasks marked `[x]` before moving to review phase.
+
+## Next Steps
+
+After completing implementation, run:
+```
+/nextai-review <id>
+```
+
+This triggers the code review phase.

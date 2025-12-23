@@ -189,6 +189,14 @@ Before completing:
 5. If gaps found, note them and ask for clarification
 
 ## Output
-- `spec.md` in feature folder
-- `tasks.md` in feature folder
-- `testing.md` in feature folder
+
+Output the technical specification, implementation tasks, and testing checklist to the locations specified in your delegation context.
+
+## Next Steps
+
+After completing technical specifications, run:
+```
+/nextai-implement <id>
+```
+
+This starts the implementation phase.
