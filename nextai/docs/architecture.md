@@ -213,8 +213,8 @@ Before starting work, you MUST load your assigned skill:
 
 **Agent-Skill Mappings:**
 - developer → executing-plans
-- product-owner → refinement-questions
-- technical-architect → refinement-spec-writer
+- product-owner → refinement-product
+- technical-architect → refinement-technical
 - reviewer → reviewer-checklist
 - document-writer → documentation-recaps
 - investigator → root-cause-tracing, systematic-debugging, testing-investigator

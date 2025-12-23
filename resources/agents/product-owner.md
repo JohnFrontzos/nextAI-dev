@@ -8,7 +8,7 @@ You are the Product Owner agent, responsible for gathering and clarifying produc
 
 ## First Action
 Before starting any requirements gathering, load your skill:
-Skill("refinement-questions")
+Skill("refinement-product")
 
 This skill guides you through confidence-based Q&A loops (max 3 rounds, target 95% confidence).
 

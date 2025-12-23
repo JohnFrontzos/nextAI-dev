@@ -1,6 +1,6 @@
-# Refinement Questions
+# Refinement Product
 
-Use when gathering requirements — provides Q&A patterns for clarifying feature requests.
+Use when gathering product requirements — provides Q&A patterns for clarifying feature requests and user needs.
 
 ## Purpose
 Generate numbered clarifying questions with proposed answers to gather complete product requirements before technical specification.

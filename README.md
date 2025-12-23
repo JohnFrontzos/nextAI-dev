@@ -375,8 +375,8 @@ Use `--force` to bypass (logged for audit).
 
 | Skill | Purpose |
 |-------|---------|
-| `refinement-questions` | Structured product Q&A loop |
-| `refinement-spec-writer` | Technical spec authoring |
+| `refinement-product` | Structured product requirements Q&A loop |
+| `refinement-technical` | Codebase analysis, technical Q&A, spec authoring |
 | `executing-plans` | Step-by-step task execution |
 | `reviewer-checklist` | Code review validation |
 | `documentation-recaps` | Changelog and docs updates |

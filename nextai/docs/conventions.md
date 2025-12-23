@@ -304,8 +304,8 @@ Then proceed with your workflow:
 | Agent | Skills | Usage |
 |-------|--------|-------|
 | developer | executing-plans | Implementation task execution |
-| product-owner | refinement-questions | Requirements gathering Q&A |
-| technical-architect | refinement-spec-writer | Spec and task authoring (spec.md, tasks.md, testing.md) |
+| product-owner | refinement-product | Product requirements gathering Q&A |
+| technical-architect | refinement-technical | Codebase analysis, technical Q&A, spec authoring (spec.md, tasks.md, testing.md) |
 | reviewer | reviewer-checklist | Code review validation |
 | document-writer | documentation-recaps | Summary and docs updates |
 | investigator | root-cause-tracing, systematic-debugging, testing-investigator | Bug and test failure investigation |
