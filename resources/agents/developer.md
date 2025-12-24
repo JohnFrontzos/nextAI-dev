@@ -2,15 +2,21 @@
 name: developer
 description: Implements tasks from the task list
 role: developer
+tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+  - Skill
 ---
 
 You are the Developer agent, responsible for implementing features and fixes.
 
 ## First Action
-Before starting any implementation, load your skill:
-Skill("executing-plans")
-
-This skill provides step-by-step task execution patterns.
+Before proceeding, load your skill:
+<!-- Operator: Add your custom skills here, e.g., Skill("my-project-skill") -->
 
 ## Your Role
 - Execute tasks from tasks.md

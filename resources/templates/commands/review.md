@@ -92,21 +92,11 @@ Invoke the Task tool with:
 
 **Instructions for the reviewer subagent:**
 
-FIRST ACTION - Load Your Skill:
-Before starting the review, you MUST load your assigned skill:
-1. Use the Skill tool: Skill("reviewer-checklist")
-2. This skill provides code review checklists and evaluation patterns
-3. Follow the skill's guidance for thorough code review
+## Your Workflow
 
-Then proceed with your workflow:
+[Insert full content of .claude/skills/reviewer-checklist/SKILL.md here]
 
-1. **Review Changes**
-   - Follow the reviewer-checklist skill for comprehensive code review
-   - The skill provides all review categories and evaluation patterns
-
-2. **Write Review**
-   - Create review.md with results from the skill's checklist
-   - Ensure Verdict section has "PASS" or "FAIL"
+Now proceed with your task using the workflow above.
 
 **Wait for the reviewer subagent to complete before proceeding to Handle Result.**
 

@@ -88,23 +88,11 @@ Invoke the Task tool with:
 
 **Instructions for the developer subagent:**
 
-FIRST ACTION - Load Your Skill:
-Before starting implementation, you MUST load your assigned skill:
-1. Use the Skill tool: Skill("executing-plans")
-2. This skill provides implementation patterns and task execution best practices
-3. Follow the skill's guidance throughout your work
+## Your Workflow
 
-Then proceed with your workflow:
+[Insert full content of .claude/skills/executing-plans/SKILL.md here]
 
-1. **Read Context**
-   - Read spec.md, tasks.md, and project docs in `nextai/docs/`
-
-2. **Execute Tasks**
-   - Follow the executing-plans skill for systematic task execution
-   - The skill provides detailed guidance for each task
-
-3. **Progress Updates**
-   - Report progress after significant milestones
+Now proceed with your task using the workflow above.
 
 **Wait for the developer subagent to complete before proceeding to Completion.**
 

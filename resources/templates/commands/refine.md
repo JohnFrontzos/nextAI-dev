@@ -80,14 +80,11 @@ Invoke the Task tool with:
 
 **Instructions for the product-owner subagent:**
 
-FIRST ACTION - Load Your Skill:
-Before starting refinement, you MUST load your assigned skill:
-1. Use the Skill tool: Skill("refinement-product-requirements")
-2. This skill provides question generation patterns and refinement best practices
-3. Follow the skill's guidance for generating clarifying questions
+## Your Workflow
 
-Then proceed with your workflow:
-1. Follow the refinement-product-requirements skill for Q&A-based requirements gathering
+[Insert full content of .claude/skills/refinement-product-requirements/SKILL.md here]
+
+Now proceed with your task using the workflow above.
 
 **Wait for the product-owner subagent to complete Phase 1 before proceeding to Phase 2.**
 
@@ -110,14 +107,11 @@ Invoke the Task tool with:
 
 **Instructions for the technical-architect subagent:**
 
-FIRST ACTION - Load Your Skill:
-Before creating the specification, you MUST load your assigned skill:
-1. Use the Skill tool: Skill("refinement-technical-specs")
-2. This skill provides codebase analysis patterns, technical Q&A, and spec writing templates
-3. Follow the skill's guidance for technical analysis, writing spec.md, tasks.md, and testing.md
+## Your Workflow
 
-Then proceed with your workflow:
-1. Follow the refinement-technical-specs skill for codebase exploration, technical Q&A, and writing spec.md, tasks.md, and testing.md
+[Insert full content of .claude/skills/refinement-technical-specs/SKILL.md here]
+
+Now proceed with your task using the workflow above.
 
 **Wait for the technical-architect subagent to complete Phase 2 before proceeding to Completion.**
 
@@ -200,18 +194,11 @@ Invoke the Task tool with:
 
 **Instructions for the investigator subagent:**
 
-FIRST ACTION - Load Your Skills:
-Before starting investigation, you MUST load your assigned skills:
-1. Use the Skill tool: Skill("root-cause-tracing")
-2. Use the Skill tool: Skill("systematic-debugging")
-3. These skills provide debugging methodologies and tracing patterns
-4. Follow the skills' guidance throughout the investigation
+## Your Workflow
 
-Then proceed with your workflow:
+[Insert full content of .claude/skills/testing-investigator/SKILL.md here]
 
-1. Analyze the evidence
-2. Trace the root cause
-3. Document findings
+Now proceed with your task using the workflow above.
 
 After investigation completes, delegate to technical-architect:
 
@@ -233,22 +220,11 @@ Invoke the Task tool with:
 
 **Instructions for the technical-architect subagent:**
 
-FIRST ACTION - Load Your Skill:
-Before creating the specification, you MUST load your assigned skill:
-1. Use the Skill tool: Skill("refinement-technical-specs")
-2. This skill provides codebase analysis patterns, technical Q&A, and spec writing templates
-3. Follow the skill's guidance for technical analysis, writing spec.md, tasks.md, and testing.md
+## Your Workflow
 
-Then proceed with your workflow:
+[Insert full content of .claude/skills/refinement-technical-specs/SKILL.md here]
 
-1. Read the investigation document thoroughly
-2. Read the original bug report for context
-3. Review project docs in `nextai/docs/` if available
-4. Design the fix approach
-5. If uncertain, ask technical clarifying questions (max 3 rounds)
-6. Write `spec.md` with full fix specification
-7. Write `tasks.md` with implementation checklist (ONLY implementation tasks)
-8. Write `testing.md` with manual test checklist
+Now proceed with your task using the workflow above.
 
 **Wait for the technical-architect subagent to complete before proceeding to Completion.**
 

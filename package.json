@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "tsx watch src/cli/index.ts",
     "build": "tsup",
+    "sync:dev": "npm run build && node bin/nextai.js sync --force",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

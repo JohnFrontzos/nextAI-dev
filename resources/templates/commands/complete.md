@@ -98,34 +98,11 @@ Invoke the Task tool with:
 
 **Instructions for the document-writer subagent:**
 
-FIRST ACTION - Load Your Skill:
-Before generating the summary, you MUST load your assigned skill:
-1. Use the Skill tool: Skill("documentation-recaps")
-2. This skill provides summary writing patterns and documentation standards
-3. Follow the skill's guidance throughout the summary generation
+## Your Workflow
 
-Then proceed with your workflow:
+[Insert full content of .claude/skills/documentation-recaps/SKILL.md here]
 
-### Step 1: Read Feature Context
-
-Read all feature artifacts:
-- planning/initialization.md, planning/requirements.md
-- spec.md, tasks.md, review.md, testing.md
-- attachments/ folder (if exists)
-
-### Step 2: Generate Summary
-
-Follow the documentation-recaps skill (Complete Mode) to:
-- Create summary.md in nextai/done/$ARGUMENTS/
-- Document key changes and implementation highlights
-- Capture attachment details before deletion
-- Update changelog and history.md
-
-### Step 3: Archive Feature
-
-Run CLI command: `nextai complete $ARGUMENTS --skip-summary`
-
-This moves files from todo/ to done/ and updates ledger.
+Now proceed with your task using the workflow above.
 
 **Wait for the document-writer subagent to complete before proceeding to Step 4.**
 
@@ -148,33 +125,11 @@ Invoke the Task tool with:
 
 **Instructions for the document-writer subagent:**
 
-FIRST ACTION - Load Your Skill:
-Before updating documentation, you MUST load your assigned skill:
-1. Use the Skill tool: Skill("documentation-recaps")
-2. This skill provides documentation patterns and update best practices
-3. Follow the skill's guidance for refreshing project docs
+## Your Workflow
 
-Then proceed with your workflow:
+[Insert full content of .claude/skills/documentation-recaps/SKILL.md here]
 
-1. **Re-scan project** for any changes introduced by this feature:
-   - New dependencies or technologies
-   - New architectural patterns or components
-   - New coding conventions
-   - Structure changes
-
-2. **Update relevant docs** in `nextai/docs/`:
-   - `architecture.md` - if structure or patterns changed
-   - `technical-guide.md` - if new setup steps or dependencies added
-   - `conventions.md` - if new coding patterns introduced
-   - `product-overview.md` - if new user-facing capabilities added
-
-3. **Preservation rules**:
-   - Never delete user-authored content
-   - Merge new information with existing
-   - Prefer appending over replacing
-   - Mark updated sections with timestamp
-
-Note: This is the same process as `/nextai-analyze` but runs automatically after feature completion.
+Now proceed with your task using the workflow above.
 
 **Wait for the document-writer subagent to complete before proceeding to Completion Message.**
 
