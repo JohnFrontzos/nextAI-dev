@@ -112,8 +112,7 @@ The CLI will:
 - Auto-check attachments/evidence/ folder for files
 - Create test session in testing.md
 - Log session with FAIL status
-- Add investigation report placeholder
-- Trigger investigator agent (placeholder for now)
+- Add investigation report section
 - Return to implementation phase
 
 ### Conversational Mode (no status provided)
@@ -145,7 +144,7 @@ The CLI will:
 - Create/update `nextai/todo/<id>/testing.md` with session format
 - Auto-increment session number (Session 1, Session 2, etc.)
 - Include auto-detected or manually specified attachments
-- For FAIL: Add investigation report placeholder
+- For FAIL: Add investigation report section
 - Update phase (PASS → stays in testing, FAIL → returns to implementation)
 
 ## Step 6: Show Next Steps
@@ -165,23 +164,56 @@ Next: Run /nextai-complete $ARGUMENTS to archive this feature
 ✓ Testing logged: FAIL (Session N)
 
 Test session recorded in testing.md.
-Investigation report placeholder added.
+Investigation report section added.
 
 The feature has been returned to implementation phase.
+```
+
+<DELEGATION_REQUIRED>
+You MUST delegate test failure investigation using the Task tool. DO NOT investigate yourself.
+
+Invoke the Task tool with:
+- subagent_type: "investigator"
+- description: "Test failure investigation for $ARGUMENTS"
+- prompt: Include ALL of the following context and instructions below
+</DELEGATION_REQUIRED>
+
+**Context to provide the investigator subagent:**
+- Feature ID: $ARGUMENTS
+- Test Session: `nextai/todo/$ARGUMENTS/testing.md` (most recent FAIL session)
+- Evidence files in `attachments/evidence/` (auto-detected by CLI)
+- Failure notes: [pass through operator's --notes value]
+- Specification: `nextai/todo/$ARGUMENTS/spec.md`
+- Implementation: `nextai/todo/$ARGUMENTS/tasks.md`
+
+**Instructions for the investigator subagent:**
+
+## Your Workflow
+
+[Insert full content of .claude/skills/testing-investigator/SKILL.md here]
+
+Now proceed with your task using the workflow above.
+
+**Wait for the investigator subagent to complete before proceeding.**
+
+After investigation completes, inform the user:
+```
+✓ Investigation complete
+
+Investigation report has been written by investigator to testing.md.
 
 Next steps:
-1. Review the test failure notes in testing.md
-2. (Future) Investigator will analyze failure and update investigation report
-3. Fix the issues identified
-4. Run /nextai-implement $ARGUMENTS to address the issues
-5. Then: /nextai-review $ARGUMENTS
-6. Then: /nextai-testing $ARGUMENTS
+1. Review the investigation report in testing.md
+2. Address the issues identified in the report
+3. Run /nextai-implement $ARGUMENTS to fix the issues
+4. Then: /nextai-review $ARGUMENTS
+5. Then: /nextai-testing $ARGUMENTS
 ```
 
 **Investigation Report Note:**
 - For FAIL sessions, an investigation report section is added to testing.md
-- Currently a placeholder - full investigator integration coming soon
-- Operator can manually add investigation findings to this section
+- The investigator agent analyzes the failure and writes findings to the report
+- Review the investigation findings before returning to implementation
 
 ## Attachments
 

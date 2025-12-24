@@ -103,12 +103,20 @@ export class ClaudeCodeConfigurator extends ClientConfigurator {
       try {
         const parsed = parseBaseAgent(content);
         const transformed = toClaudeAgent(parsed);
-        writeFileSync(targetPath, transformed);
+
+        // Embed skill placeholders with actual skill content
+        const contentWithSkills = embedSkillPlaceholders(transformed, projectRoot);
+
+        writeFileSync(targetPath, contentWithSkills);
       } catch (error) {
         // Fallback for legacy format - just add tools if missing
         console.warn(`Failed to parse ${agent} as base format, using legacy fallback`);
         const transformed = this.transformAgentManifest(content);
-        writeFileSync(targetPath, transformed);
+
+        // Embed skills in legacy format too
+        const contentWithSkills = embedSkillPlaceholders(transformed, projectRoot);
+
+        writeFileSync(targetPath, contentWithSkills);
       }
       agentsSynced.push(agent);
     }

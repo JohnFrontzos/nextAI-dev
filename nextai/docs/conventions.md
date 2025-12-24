@@ -301,14 +301,20 @@ Then proceed with your workflow:
 
 **Agent-Skill Mappings:**
 
-| Agent | Skills | Usage |
-|-------|--------|-------|
-| developer | executing-plans | Implementation task execution |
-| product-owner | refinement-product | Product requirements gathering Q&A |
-| technical-architect | refinement-technical | Codebase analysis, technical Q&A, spec authoring (spec.md, tasks.md, testing.md) |
-| reviewer | reviewer-checklist | Code review validation |
-| document-writer | documentation-recaps | Summary and docs updates |
-| investigator | root-cause-tracing, systematic-debugging, testing-investigator | Bug and test failure investigation |
+| Agent | Skills | Loading Method |
+|-------|--------|----------------|
+| developer | executing-plans | Runtime (Skill tool) |
+| product-owner | refinement-product | Runtime (Skill tool) |
+| technical-architect | refinement-technical | Runtime (Skill tool) |
+| reviewer | reviewer-checklist | Runtime (Skill tool) |
+| document-writer | documentation-recaps | Runtime (Skill tool) |
+| investigator | root-cause-tracing, systematic-debugging | Embedded (sync-time via skillDependencies) |
+| investigator | testing-investigator | Delegation-time (via command template) |
+
+**Loading Methods:**
+- **Runtime**: Agent uses Skill tool to load skill after being invoked
+- **Embedded**: Skills declared in agent frontmatter `skillDependencies` are embedded during sync
+- **Delegation-time**: Workflow skills provided inline in delegation prompt by command templates
 
 **Note:** Skills must be direct children of `.claude/skills/` (no subdirectories). Use bare skill names without namespace prefixes when invoking skills.
 
@@ -373,6 +379,7 @@ When using the /testing command, test sessions are logged to testing.md with seq
 - Attachments folder (attachments/evidence/) is auto-checked
 
 <!-- Updated: 2025-12-21 - Added test session logging format, testing-investigator skill, tasks.md/testing.md separation -->
+<!-- Updated: 2025-12-24 - Updated Agent-Skill Mappings table to document skill loading methods (runtime, embedded, delegation-time) -->
 
 ## Metrics Logging Conventions
 

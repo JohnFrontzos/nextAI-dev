@@ -76,6 +76,9 @@ Business logic for state management, scaffolding, sync, and validation.
 | `base.ts` | Abstract base class for client configurators |
 | `claude-code.ts` | Claude Code integration (`.claude/`) |
 | `opencode.ts` | OpenCode integration (`.opencode/`) |
+| `transformers/agent.ts` | Agent template format conversions |
+| `transformers/skill.ts` | Skill validation and embedding |
+| `transformers/skill-embedder.ts` | Skill placeholder replacement |
 
 #### Validation (`src/core/validation/`)
 
@@ -97,6 +100,14 @@ Zod schemas for runtime validation.
 | `history.ts` | History log entries |
 | `agent.ts` | Agent definitions |
 | `validation.ts` | Validation results |
+
+### Types (`src/types/`)
+
+TypeScript type definitions for templates and transformers.
+
+| File | Type Definitions |
+|------|------------------|
+| `templates.ts` | Base format, Claude Code format, OpenCode format for agents and skills |
 
 ## Data Flow
 
@@ -141,11 +152,81 @@ Zod schemas for runtime validation.
 ### Sync Flow
 
 ```
-.nextai/                          .claude/ (or .opencode/)
-├── agents/*.md          ──►      ├── agents/*.md
-├── skills/*/SKILL.md    ──►      ├── skills/*/SKILL.md
-└── templates/commands/  ──►      └── commands/nextai-*.md
+resources/                        .nextai/                         .claude/ (or .opencode/)
+├── agents/*.md          ──►      ├── agents/*.md         ──►      ├── agents/*.md (transformed + embedded skills)
+├── skills/*/SKILL.md    ──►      ├── skills/*/SKILL.md   ──►      ├── skills/*/SKILL.md
+└── templates/commands/  ──►      └── templates/commands/ ──►      └── commands/nextai-*.md (embedded skills)
 ```
+
+The sync pipeline performs two transformations:
+
+1. **Template Transformation** - Converts base format (resources/) to platform-specific format
+2. **Skill Embedding** - Embeds skill content at skill placeholder locations
+
+During sync, agents and commands with skill placeholders have those skills embedded directly into their content. This ensures subagents always have access to their methodology skills without runtime dependencies.
+
+### Template Transformation System
+
+<!-- Updated: 2025-12-24 by NextAI -->
+
+NextAI uses a canonical base format in `resources/` as the single source of truth for agents and skills. Platform-specific transformers convert these templates to the optimal format for each AI client during sync operations.
+
+**Architecture:**
+
+```
+Base Format (resources/agents/*.md)
+  |
+  ├──► Parser (parseBaseAgent)
+  |      └─ Validates required fields (id, description, role, tools)
+  |
+  ├──► Claude Code Transformer (toClaudeAgent)
+  |      ├─ id → name
+  |      ├─ tools object → comma-separated string (capitalized)
+  |      └─ skillDependencies → skills (comma-separated)
+  |
+  └──► OpenCode Transformer (toOpenCodeAgent)
+         ├─ role → mode
+         ├─ tools → object format (preserved)
+         └─ skillDependencies → omitted (uses Skill tool)
+```
+
+**Base Format Structure:**
+
+```yaml
+---
+id: agent-name
+description: Agent purpose
+role: subagent | primary | all
+tools:
+  read: true
+  write: true
+  bash: false
+skillDependencies:
+  - skill-name-1
+  - skill-name-2
+---
+
+Agent instructions content...
+```
+
+**Platform-Specific Outputs:**
+
+| Attribute | Base Format | Claude Code | OpenCode |
+|-----------|-------------|-------------|----------|
+| Identity | `id` | `name` | filename |
+| Agent role | `role` | omitted | `mode` |
+| Tools | `{read: true}` | `"Read, Write"` | `{read: true}` |
+| Skills | `skillDependencies` array | `skills` comma-separated | omitted |
+
+**Transformer Modules:**
+
+- `src/core/sync/transformers/agent.ts` - Agent format conversions
+- `src/core/sync/transformers/skill.ts` - Skill validation and embedding
+- `src/types/templates.ts` - TypeScript type definitions
+
+**Error Handling:**
+
+If parsing fails, the sync system falls back to legacy format (direct copy) with a console warning. This ensures sync operations never fail due to template format issues.
 
 ## Technology Stack
 
@@ -191,35 +272,73 @@ Every phase produces reviewable outputs:
 
 ### Client-Agnostic
 
-Sync adapters transform NextAI resources for each supported AI client:
-- Claude Code: `.claude/commands/`, `.claude/agents/`, `.claude/skills/`
-- OpenCode: `.opencode/command/`, `.opencode/agent/`
+NextAI maintains a single source of truth in `resources/` using a canonical base format. Platform-specific transformers convert these templates to optimized formats for each AI client during sync:
 
-### Explicit Skill Loading
+- **Claude Code**: `.claude/commands/`, `.claude/agents/`, `.claude/skills/`
+  - Tools as comma-separated strings
+  - Skills as comma-separated strings
+  - Agent name from `id` field
 
-Subagents must explicitly load their assigned skills via the Skill tool. Agent frontmatter `skills:` fields serve as documentation, but Claude Code does not automatically load them when spawning subagents via the Task tool.
+- **OpenCode**: `.opencode/command/`, `.opencode/agent/`
+  - Tools as object format
+  - Agent mode from `role` field
+  - Skills loaded via Skill tool
 
-**Implementation Pattern:**
+This approach enables multi-platform support from a single template source, reducing maintenance overhead and ensuring consistency across platforms.
 
-Command templates instruct subagents to load skills as their first action:
+### Skill Loading Strategy
+
+NextAI uses a dual approach to provide skills to subagents, balancing embedded methodology with context-specific workflows:
+
+#### Embedded Skills (Sync-Time)
+
+Agents can declare `skillDependencies` in their frontmatter to have methodology skills embedded directly during sync:
+
+```yaml
+---
+id: investigator
+skillDependencies: ["root-cause-tracing", "systematic-debugging"]
+---
+```
+
+During `nextai sync`, the sync pipeline calls `embedSkillPlaceholders()` to replace skill placeholder comments with full skill content. This ensures methodology skills are always available without runtime loading.
+
+**Embedded Skills by Agent:**
+- investigator → root-cause-tracing, systematic-debugging (embedded at sync time)
+
+#### Workflow Skills (Delegation-Time)
+
+For context-specific workflow skills, command templates provide the skill content via delegation prompts:
+
+```markdown
+**Instructions for the investigator subagent:**
+
+## Your Workflow
+
+[Insert full content of .claude/skills/testing-investigator/SKILL.md here]
+```
+
+The `embedSkillPlaceholders()` function replaces these placeholders during command template sync.
+
+**Workflow Skills by Context:**
+- testing FAIL → testing-investigator (provided via delegation)
+
+#### Runtime Skill Loading (Legacy)
+
+Some agents still use explicit runtime loading via the Skill tool:
 
 ```markdown
 FIRST ACTION - Load Your Skill:
 Before starting work, you MUST load your assigned skill:
 1. Use the Skill tool: Skill("[skill-name]")
-2. This skill provides [description]
-3. Follow the skill's guidance throughout your work
 ```
 
-**Agent-Skill Mappings:**
+**Runtime-Loaded Skills by Agent:**
 - developer → executing-plans
 - product-owner → refinement-product
 - technical-architect → refinement-technical
 - reviewer → reviewer-checklist
 - document-writer → documentation-recaps
-- investigator → root-cause-tracing, systematic-debugging, testing-investigator
-
-This ensures subagents have access to their specialized skill instructions, improving output quality and consistency.
 
 **Note:** Skills are stored at `.claude/skills/` (root level) not in subdirectories. Claude Code only discovers skills that are direct children of the skills directory.
 
@@ -333,3 +452,5 @@ Steps:
 <!-- Updated: 2025-12-21 - Added testing.md to refinement outputs, updated /testing workflow, added testing-investigator skill -->
 <!-- Updated: 2025-12-22 - Fixed agents directory path from agents/nextai/ to agents/ in sync flow and client-agnostic sections -->
 <!-- Updated: 2025-12-23 - Added NextAI Guidelines Skill section documenting the new nextai-guidelines skill -->
+<!-- Updated: 2025-12-24 - Documented skill embedding in sync pipeline and updated Skill Loading Strategy section to reflect embedded skills, workflow skills, and runtime skills -->
+<!-- Updated: 2025-12-24 by NextAI - Added Template Transformation System section documenting the new base format and platform-specific transformers for multi-platform support -->
