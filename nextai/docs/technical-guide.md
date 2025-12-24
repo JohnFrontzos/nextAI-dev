@@ -419,12 +419,25 @@ nextai testing <id>
 
 ## Extending NextAI
 
+<!-- Updated: 2025-12-24 by NextAI -->
+
 ### Adding Custom Agents
 
-Add agent files to `.nextai/agents/`:
+Add agent files to `.nextai/agents/` using the NextAI base format:
 
 ```markdown
-# My Custom Agent
+---
+id: my-custom-agent
+description: A specialized agent for custom tasks
+role: subagent
+tools:
+  read: true
+  write: true
+  edit: true
+  bash: false
+skillDependencies:
+  - my-custom-skill
+---
 
 You are a specialized agent for...
 
@@ -432,7 +445,16 @@ You are a specialized agent for...
 ...
 ```
 
-Run `nextai sync` to sync to AI clients.
+**Required Fields:**
+- `id` - Unique identifier (lowercase-with-hyphens)
+- `description` - Brief agent purpose
+- `role` - `subagent`, `primary`, or `all`
+- `tools` - Object mapping tool names to boolean enabled status
+
+**Optional Fields:**
+- `skillDependencies` - Array of skill names to embed at sync time
+
+Run `nextai sync` to transform and sync to AI clients.
 
 ### Adding Custom Skills
 

@@ -2,6 +2,8 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { ClientConfigurator, type ClientConfig, type SyncContext } from './base.js';
 import { ensureDir, getNextAIDir } from '../../cli/utils/config.js';
+import { parseBaseAgent, toClaudeAgent } from './transformers/agent.js';
+import { embedSkillPlaceholders } from './transformers/skill-embedder.js';
 
 export class ClaudeCodeConfigurator extends ClientConfigurator {
   config: ClientConfig = {
@@ -96,10 +98,26 @@ export class ClaudeCodeConfigurator extends ClientConfigurator {
         continue;
       }
 
-      // Transform agent for Claude Code (add tools if not present)
+      // Transform agent from base format to Claude Code format
       const content = readFileSync(sourcePath, 'utf-8');
-      const transformed = this.transformAgentManifest(content);
-      writeFileSync(targetPath, transformed);
+      try {
+        const parsed = parseBaseAgent(content);
+        const transformed = toClaudeAgent(parsed);
+
+        // Embed skill placeholders with actual skill content
+        const contentWithSkills = embedSkillPlaceholders(transformed, projectRoot);
+
+        writeFileSync(targetPath, contentWithSkills);
+      } catch (error) {
+        // Fallback for legacy format - just add tools if missing
+        console.warn(`Failed to parse ${agent} as base format, using legacy fallback`);
+        const transformed = this.transformAgentManifest(content);
+
+        // Embed skills in legacy format too
+        const contentWithSkills = embedSkillPlaceholders(transformed, projectRoot);
+
+        writeFileSync(targetPath, contentWithSkills);
+      }
       agentsSynced.push(agent);
     }
 
@@ -170,15 +188,19 @@ If arguments are provided via $ARGUMENTS, parse them and pass to the command.
   }
 
   private transformCommandTemplate(template: string): string {
-    // Claude Code format already matches our template format
+    let content = template;
+
+    // Embed skill placeholders with actual skill content
+    content = embedSkillPlaceholders(content, this.projectRoot!);
+
     // Add skill loading instructions if not present
-    if (!template.includes('Skill tool')) {
-      return template.replace(
+    if (!content.includes('Skill tool')) {
+      return content.replace(
         '---\n\n',
         '---\n\nUse the Skill tool to load NextAI skills when needed.\n\n'
       );
     }
-    return template;
+    return content;
   }
 
   private transformAgentManifest(content: string): string {

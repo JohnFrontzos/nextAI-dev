@@ -1,6 +1,6 @@
 {
   "name": "@frontztech/nextai-dev",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "NextAI Dev Framework - AI Development Workflow Orchestrator",
   "type": "module",
   "main": "dist/index.js",
@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "tsx watch src/cli/index.ts",
     "build": "tsup",
+    "sync:dev": "npm run build && node bin/nextai.js sync --force",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -44,6 +45,7 @@
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "glob": "^11.0.0",
+    "gray-matter": "^4.0.3",
     "ora": "^8.1.1",
     "uuid": "^11.0.3",
     "yaml": "^2.6.1",
