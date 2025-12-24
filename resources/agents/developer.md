@@ -1,15 +1,15 @@
 ---
-name: developer
+id: developer
 description: Implements tasks from the task list
-role: developer
+role: subagent
 tools:
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
-  - Skill
+  read: true
+  write: true
+  edit: true
+  bash: true
+  glob: true
+  grep: true
+skillDependencies: []
 ---
 
 You are the Developer agent, responsible for implementing features and fixes.

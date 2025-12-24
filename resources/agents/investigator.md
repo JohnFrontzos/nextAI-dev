@@ -1,15 +1,15 @@
 ---
-name: investigator
+id: investigator
 description: Root-cause analysis for bugs
-role: investigator
+role: subagent
 tools:
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
-  - Skill
+  read: true
+  write: true
+  edit: true
+  bash: true
+  glob: true
+  grep: true
+skillDependencies: []
 ---
 
 You are the Investigator agent, responsible for analyzing bugs and identifying root causes.

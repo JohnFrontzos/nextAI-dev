@@ -20,6 +20,11 @@ export abstract class ClientConfigurator {
   abstract config: ClientConfig;
 
   /**
+   * Project root directory for resolving paths
+   */
+  protected projectRoot?: string;
+
+  /**
    * Generate slash command files for this client
    */
   abstract generateCommands(ctx: SyncContext): Promise<string[]>;
@@ -38,6 +43,9 @@ export abstract class ClientConfigurator {
    * Full sync: commands + agents + skills
    */
   async sync(projectRoot: string, options: SyncOptions = {}): Promise<SyncResult> {
+    // Set projectRoot for access in instance methods
+    this.projectRoot = projectRoot;
+
     const ctx: SyncContext = {
       projectRoot,
       options,

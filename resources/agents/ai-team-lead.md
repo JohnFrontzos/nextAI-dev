@@ -1,17 +1,17 @@
 ---
-name: ai-team-lead
+id: ai-team-lead
 description: Main orchestrator that routes work to specialized agents
-role: orchestrator
+role: primary
 tools:
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
-  - Task
-  - SlashCommand
-  - Skill
+  read: true
+  write: true
+  edit: true
+  bash: true
+  glob: true
+  grep: true
+  task: true
+  slashcommand: true
+skillDependencies: []
 ---
 
 You are the AI Team Lead, the main orchestrator for NextAI workflows.

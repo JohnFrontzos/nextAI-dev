@@ -2,6 +2,8 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { ClientConfigurator, type ClientConfig, type SyncContext } from './base.js';
 import { ensureDir, getNextAIDir } from '../../cli/utils/config.js';
+import { parseBaseAgent, toOpenCodeAgent } from './transformers/agent.js';
+import { embedSkillPlaceholders } from './transformers/skill-embedder.js';
 
 export class OpenCodeConfigurator extends ClientConfigurator {
   config: ClientConfig = {
@@ -88,60 +90,37 @@ export class OpenCodeConfigurator extends ClientConfigurator {
     const agents = readdirSync(sourceDir).filter((f) => f.endsWith('.md'));
     for (const agent of agents) {
       const sourcePath = join(sourceDir, agent);
-      const targetFilename = `nextai-${agent}`;
-      const targetPath = join(targetDir, targetFilename);
+      // Use agent filename directly (no nextai- prefix per spec)
+      const targetPath = join(targetDir, agent);
 
       // Check if file exists and force is not set
       if (existsSync(targetPath) && !options.force) {
-        skipped.push(`agents/${targetFilename}`);
+        skipped.push(`agents/${agent}`);
         continue;
       }
 
       const content = readFileSync(sourcePath, 'utf-8');
-      // Transform for OpenCode format (add mode: subagent, use nextai- prefix)
-      const transformed = this.transformAgentManifest(content);
-      writeFileSync(targetPath, transformed);
-      agentsSynced.push(targetFilename);
+      // Transform from base format to OpenCode format
+      try {
+        const parsed = parseBaseAgent(content);
+        const transformed = toOpenCodeAgent(parsed);
+        writeFileSync(targetPath, transformed);
+      } catch (error) {
+        // Fallback for legacy format - just add mode if missing
+        console.warn(`Failed to parse ${agent} as base format, using legacy fallback`);
+        const transformed = this.transformAgentManifest(content);
+        writeFileSync(targetPath, transformed);
+      }
+      agentsSynced.push(agent);
     }
 
     return agentsSynced;
   }
 
-  async syncSkills(ctx: SyncContext): Promise<string[]> {
-    const { projectRoot, options, skipped } = ctx;
-    // OpenCode doesn't use skills directly - convert skills to agent format
-    const skillsSynced: string[] = [];
-    const sourceDir = join(getNextAIDir(projectRoot), 'skills');
-    const targetDir = join(projectRoot, this.config.configDir, this.config.agentsDir!);
-
-    if (!existsSync(sourceDir)) {
-      return skillsSynced;
-    }
-
-    ensureDir(targetDir);
-
-    const skills = readdirSync(sourceDir);
-    for (const skill of skills) {
-      const srcSkillFile = join(sourceDir, skill, 'SKILL.md');
-
-      if (existsSync(srcSkillFile)) {
-        const targetFilename = `nextai-${skill}.md`;
-        const targetPath = join(targetDir, targetFilename);
-
-        // Check if file exists and force is not set
-        if (existsSync(targetPath) && !options.force) {
-          skipped.push(`skills/${skill}`);
-          continue;
-        }
-
-        const content = readFileSync(srcSkillFile, 'utf-8');
-        const transformed = this.transformSkillToAgent(content, skill);
-        writeFileSync(targetPath, transformed);
-        skillsSynced.push(skill);
-      }
-    }
-
-    return skillsSynced;
+  async syncSkills(_ctx: SyncContext): Promise<string[]> {
+    // OpenCode reads skills from .claude/skills/ path, no separate generation needed
+    // Per spec: "Skills: OpenCode reads from `.claude/skills/` path, so no separate generation needed"
+    return [];
   }
 
   isConfigDirPresent(projectRoot: string): boolean {
@@ -168,6 +147,9 @@ Instructions:
     // OpenCode format is simpler - remove Claude-specific references
     let content = template;
 
+    // Embed skill placeholders with actual skill content
+    content = embedSkillPlaceholders(content, this.projectRoot!);
+
     // Remove Skill tool references (OpenCode uses agents)
     content = content.replace(/Use the Skill tool to load.*?\r?\n/g, '');
 
@@ -181,33 +163,5 @@ Instructions:
       return content.replace(/---\r?\n/, '---\nmode: subagent\n');
     }
     return content;
-  }
-
-  private transformSkillToAgent(skillContent: string, skillName: string): string {
-    // Check if frontmatter already exists
-    if (skillContent.trimStart().startsWith('---')) {
-      // Extract frontmatter block to check for mode: field
-      const frontmatterEnd = skillContent.indexOf('---', 3);
-      if (frontmatterEnd !== -1) {
-        const frontmatter = skillContent.slice(0, frontmatterEnd);
-        // Only check within frontmatter block, not entire document
-        if (!frontmatter.includes('mode:')) {
-          // Handle both Unix (\n) and Windows (\r\n) line endings
-          return skillContent.replace(/---\r?\n/, '---\nmode: subagent\n');
-        }
-      }
-      return skillContent;
-    }
-
-    // Extract description from first paragraph after title
-    const descMatch = skillContent.match(/^#[^\n]+\n+([^\n#]+)/m);
-    const description = descMatch?.[1].trim() || `NextAI ${skillName.replace(/-/g, ' ')} skill`;
-
-    return `---
-description: ${description}
-mode: subagent
----
-
-${skillContent}`;
   }
 }

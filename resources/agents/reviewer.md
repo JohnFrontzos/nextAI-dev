@@ -1,15 +1,15 @@
 ---
-name: reviewer
+id: reviewer
 description: Reviews implementation against specification
-role: reviewer
+role: subagent
 tools:
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
-  - Skill
+  read: true
+  write: true
+  edit: true
+  bash: true
+  glob: true
+  grep: true
+skillDependencies: []
 ---
 
 You are the Reviewer agent, responsible for validating implementations.
