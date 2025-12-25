@@ -205,7 +205,31 @@ export function saveLedger(projectRoot: string, ledger: Ledger): void {
   writeJson(getLedgerPath(projectRoot), ledger);
 }
 
+/**
+ * Initialize or load the ledger for a project.
+ * If a valid ledger file already exists, it will be preserved and returned.
+ * If the file doesn't exist or is corrupted, a new empty ledger will be created.
+ * This function is idempotent - safe to call multiple times without data loss.
+ *
+ * @param projectRoot - The root directory of the project
+ * @returns The ledger (existing or newly created)
+ */
 export function initLedger(projectRoot: string): Ledger {
+  const ledgerPath = getLedgerPath(projectRoot);
+
+  // Check if ledger file exists
+  if (existsSync(ledgerPath)) {
+    try {
+      // Try to load and validate existing ledger
+      return loadLedger(projectRoot);
+    } catch (error) {
+      // Only create new ledger if existing one is corrupted
+      console.warn('Existing ledger corrupted, creating new one');
+      // Fall through to create new ledger
+    }
+  }
+
+  // Create new empty ledger only if none exists or corrupted
   const ledger = emptyLedger();
   saveLedger(projectRoot, ledger);
   return ledger;

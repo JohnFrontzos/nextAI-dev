@@ -1,12 +1,13 @@
 import { Command } from 'commander';
-import { existsSync } from 'fs';
-import { join } from 'path';
+import { existsSync, readdirSync, readFileSync } from 'fs';
+import { join, basename } from 'path';
 import ora from 'ora';
 import chalk from 'chalk';
 import { logger } from '../utils/logger.js';
 import {
   findProjectRoot,
   getNextAIDir,
+  getNextAIContentDir,
   loadLedger,
   saveLedger,
   loadConfig,
@@ -15,7 +16,7 @@ import {
 import { logRepair } from '../../core/state/history.js';
 import { getFeaturePath, artifactExists } from '../../core/scaffolding/feature.js';
 import { unblockFeature, getFeature } from '../../core/state/ledger.js';
-import type { Phase } from '../../schemas/ledger.js';
+import type { Phase, Feature, FeatureType } from '../../schemas/ledger.js';
 
 interface RepairIssue {
   type: 'error' | 'warning';
@@ -134,6 +135,69 @@ export const repairCommand = new Command('repair')
     }
   });
 
+/**
+ * Extract feature metadata from initialization.md
+ */
+function extractFeatureMetadata(featurePath: string): {
+  title: string;
+  type: FeatureType;
+} {
+  const initPath = join(featurePath, 'planning', 'initialization.md');
+
+  if (!existsSync(initPath)) {
+    return {
+      title: basename(featurePath),
+      type: 'feature',
+    };
+  }
+
+  try {
+    const content = readFileSync(initPath, 'utf-8');
+    const firstLine = content.split('\n')[0];
+    const match = firstLine.match(/^#\s+(Bug|Feature|Task):\s+(.+)$/i);
+
+    if (match) {
+      const typeStr = match[1].toLowerCase();
+      const type = ['bug', 'feature', 'task'].includes(typeStr)
+        ? (typeStr as FeatureType)
+        : 'feature';
+      return {
+        title: match[2].trim(),
+        type,
+      };
+    }
+  } catch (error) {
+    // File exists but cannot be read, use fallback
+  }
+
+  // Fallback
+  return {
+    title: basename(featurePath),
+    type: 'feature',
+  };
+}
+
+/**
+ * Detect phase from existing artifacts
+ */
+function detectPhaseFromArtifacts(featurePath: string): Phase {
+  // Check artifacts in reverse order (most complete first)
+  if (existsSync(join(featurePath, 'review.md'))) {
+    return 'testing';
+  }
+  if (existsSync(join(featurePath, 'tasks.md'))) {
+    return 'implementation';
+  }
+  if (existsSync(join(featurePath, 'spec.md'))) {
+    return 'tech_spec';
+  }
+  if (existsSync(join(featurePath, 'planning', 'requirements.md'))) {
+    return 'product_refinement';
+  }
+  // Default: only initialization.md exists
+  return 'created';
+}
+
 async function checkProject(projectRoot: string, verbose: boolean): Promise<RepairIssue[]> {
   const issues: RepairIssue[] = [];
 
@@ -175,6 +239,90 @@ async function checkProject(projectRoot: string, verbose: boolean): Promise<Repa
             fix: () => {
               const newLedger = loadLedger(projectRoot);
               newLedger.features = newLedger.features.filter((f) => f.id !== feature.id);
+              saveLedger(projectRoot, newLedger);
+            },
+          });
+        }
+      }
+    }
+
+    // Check for missing ledger entries in todo/
+    const contentDir = getNextAIContentDir(projectRoot);
+    const todoDir = join(contentDir, 'todo');
+
+    if (existsSync(todoDir)) {
+      const todoFeatures = readdirSync(todoDir, { withFileTypes: true })
+        .filter((dirent) => dirent.isDirectory())
+        .map((dirent) => dirent.name);
+
+      if (verbose) logger.dim(`  Scanning todo/ directory...`);
+      if (verbose) logger.dim(`  Found ${todoFeatures.length} feature folders`);
+
+      for (const featureId of todoFeatures) {
+        const inLedger = ledger.features.some((f) => f.id === featureId);
+        if (!inLedger) {
+          const featurePath = join(todoDir, featureId);
+          const metadata = extractFeatureMetadata(featurePath);
+          const phase = detectPhaseFromArtifacts(featurePath);
+
+          issues.push({
+            type: 'warning',
+            message: `Missing ledger entry for todo/${featureId} (${metadata.type}: ${metadata.title})`,
+            fix: () => {
+              const newLedger = loadLedger(projectRoot);
+              const now = new Date().toISOString();
+              const feature: Feature = {
+                id: featureId,
+                title: metadata.title,
+                type: metadata.type,
+                phase: phase,
+                blocked_reason: null,
+                retry_count: 0,
+                created_at: now,
+                updated_at: now,
+              };
+              newLedger.features.push(feature);
+              saveLedger(projectRoot, newLedger);
+            },
+          });
+        }
+      }
+    }
+
+    // Check for missing ledger entries in done/
+    const doneDir = join(contentDir, 'done');
+
+    if (existsSync(doneDir)) {
+      const doneFeatures = readdirSync(doneDir, { withFileTypes: true })
+        .filter((dirent) => dirent.isDirectory())
+        .map((dirent) => dirent.name);
+
+      if (verbose) logger.dim(`  Scanning done/ directory...`);
+      if (verbose) logger.dim(`  Found ${doneFeatures.length} archived features`);
+
+      for (const featureId of doneFeatures) {
+        const inLedger = ledger.features.some((f) => f.id === featureId);
+        if (!inLedger) {
+          const featurePath = join(doneDir, featureId);
+          const metadata = extractFeatureMetadata(featurePath);
+
+          issues.push({
+            type: 'warning',
+            message: `Missing ledger entry for done/${featureId} (${metadata.type}: ${metadata.title})`,
+            fix: () => {
+              const newLedger = loadLedger(projectRoot);
+              const now = new Date().toISOString();
+              const feature: Feature = {
+                id: featureId,
+                title: metadata.title,
+                type: metadata.type,
+                phase: 'complete',
+                blocked_reason: null,
+                retry_count: 0,
+                created_at: now,
+                updated_at: now,
+              };
+              newLedger.features.push(feature);
               saveLedger(projectRoot, newLedger);
             },
           });

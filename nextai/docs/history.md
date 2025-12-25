@@ -4,6 +4,8 @@ Completed features are archived in `nextai/done/` with full artifacts.
 
 | Date | Feature ID | Type | Summary | Archive |
 |------|------------|------|---------|---------|
+| 2025-12-25 | 20251225_repair-doesnt-rebuild-ledger | bug | Extended repair command to detect and reconstruct missing ledger entries from feature folders in todo/ and done/ directories | [summary](../done/20251225_repair-doesnt-rebuild-ledger/summary.md) |
+| 2025-12-25 | 20251225_fix-initledger-overwrite | bug | Fixed critical data loss bug where initLedger() overwrote existing ledger during re-initialization. Ledgers are now preserved unless corrupted. | [summary](../done/20251225_fix-initledger-overwrite/summary.md) |
 | 2025-12-24 | 20251224_update-agent-templates | feature | Established canonical base format for agents/skills with platform-specific transformers, enabling multi-platform support (Claude Code and OpenCode) from a single source of truth in resources/ directory | [summary](../done/20251224_update-agent-templates/summary.md) |
 | 2025-12-24 | 20251224_missing-investigator-skills | bug | Fixed investigator agent skill integration by adding skillDependencies frontmatter for native skill loading, and replaced "(Future)" placeholders with complete test failure investigation delegation using testing-investigator workflow skill | [summary](../done/20251224_missing-investigator-skills/summary.md) |
 | 2025-12-23 | 20251223_nextai-usage-guidelines-skill | feature | Created comprehensive usage guidelines skill to educate AI agents about NextAI architecture, CLI usage, directory structure, auto-managed files, and common pitfalls. Integrated with ai-team-lead agent for consistent workflow understanding. | [summary](../done/20251223_nextai-usage-guidelines-skill/summary.md) |

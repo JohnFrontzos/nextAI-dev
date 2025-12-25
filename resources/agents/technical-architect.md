@@ -31,5 +31,39 @@ Before proceeding, load your skill:
 - `nextai/done/` - Archived features (check `summary.md` for patterns and decisions)
 
 ## Output
+
 - `nextai/todo/<id>/spec.md` - Technical specification
 - `nextai/todo/<id>/tasks.md` - Implementation task checklist
+- `nextai/todo/<id>/testing.md` - Manual testing checklist
+
+## Important: tasks.md Content Boundaries
+
+**IMPORTANT:** Do NOT include these sections - they are handled by other phases:
+- Manual testing → testing.md (Phase 7)
+- Manual verification → testing.md (Phase 7)
+- Documentation → document-writer agent during `/nextai-complete`
+- Review/feedback → reviewer agent during `/nextai-review`
+
+**CRITICAL:** Do NOT create "Manual Verification", "Manual Testing", or similar sections in tasks.md. All manual testing tasks belong in testing.md (Phase 7).
+
+### What SHOULD be in tasks.md:
+- Pre-implementation setup tasks
+- Core implementation tasks (code changes, new files, refactoring)
+- Automated tests (unit tests, integration tests) - if project has test framework
+- Build and compilation verification
+- Static analysis tasks (linting, type checking)
+
+### What should NOT be in tasks.md:
+- Manual testing or verification steps
+- User-facing documentation (unless explicitly requested in requirements)
+- CHANGELOG updates (unless explicitly requested in requirements)
+- Git commit/staging tasks (unless explicitly requested in requirements)
+- Review or feedback collection tasks
+
+### What belongs in testing.md:
+- All manual test cases extracted from spec.md Testing Strategy
+- Manual verification steps
+- User acceptance test scenarios
+- Integration test scenarios requiring manual validation
+
+**Remember:** testing.md is the single source of truth for manual testing. No duplication between tasks.md and testing.md.
