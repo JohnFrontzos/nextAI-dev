@@ -137,12 +137,13 @@ describe('Sync Command Integration', () => {
       await syncToClient(testContext.projectRoot, 'opencode');
 
       const agentDir = path.join(testContext.projectRoot, '.opencode', 'agent');
-      const files = fs.readdirSync(agentDir).filter((f) => f.endsWith('.md'));
 
-      if (files.length > 0) {
-        const content = fs.readFileSync(path.join(agentDir, files[0]), 'utf-8');
-        expect(content).toContain('mode: subagent');
-      }
+      // Check a specific subagent file (developer.md)
+      const developerPath = path.join(agentDir, 'developer.md');
+      expect(fs.existsSync(developerPath)).toBe(true);
+
+      const content = fs.readFileSync(developerPath, 'utf-8');
+      expect(content).toContain('mode: subagent');
     });
 
     it('Claude Code uses commands/ path', async () => {

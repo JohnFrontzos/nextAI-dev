@@ -60,13 +60,13 @@ describe('OpenCode Sync', () => {
       await configurator.sync(testContext.projectRoot, {});
 
       const agentDir = path.join(testContext.projectRoot, '.opencode', 'agent');
-      const files = fs.readdirSync(agentDir).filter((f) => f.endsWith('.md'));
 
-      if (files.length > 0) {
-        const agentPath = path.join(agentDir, files[0]);
-        const content = fs.readFileSync(agentPath, 'utf-8');
-        expect(content).toContain('mode: subagent');
-      }
+      // Check a specific subagent file (developer.md)
+      const developerPath = path.join(agentDir, 'developer.md');
+      expect(fs.existsSync(developerPath)).toBe(true);
+
+      const content = fs.readFileSync(developerPath, 'utf-8');
+      expect(content).toContain('mode: subagent');
     });
 
     it('is idempotent', async () => {
@@ -123,63 +123,9 @@ describe('OpenCode Sync', () => {
     });
   });
 
-  describe('transformSkillToAgent', () => {
-    // Access private method for unit testing
-    const transform = (content: string, skillName: string) =>
-      (configurator as any).transformSkillToAgent(content, skillName);
-
-    it('adds frontmatter to skill without frontmatter', () => {
-      const content = `# My Skill\n\nThis is the description.\n\n## Purpose\n...`;
-      const result = transform(content, 'my-skill');
-
-      expect(result).toContain('description: This is the description.');
-      expect(result).toContain('mode: subagent');
-      expect(result).toContain('# My Skill');
-    });
-
-    it('preserves existing frontmatter and adds mode if missing', () => {
-      const content = `---\ndescription: Custom desc\n---\n\n# My Skill`;
-      const result = transform(content, 'my-skill');
-
-      expect(result).toContain('mode: subagent');
-      expect(result).toContain('description: Custom desc');
-    });
-
-    it('preserves existing frontmatter with mode already present', () => {
-      const content = `---\ndescription: Custom desc\nmode: subagent\n---\n\n# My Skill`;
-      const result = transform(content, 'my-skill');
-
-      expect(result).toBe(content);
-    });
-
-    it('does not match mode: in body content', () => {
-      // Body contains "mode:" but frontmatter does not
-      const content = `---\ndescription: Custom desc\n---\n\n# My Skill\n\nSet debug mode: on`;
-      const result = transform(content, 'my-skill');
-
-      // Should add mode: to frontmatter despite "mode:" appearing in body
-      expect(result).toMatch(/^---\nmode: subagent\ndescription:/);
-    });
-
-    it('extracts description from first paragraph after title', () => {
-      const content = `# Code Review\n\nValidates code against specifications.\n\n## Details`;
-      const result = transform(content, 'code-review');
-
-      expect(result).toContain('description: Validates code against specifications.');
-    });
-
-    it('uses fallback description when no paragraph after title', () => {
-      const content = `# Minimal Skill`;
-      const result = transform(content, 'minimal-skill');
-
-      expect(result).toContain('description: NextAI minimal skill skill');
-      expect(result).toContain('mode: subagent');
-    });
-  });
-
   describe('syncSkills', () => {
-    it('transforms skills when syncing to OpenCode', async () => {
-      // Setup: create a skill without frontmatter
+    it('does not sync skills to OpenCode agents directory', async () => {
+      // Setup: create a skill
       const skillDir = path.join(testContext.projectRoot, '.nextai', 'skills', 'test-skill');
       fs.mkdirSync(skillDir, { recursive: true });
       fs.writeFileSync(
@@ -188,45 +134,52 @@ describe('OpenCode Sync', () => {
       );
 
       // Run sync
-      await configurator.sync(testContext.projectRoot, {});
+      const result = await configurator.sync(testContext.projectRoot, {});
 
-      // Verify: skill should have frontmatter
-      const syncedSkill = fs.readFileSync(
-        path.join(testContext.projectRoot, '.opencode', 'agent', 'nextai-test-skill.md'),
-        'utf-8'
-      );
+      // Verify: skills are not synced to OpenCode
+      expect(result.skillsSynced).toEqual([]);
 
-      expect(syncedSkill).toMatch(/^---\n/);
-      expect(syncedSkill).toContain('description: Test description.');
-      expect(syncedSkill).toContain('mode: subagent');
+      // Verify: no skill files in agent directory
+      const agentDir = path.join(testContext.projectRoot, '.opencode', 'agent');
+      if (fs.existsSync(agentDir)) {
+        const files = fs.readdirSync(agentDir);
+        expect(files.some(f => f.includes('test-skill'))).toBe(false);
+      }
     });
 
-    it('preserves existing frontmatter in custom skills', async () => {
+    it('skills are kept in .nextai/skills directory', async () => {
       // Setup: create custom skill with frontmatter
       const customSkillDir = path.join(testContext.projectRoot, '.nextai', 'skills', 'codex');
       fs.mkdirSync(customSkillDir, { recursive: true });
-      fs.writeFileSync(
-        path.join(customSkillDir, 'SKILL.md'),
-        `---
+      const skillContent = `---
 description: Use Codex CLI for code analysis
 mode: subagent
 ---
 
 # Codex Skill Guide
-...`
+...`;
+      fs.writeFileSync(
+        path.join(customSkillDir, 'SKILL.md'),
+        skillContent
       );
 
       // Run sync
-      await configurator.sync(testContext.projectRoot, {});
+      const result = await configurator.sync(testContext.projectRoot, {});
 
-      // Verify: frontmatter preserved exactly
-      const syncedContent = fs.readFileSync(
-        path.join(testContext.projectRoot, '.opencode', 'agent', 'nextai-codex.md'),
+      // Verify: skill file remains in .nextai/skills directory
+      const sourceSkill = fs.readFileSync(
+        path.join(customSkillDir, 'SKILL.md'),
         'utf-8'
       );
+      expect(sourceSkill).toContain('description: Use Codex CLI for code analysis');
 
-      expect(syncedContent).toContain('description: Use Codex CLI for code analysis');
-      expect(syncedContent).toContain('mode: subagent');
+      // Verify: skill NOT copied to OpenCode agents
+      expect(result.skillsSynced).toEqual([]);
+      const agentDir = path.join(testContext.projectRoot, '.opencode', 'agent');
+      if (fs.existsSync(agentDir)) {
+        const files = fs.readdirSync(agentDir);
+        expect(files.some(f => f.includes('codex'))).toBe(false);
+      }
     });
   });
 
