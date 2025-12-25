@@ -26,11 +26,20 @@ import { join } from 'path';
 
 /**
  * Helper to calculate average, filtering out undefined values
+ * Single-pass implementation for better performance
  */
 function average(values: (number | undefined)[]): number | undefined {
-  const defined = values.filter((v): v is number => v !== undefined);
-  if (defined.length === 0) return undefined;
-  return defined.reduce((a, b) => a + b, 0) / defined.length;
+  let sum = 0;
+  let count = 0;
+
+  for (const value of values) {
+    if (value !== undefined) {
+      sum += value;
+      count++;
+    }
+  }
+
+  return count === 0 ? undefined : sum / count;
 }
 
 /**
@@ -147,7 +156,7 @@ export function calculateFeatureMetrics(projectRoot: string, featureId: string):
                 exited_at: event.ts,
                 duration_ms: duration,
               };
-              (metrics.phases as any)[event.from_phase] = phaseMetrics;
+              metrics.phases[event.from_phase as keyof typeof metrics.phases] = phaseMetrics;
             }
           }
 
@@ -281,9 +290,31 @@ export function calculateAggregatedMetrics(projectRoot: string): AggregatedMetri
     for (const f of todo) byType[f.type].todo++;
 
     // Calculate averages from completed features only
+    // Try to read from disk cache first before recalculating
     const completedMetrics: FeatureMetrics[] = [];
     for (const feature of done) {
-      const metrics = calculateFeatureMetrics(projectRoot, feature.id);
+      let metrics: FeatureMetrics | null = null;
+
+      // Try reading from disk cache first, but only use if it has completed_at
+      try {
+        const metricsPath = getFeatureMetricsPath(projectRoot, feature.id);
+        if (existsSync(metricsPath)) {
+          const cached = JSON.parse(readFileSync(metricsPath, 'utf-8'));
+          const parsed = FeatureMetricsSchema.parse(cached);
+          // Only use cache if it has completed_at (fully calculated)
+          if (parsed.completed_at) {
+            metrics = parsed;
+          }
+        }
+      } catch {
+        // If cache read fails, fall through to recalculation
+      }
+
+      // Recalculate if not cached, cache read failed, or cache incomplete
+      if (!metrics) {
+        metrics = calculateFeatureMetrics(projectRoot, feature.id);
+      }
+
       if (metrics && metrics.completed_at) {
         completedMetrics.push(metrics);
       }

@@ -18,7 +18,7 @@ const configurators: Record<SupportedClient, () => ClientConfigurator> = {
   codex: () => {
     throw new Error('Codex support is planned for Phase 2');
   },
-};
+} as const;
 
 /**
  * Get configurator for a client
@@ -71,10 +71,15 @@ export async function syncToClient(
  */
 export function getAvailableClients(projectRoot: string): SupportedClient[] {
   const available: SupportedClient[] = [];
-  for (const client of ['claude', 'opencode'] as SupportedClient[]) {
-    const configurator = getConfigurator(client);
-    if (configurator.isConfigDirPresent(projectRoot)) {
-      available.push(client);
+  // Extract client list from configurators object keys
+  for (const client of Object.keys(configurators) as SupportedClient[]) {
+    try {
+      const configurator = getConfigurator(client);
+      if (configurator.isConfigDirPresent(projectRoot)) {
+        available.push(client);
+      }
+    } catch {
+      // Skip clients that throw errors (e.g., not yet implemented)
     }
   }
   return available;

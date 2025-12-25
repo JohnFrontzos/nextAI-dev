@@ -194,7 +194,7 @@ description: ${agent.description}
 role: ${agent.role}
 ---
 
-You are the ${agent.name.replace(/-/g, ' ')} agent.
+You are the ${agent.name.replaceAll('-', ' ')} agent.
 
 ## Your Role
 ${agent.description}
@@ -231,7 +231,7 @@ ${skill.description}
 
 ## Instructions
 
-Follow the structured approach for ${skill.name.replace(/-/g, ' ')}.
+Follow the structured approach for ${skill.name.replaceAll('-', ' ')}.
 `;
     writeFileSync(join(skillDir, 'SKILL.md'), content);
   }

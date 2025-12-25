@@ -195,7 +195,7 @@ describe('Ledger Schema', () => {
 
       it('uses current date by default', () => {
         const id = generateFeatureId('test');
-        const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const today = new Date().toISOString().slice(0, 10).replaceAll('-', '');
         expect(id.startsWith(today)).toBe(true);
       });
     });

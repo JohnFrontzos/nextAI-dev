@@ -195,15 +195,12 @@ export function canTransitionTo(
     }
   }
 
-  const prerequisites: Record<Phase, Phase[]> = {
-    created: [],
-    product_refinement: ['created'],
-    tech_spec: ['created', 'product_refinement'],
-    implementation: ['created', 'product_refinement', 'tech_spec'],
-    review: ['created', 'product_refinement', 'tech_spec', 'implementation'],
-    testing: ['created', 'product_refinement', 'tech_spec', 'implementation', 'review'],
-    complete: ['created', 'product_refinement', 'tech_spec', 'implementation', 'review', 'testing'],
-  };
+  // Generate prerequisites dynamically from PHASE_ORDER
+  // Each phase requires all phases that come before it
+  const prerequisites: Record<Phase, Phase[]> = {} as Record<Phase, Phase[]>;
+  for (let i = 0; i < PHASE_ORDER.length; i++) {
+    prerequisites[PHASE_ORDER[i]] = PHASE_ORDER.slice(0, i);
+  }
 
   const requiredPhases = prerequisites[targetPhase];
 

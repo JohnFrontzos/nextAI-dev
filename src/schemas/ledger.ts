@@ -89,7 +89,7 @@ export const emptyLedger = (): Ledger => ({
  * Simple approach: slugify title and cap at 30 chars
  */
 export function generateFeatureId(title: string, date: Date = new Date()): string {
-  const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+  const dateStr = date.toISOString().slice(0, 10).replaceAll('-', '');
 
   const slug = title
     .toLowerCase()

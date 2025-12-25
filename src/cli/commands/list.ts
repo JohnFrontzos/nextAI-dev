@@ -119,6 +119,6 @@ function formatPhase(phase: Phase): string {
     review: 'review',
     testing: 'testing',
     complete: 'complete',
-  };
-  return phaseLabels[phase] || phase;
+  } as const;
+  return phaseLabels[phase];
 }

@@ -222,7 +222,7 @@ If arguments are provided via $ARGUMENTS, parse them and pass to the command.
 
     // Extract description from first paragraph after title
     const descMatch = content.match(/^#[^\n]+\n+([^\n#]+)/m);
-    const description = descMatch?.[1].trim() || `NextAI ${skillName.replace(/-/g, ' ')} skill`;
+    const description = descMatch?.[1].trim() || `NextAI ${skillName.replaceAll('-', ' ')} skill`;
 
     return `---
 name: ${skillName}

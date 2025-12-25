@@ -25,9 +25,11 @@ export function addFeature(
   const id = generateFeatureId(title);
 
   // Check for duplicate ID (same day + similar title)
+  // Use Set for O(1) lookup instead of O(n) .some() calls
+  const existingIds = new Set(ledger.features.map((f) => f.id));
   let finalId = id;
   let counter = 1;
-  while (ledger.features.some((f) => f.id === finalId)) {
+  while (existingIds.has(finalId)) {
     finalId = `${id}-${counter}`;
     counter++;
   }
@@ -60,14 +62,20 @@ export function getFeature(projectRoot: string, featureId: string): Feature | un
  */
 export function findFeature(projectRoot: string, partialId: string): Feature | undefined {
   const ledger = loadLedger(projectRoot);
-  // Exact match first
-  const exact = ledger.features.find((f) => f.id === partialId);
-  if (exact) return exact;
+  const matches: Feature[] = [];
 
-  // Partial match
-  const matches = ledger.features.filter((f) => f.id.includes(partialId));
-  if (matches.length === 1) return matches[0];
-  return undefined;
+  // Single-pass: check for exact match and collect partial matches
+  for (const feature of ledger.features) {
+    if (feature.id === partialId) {
+      return feature; // Exact match, return immediately
+    }
+    if (feature.id.includes(partialId)) {
+      matches.push(feature);
+    }
+  }
+
+  // Return partial match only if unique
+  return matches.length === 1 ? matches[0] : undefined;
 }
 
 /**
@@ -82,21 +90,20 @@ export function listFeatures(
   } = {}
 ): Feature[] {
   const ledger = loadLedger(projectRoot);
-  let features = ledger.features;
 
-  if (!options.includeComplete) {
-    features = features.filter((f) => f.phase !== 'complete');
-  }
-
-  if (options.type) {
-    features = features.filter((f) => f.type === options.type);
-  }
-
-  if (options.phase) {
-    features = features.filter((f) => f.phase === options.phase);
-  }
-
-  return features;
+  // Single-pass filter combining all conditions
+  return ledger.features.filter((f) => {
+    if (!options.includeComplete && f.phase === 'complete') {
+      return false;
+    }
+    if (options.type && f.type !== options.type) {
+      return false;
+    }
+    if (options.phase && f.phase !== options.phase) {
+      return false;
+    }
+    return true;
+  });
 }
 
 /**
@@ -315,6 +322,26 @@ export async function updateFeaturePhase(
 }
 
 /**
+ * Helper to update a feature field and save the ledger
+ */
+function updateFeatureField<K extends keyof Feature>(
+  projectRoot: string,
+  featureId: string,
+  field: K,
+  value: Feature[K]
+): boolean {
+  const ledger = loadLedger(projectRoot);
+  const featureIndex = ledger.features.findIndex((f) => f.id === featureId);
+
+  if (featureIndex === -1) return false;
+
+  ledger.features[featureIndex][field] = value;
+  ledger.features[featureIndex].updated_at = new Date().toISOString();
+  saveLedger(projectRoot, ledger);
+  return true;
+}
+
+/**
  * Block a feature with a reason
  */
 export function blockFeature(
@@ -322,28 +349,14 @@ export function blockFeature(
   featureId: string,
   reason: string
 ): void {
-  const ledger = loadLedger(projectRoot);
-  const featureIndex = ledger.features.findIndex((f) => f.id === featureId);
-
-  if (featureIndex === -1) return;
-
-  ledger.features[featureIndex].blocked_reason = reason;
-  ledger.features[featureIndex].updated_at = new Date().toISOString();
-  saveLedger(projectRoot, ledger);
+  updateFeatureField(projectRoot, featureId, 'blocked_reason', reason);
 }
 
 /**
  * Unblock a feature
  */
 export function unblockFeature(projectRoot: string, featureId: string): void {
-  const ledger = loadLedger(projectRoot);
-  const featureIndex = ledger.features.findIndex((f) => f.id === featureId);
-
-  if (featureIndex === -1) return;
-
-  ledger.features[featureIndex].blocked_reason = null;
-  ledger.features[featureIndex].updated_at = new Date().toISOString();
-  saveLedger(projectRoot, ledger);
+  updateFeatureField(projectRoot, featureId, 'blocked_reason', null);
 }
 
 /**
